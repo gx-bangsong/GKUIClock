@@ -68,27 +68,44 @@ public class HolidayRepository {
         try {
             JSONObject jsonObject = new JSONObject(json);
             JSONObject years = jsonObject.getJSONObject("Years");
-            // In a real application, you would iterate through the years and save the data to a database.
-            // For this example, we'll just log the data.
-            System.out.println(years.toString());
+            List<Holiday> holidays = new ArrayList<>();
+            for (int i = 0; i < years.names().length(); i++) {
+                String year = years.names().getString(i);
+                JSONArray yearHolidays = years.getJSONArray(year);
+                for (int j = 0; j < yearHolidays.length(); j++) {
+                    JSONObject holidayObject = yearHolidays.getJSONObject(j);
+                    String name = holidayObject.getString("Name");
+                    String startDate = holidayObject.getString("StartDate");
+                    String endDate = holidayObject.getString("EndDate");
+                    JSONArray compDaysArray = holidayObject.getJSONArray("CompDays");
+                    List<String> compDays = new ArrayList<>();
+                    for (int k = 0; k < compDaysArray.length(); k++) {
+                        compDays.add(compDaysArray.getString(k));
+                    }
+                    holidays.add(new Holiday(name, startDate, endDate, compDays));
+                }
+            }
+            HolidayDatabase.getDatabase(context).holidayDao().insertAll(holidays);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
     public List<Holiday> getHolidays(int year) {
-        // In a real application, you would query the database for the holidays.
-        // For this example, we'll just return an empty list.
-        return new ArrayList<>();
+        return HolidayDatabase.getDatabase(context).holidayDao().getHolidaysByYear(String.valueOf(year));
     }
 
     public boolean isHoliday(long timeInMillis) {
-        // In a real application, you would query the database to see if the given date is a holiday.
-        return false;
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(new java.util.Date(timeInMillis));
+        Holiday holiday = HolidayDatabase.getDatabase(context).holidayDao().getHolidayByDate(date);
+        return holiday != null;
     }
 
     public boolean isWorkday(long timeInMillis) {
-        // In a real application, you would query the database to see if the given date is a workday.
-        return false;
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(new java.util.Date(timeInMillis));
+        Holiday holiday = HolidayDatabase.getDatabase(context).holidayDao().getWorkdayByDate(date);
+        return holiday != null;
     }
 }

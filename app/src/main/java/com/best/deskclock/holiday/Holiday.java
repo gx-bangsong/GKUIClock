@@ -16,10 +16,16 @@
 
 package com.best.deskclock.holiday;
 
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
 import java.util.List;
 
+@Entity(tableName = "holiday")
 public class Holiday {
 
+    @PrimaryKey(autoGenerate = true)
+    private int id;
     private final String name;
     private final String startDate;
     private final String endDate;
@@ -46,5 +52,13 @@ public class Holiday {
 
     public List<String> getCompDays() {
         return compDays;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }

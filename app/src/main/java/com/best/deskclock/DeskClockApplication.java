@@ -43,6 +43,8 @@ public class DeskClockApplication extends Application {
         Controller.getController().setContext(applicationContext);
         Controller.getController().addEventTracker(new LogEventTracker(applicationContext));
         Controller.getController().updateShortcuts();
+
+        new com.best.deskclock.holiday.HolidayRepository(applicationContext).downloadAndSaveHolidays();
     }
 
     public static Context getContext() {
