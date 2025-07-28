@@ -95,6 +95,8 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final boolean mHasVibrator;
     private final boolean mHasFlash;
 
+    private final TextView holidayOption;
+
     private ExpandedAlarmViewHolder(View itemView, boolean hasVibrator, boolean hasFlash) {
         super(itemView);
 
@@ -105,6 +107,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
 
         editLabelIcon = itemView.findViewById(R.id.edit_label_icon);
         editLabel = itemView.findViewById(R.id.edit_label);
+        holidayOption = itemView.findViewById(R.id.holiday_option);
         repeatDays = itemView.findViewById(R.id.repeat_days);
         emptyView = itemView.findViewById(R.id.empty_view);
         scheduleAlarm = itemView.findViewById(R.id.schedule_alarm);
@@ -141,6 +144,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         // Edit label handler
         editLabel.setOnClickListener(view ->
                 getAlarmTimeClickHandler().onEditLabelClicked(getItemHolder().item));
+
+        holidayOption.setOnClickListener(view ->
+                getAlarmTimeClickHandler().onHolidayOptionClicked(getItemHolder().item));
 
         // Build button for each day.
         final LayoutInflater inflater = LayoutInflater.from(context);
