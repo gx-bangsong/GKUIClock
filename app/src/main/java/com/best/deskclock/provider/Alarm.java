@@ -70,7 +70,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             SNOOZE_DURATION,
             CRESCENDO_DURATION,
             ALARM_VOLUME,
-            HOLIDAY_OPTION
+            ClockContract.AlarmsColumns.HOLIDAY_OPTION
     };
     private static final String[] QUERY_ALARMS_WITH_INSTANCES_COLUMNS = {
             ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + _ID,
@@ -104,7 +104,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.SNOOZE_DURATION,
             ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.CRESCENDO_DURATION,
             ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME,
-            ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + HOLIDAY_OPTION
+            ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + ClockContract.AlarmsColumns.HOLIDAY_OPTION
     };
     /**
      * These save calls to cursor.getColumnIndexOrThrow()
@@ -241,7 +241,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         snoozeDuration = c.getInt(SNOOZE_DURATION_INDEX);
         crescendoDuration = c.getInt(CRESCENDO_DURATION_INDEX);
         alarmVolume = c.getInt(ALARM_VOLUME_INDEX);
-        holidayOption = c.getInt(HOLIDAY_OPTION_INDEX);
 
         if (c.getColumnCount() == ALARM_JOIN_INSTANCE_COLUMN_COUNT) {
             instanceState = c.getInt(INSTANCE_STATE_INDEX);
@@ -301,7 +300,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         values.put(SNOOZE_DURATION, alarm.snoozeDuration);
         values.put(CRESCENDO_DURATION, alarm.crescendoDuration);
         values.put(ALARM_VOLUME, alarm.alarmVolume);
-        values.put(HOLIDAY_OPTION, alarm.holidayOption);
+        values.put(ClockContract.AlarmsColumns.HOLIDAY_OPTION, alarm.holidayOption);
         if (alarm.alert == null) {
             // We want to put null, so default alarm changes
             values.putNull(RINGTONE);

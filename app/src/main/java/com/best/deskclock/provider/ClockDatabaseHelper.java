@@ -148,7 +148,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
 
         // Remove "Dismiss alarm when ringtone ends", "Alarm snooze action" and "Increasing volume"
         if (oldVersion < 21) {
-            db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN holidayOption" + " INTEGER NOT NULL DEFAULT 0;");
+            db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " + ClockContract.AlarmsColumns.HOLIDAY_OPTION + " INTEGER NOT NULL DEFAULT 0;");
             LogUtils.i("Added holidayOption column for version 21 upgrade.");
             LogUtils.i("Copying alarms to temporary table");
             final String TEMP_ALARMS_TABLE_NAME = ALARMS_TABLE_NAME + "_temp";
