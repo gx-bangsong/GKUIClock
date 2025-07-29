@@ -358,9 +358,11 @@ public class BackupAndRestoreUtils {
             day = calendar.get(Calendar.DAY_OF_MONTH);
         }
 
+        int holidayOption = alarmObject.has("holidayOption") ? alarmObject.getInt("holidayOption") : 0;
+
         restoredAlarm = new Alarm(id, enabled, year, month, day, hour, minutes,
                 vibrate, flash, Weekdays.fromBits(daysOfWeek), label, alarmRingtone, deleteAfterUse,
-                autoSilenceDuration, snoozeDuration, crescendoDuration, alarmVolume);
+                autoSilenceDuration, snoozeDuration, crescendoDuration, alarmVolume, holidayOption);
 
         Alarm.addAlarm(contentResolver, restoredAlarm);
 
