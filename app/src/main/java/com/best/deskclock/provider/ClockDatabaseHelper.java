@@ -52,7 +52,8 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                 ClockContract.AlarmsColumns.AUTO_SILENCE_DURATION + " INTEGER NOT NULL DEFAULT 10, " +
                 ClockContract.AlarmsColumns.SNOOZE_DURATION + " INTEGER NOT NULL DEFAULT 10, " +
                 ClockContract.AlarmsColumns.CRESCENDO_DURATION + " INTEGER NOT NULL DEFAULT 0, " +
-                ClockContract.AlarmsColumns.ALARM_VOLUME + " INTEGER NOT NULL DEFAULT 11);");
+                ClockContract.AlarmsColumns.ALARM_VOLUME + " INTEGER NOT NULL DEFAULT 11, " +
+                ClockContract.AlarmsColumns.HOLIDAY_OPTION + " INTEGER NOT NULL DEFAULT 0);");
 
         LogUtils.i("Alarms Table created");
     }
@@ -147,6 +148,8 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
 
         // Remove "Dismiss alarm when ringtone ends", "Alarm snooze action" and "Increasing volume"
         if (oldVersion < 21) {
+            db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN holidayOption" + " INTEGER NOT NULL DEFAULT 0;");
+            LogUtils.i("Added holidayOption column for version 21 upgrade.");
             LogUtils.i("Copying alarms to temporary table");
             final String TEMP_ALARMS_TABLE_NAME = ALARMS_TABLE_NAME + "_temp";
             final String TEMP_INSTANCES_TABLE_NAME = INSTANCES_TABLE_NAME + "_temp";
@@ -169,7 +172,8 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                     ClockContract.AlarmsColumns.AUTO_SILENCE_DURATION,
                     ClockContract.AlarmsColumns.SNOOZE_DURATION,
                     ClockContract.AlarmsColumns.CRESCENDO_DURATION,
-                    ClockContract.AlarmsColumns.ALARM_VOLUME
+                    ClockContract.AlarmsColumns.ALARM_VOLUME,
+                    ClockContract.AlarmsColumns.HOLIDAY_OPTION
             };
 
             try (Cursor cursor = db.query(ALARMS_TABLE_NAME, OLD_TABLE_COLUMNS,

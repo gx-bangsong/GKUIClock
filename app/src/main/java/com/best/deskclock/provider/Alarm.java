@@ -145,7 +145,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     public static final int INSTANCE_ALARM_VOLUME_INDEX = 31;
 
     private static final int COLUMN_COUNT = HOLIDAY_OPTION_INDEX + 1;
-    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_ALARM_VOLUME_INDEX + 1;
+    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_ALARM_VOLUME_INDEX + 2;
     // Public fields
     public long id;
     public boolean enabled;

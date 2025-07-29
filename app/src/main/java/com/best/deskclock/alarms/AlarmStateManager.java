@@ -292,42 +292,6 @@ public final class AlarmStateManager extends BroadcastReceiver {
      * @param newState to change to
      */
     private static void scheduleInstanceStateChange(Context ctx, Calendar time, AlarmInstance instance, int newState) {
-        final com.best.deskclock.holiday.HolidayRepository holidayRepository = new com.best.deskclock.holiday.HolidayRepository(ctx);
-        final Alarm alarm = Alarm.getAlarm(ctx.getContentResolver(), instance.mAlarmId);
-        if (alarm != null) {
-            boolean isHoliday = holidayRepository.isHoliday(time.getTimeInMillis());
-            boolean isWorkday = holidayRepository.isWorkday(time.getTimeInMillis());
-            if (isWorkday) {
-                sStateChangeScheduler.scheduleInstanceStateChange(ctx, time, instance, newState);
-                return;
-            }
-            switch (alarm.holidayOption) {
-                case 0: // Skip holiday
-                    if (isHoliday) {
-                        return;
-                    }
-                    break;
-                case 1: // 大小周大周
-                    if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-                        if (time.get(Calendar.WEEK_OF_YEAR) % 2 != 0) {
-                            return;
-                        }
-                    }
-                    break;
-                case 2: // 大小周小周
-                    if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY) {
-                        if (time.get(Calendar.WEEK_OF_YEAR) % 2 == 0) {
-                            return;
-                        }
-                    }
-                    break;
-                case 3: // 單休
-                    if (time.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY) {
-                        return;
-                    }
-                    break;
-            }
-        }
         sStateChangeScheduler.scheduleInstanceStateChange(ctx, time, instance, newState);
     }
 
