@@ -103,8 +103,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.AUTO_SILENCE_DURATION,
             ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.SNOOZE_DURATION,
             ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.CRESCENDO_DURATION,
-            ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME,
-            ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + ClockContract.AlarmsColumns.HOLIDAY_OPTION
+            ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME
     };
     /**
      * These save calls to cursor.getColumnIndexOrThrow()
@@ -241,6 +240,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         snoozeDuration = c.getInt(SNOOZE_DURATION_INDEX);
         crescendoDuration = c.getInt(CRESCENDO_DURATION_INDEX);
         alarmVolume = c.getInt(ALARM_VOLUME_INDEX);
+        holidayOption = c.getInt(HOLIDAY_OPTION_INDEX);
 
         if (c.getColumnCount() == ALARM_JOIN_INSTANCE_COLUMN_COUNT) {
             instanceState = c.getInt(INSTANCE_STATE_INDEX);
