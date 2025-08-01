@@ -2,37 +2,25 @@ name: Android CI
 
 on:
   push:
-    branches: [ "holiday-alarm" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "holiday-alarm" ]
+    branches: [ "main" ]
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up JDK 17
+    - uses: actions/checkout@v4
+    - name: set up JDK 11
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '11'
         distribution: 'temurin'
         cache: gradle
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-
     - name: Build with Gradle
       run: ./gradlew build
-
-    # Corrected Step: 'name' and 'uses' are part of the same step definition.
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: Dialer-build-apk
-        # This path assumes your project is at the root.
-        # If your APK is inside a specific module, you might need to adjust it.
-        # e.g., app/build/outputs/apk/debug/app-debug.apk
-        path: '**/build/outputs/apk/debug/*.apk'

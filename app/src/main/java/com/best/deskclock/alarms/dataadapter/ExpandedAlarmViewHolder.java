@@ -266,6 +266,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         bindSnoozeValue(context, alarm);
         bindCrescendoValue(context, alarm);
         bindAlarmVolume(context, alarm);
+        bindHolidayOption(context, alarm);
 
         // If this view is bound without coming from a CollapsedAlarmViewHolder (e.g.
         // when calling expand() before this alarm was visible in it's collapsed state),
@@ -280,6 +281,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         // and to avoid flickering when turning the alarm on/off
         final boolean labelIsEmpty = alarm.label == null || alarm.label.isEmpty();
         editLabel.setAlpha(labelIsEmpty || alarm.enabled ? 1f : editLabel.getAlpha());
+        holidayOption.setAlpha(1f);
         repeatDays.setAlpha(1f);
         scheduleAlarm.setAlpha(1f);
         selectedDate.setAlpha(1f);
@@ -510,6 +512,10 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         }
     }
 
+    private void bindHolidayOption(Context context, Alarm alarm) {
+        holidayOption.setVisibility(VISIBLE);
+    }
+
     private void bindEditLabelAnnotations(Alarm alarm) {
         final boolean labelIsEmpty = alarm.label == null || alarm.label.isEmpty();
         final float labelAlpha = labelIsEmpty ? 1f : editLabel.getAlpha();
@@ -604,6 +610,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
                 .setDuration(shortDuration);
 
         final Animator editLabelAnimation = ObjectAnimator.ofFloat(editLabel, View.ALPHA, 0f)
+                .setDuration(shortDuration);
+
+        final Animator holidayOptionAnimation = ObjectAnimator.ofFloat(holidayOption, View.ALPHA, 0f)
                 .setDuration(shortDuration);
 
         final Animator repeatDaysAnimation = ObjectAnimator.ofFloat(repeatDays, View.ALPHA, 0f)
@@ -738,7 +747,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
 
         final AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(backgroundAnimator, boundsAnimator, repeatDaysAnimation,
-                editLabelAnimation, editLabelIconAnimation, flashAnimation,
+                editLabelAnimation, holidayOptionAnimation, editLabelIconAnimation, flashAnimation,
                 deleteOccasionalAlarmAfterUseAnimation, vibrateAnimation, ringtoneAnimation,
                 deleteAnimation, duplicateAnimation, dismissAnimation, switchAnimator,
                 clockAnimator, ellipseAnimator, scheduleAlarmAnimation, selectedDateAnimation,
@@ -811,6 +820,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         final long longDuration = (long) (duration * ANIM_LONG_DURATION_MULTIPLIER);
 
         final Animator editLabelAnimation = ObjectAnimator.ofFloat(editLabel, View.ALPHA, 1f)
+                .setDuration(longDuration);
+
+        final Animator holidayOptionAnimation = ObjectAnimator.ofFloat(holidayOption, View.ALPHA, 1f)
                 .setDuration(longDuration);
 
         final Animator editLabelIconAnimation = ObjectAnimator.ofFloat(editLabelIcon, View.ALPHA, 1f)
@@ -952,7 +964,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
 
         final AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(backgroundAnimator, boundsAnimator, repeatDaysAnimation,
-                editLabelAnimation, editLabelIconAnimation, flashAnimation, vibrateAnimation,
+                editLabelAnimation, holidayOptionAnimation, editLabelIconAnimation, flashAnimation, vibrateAnimation,
                 deleteOccasionalAlarmAfterUseAnimation, ringtoneAnimation, deleteAnimation,
                 duplicateAnimation, dismissAnimation, arrowAnimation, scheduleAlarmAnimation,
                 selectedDateAnimation, addDateAnimation, removeDateAnimation,
