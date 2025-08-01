@@ -79,10 +79,6 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         mSelectedAlarm = selectedAlarm;
     }
 
-    public Alarm getSelectedAlarm() {
-        return mSelectedAlarm;
-    }
-
     public void setAlarmEnabled(Alarm alarm, boolean newState) {
         if (newState != alarm.enabled) {
             alarm.enabled = newState;
