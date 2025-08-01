@@ -21,6 +21,13 @@ jobs:
         cache: gradle
 
     - name: Grant execute permission for gradlew
+      working-directory: ./GKUIClock
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+      
+    - name: Upload APK
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Dialer-build-apk
+        path: GKUIClock/app/build/outputs/apk/debug/*.apk
