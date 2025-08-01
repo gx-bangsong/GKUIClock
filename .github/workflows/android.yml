@@ -2,9 +2,9 @@ name: Android CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "holiday-alarm" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "holiday-alarm" ]
 
 jobs:
   build:
