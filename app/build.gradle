@@ -1,12 +1,13 @@
 plugins {
     id 'com.android.application'
-    // Add the Room plugin ID here
-    id 'androidx.room'
+    // FIX 1: Add the version for the Room plugin. It should match your dependency version.
+    id 'androidx.room' version '2.6.1'
 }
 
 android {
     compileSdk = 35
 
+    // FIX 2: All defaultConfig items are now in a single, merged block.
     defaultConfig {
         applicationId = "com.best.deskclock"
         minSdk = 23
@@ -16,10 +17,8 @@ android {
         ndk {
             abiFilters = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
         }
-    }
 
-    // It's good practice to add the Room schema location here
-    defaultConfig {
+        // The Room schema location is now inside the main defaultConfig block.
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
@@ -97,8 +96,7 @@ android {
 }
 
 dependencies {
-    // You will also need to add Room's runtime and compiler dependencies
-    def room_version = "2.6.1" // Use the latest stable version
+    def room_version = "2.6.1" // This version should match the plugin version above
 
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
