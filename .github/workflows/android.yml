@@ -21,7 +21,6 @@ jobs:
         cache: gradle
 
     - name: Grant execute permission for gradlew
-      working-directory: ./GKUIClock
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
