@@ -1,10 +1,11 @@
+// 文件路径: GKUIClock/app/build.gradle
+
 plugins {
     id 'com.android.application'
     id 'androidx.room' version '2.6.1'
 }
 
-// STEP 1: ADD THIS NEW BLOCK RIGHT AFTER PLUGINS
-// This is the new, required way to configure Room's schema location.
+// 这是必须的、正确配置Room的方式
 room {
     schemaDirectory("$projectDir/schemas")
 }
@@ -21,16 +22,6 @@ android {
         ndk {
             abiFilters = ['armeabi-v7a', 'arm64-v8a', 'x86', 'x86_64']
         }
-
-        // STEP 2: REMOVE THE FOLLOWING BLOCK.
-        // The 'javaCompileOptions' block for Room is no longer needed here.
-        /*
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments += ["room.schemaLocation": "$projectDir/schemas".toString()]
-            }
-        }
-        */
     }
 
 	def keystorePropertiesFile = rootProject.file("keystore.properties")
