@@ -91,7 +91,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final TextView alarmVolumeValue;
     private final Chip delete;
     private final Chip duplicate;
-    private final TextView holidayOption; // FIX: 变量声明
+    private final TextView holidayOption;
 
     private final boolean mHasVibrator;
     private final boolean mHasFlash;
@@ -126,7 +126,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         alarmVolumeValue = itemView.findViewById(R.id.alarm_volume_value);
         delete = itemView.findViewById(R.id.delete);
         duplicate = itemView.findViewById(R.id.duplicate);
-        holidayOption = itemView.findViewById(R.id.holiday_option); // FIX: 变量初始化
+        holidayOption = itemView.findViewById(R.id.holiday_option);
 
         // Collapse handler
         itemView.setOnClickListener(v -> {
@@ -143,6 +143,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         // Edit label handler
         editLabel.setOnClickListener(view ->
                 getAlarmTimeClickHandler().onEditLabelClicked(getItemHolder().item));
+
+        holidayOption.setOnClickListener(view ->
+                getAlarmTimeClickHandler().onHolidayOptionClicked(getItemHolder().item));
 
         // Build button for each day.
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -268,7 +271,6 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         bindSnoozeValue(context, alarm);
         bindCrescendoValue(context, alarm);
         bindAlarmVolume(context, alarm);
-        bindHolidayOption(context, alarm);
 
         // If this view is bound without coming from a CollapsedAlarmViewHolder (e.g.
         // when calling expand() before this alarm was visible in it's collapsed state),
@@ -512,10 +514,6 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             deleteOccasionalAlarmAfterUse.setVisibility(VISIBLE);
             deleteOccasionalAlarmAfterUse.setChecked(alarm.deleteAfterUse);
         }
-    }
-
-    private void bindHolidayOption(Context context, Alarm alarm) {
-        holidayOption.setVisibility(VISIBLE);
     }
 
     private void bindEditLabelAnnotations(Alarm alarm) {
