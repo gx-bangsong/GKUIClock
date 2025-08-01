@@ -24,3 +24,8 @@ jobs:
       run: chmod +x gradlew
     - name: Build with Gradle
       run: ./gradlew build
+    - name: Upload APK
+    - uses: actions/upload-artifact@v4
+   
+    name: build-apk
+     path:GKUIClock/app/build/outputs/apk/debug/*.apk
