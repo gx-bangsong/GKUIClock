@@ -97,7 +97,6 @@ android {
 }
 
 dependencies {
-    // You will also need to add Room's runtime and compiler dependencies
     def room_version = "2.6.1" // Use the latest stable version
 
     implementation "androidx.room:room-runtime:$room_version"
