@@ -91,6 +91,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final TextView alarmVolumeValue;
     private final Chip delete;
     private final Chip duplicate;
+    private final TextView holidayOption;
 
     private final boolean mHasVibrator;
     private final boolean mHasFlash;
@@ -125,6 +126,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         alarmVolumeValue = itemView.findViewById(R.id.alarm_volume_value);
         delete = itemView.findViewById(R.id.delete);
         duplicate = itemView.findViewById(R.id.duplicate);
+        holidayOption = itemView.findViewById(R.id.holiday_option);
 
         // Collapse handler
         itemView.setOnClickListener(v -> {
