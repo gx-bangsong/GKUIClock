@@ -1,13 +1,5 @@
-// 文件路径: GKUIClock/app/build.gradle
-
 plugins {
     id 'com.android.application'
-    id 'androidx.room' version '2.6.1'
-}
-
-// 这是必须的、正确配置Room的方式
-room {
-    schemaDirectory("$projectDir/schemas")
 }
 
 android {
@@ -94,12 +86,6 @@ android {
 }
 
 dependencies {
-    def room_version = "2.6.1"
-
-    implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
-    implementation "androidx.room:room-ktx:$room_version"
-
     implementation 'androidx.media3:media3-exoplayer:1.7.1'
     implementation 'androidx.media3:media3-common:1.7.1'
     implementation 'androidx.preference:preference:1.2.1'
