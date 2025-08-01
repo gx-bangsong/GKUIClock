@@ -1,10 +1,14 @@
 name: Android CI
 
 on:
+  # 1. 修改：让工作流也能在 holiday-alarm 分支上自动触发
   push:
-    branches: [ "main" ]
+    branches: [ "main", "holiday-alarm" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "holiday-alarm" ]
+  
+  # 2. 新增：添加这一段来允许手动触发工作流
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,5 +26,7 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+      
     - name: Build with Gradle
-      run: ./gradlew build
+      # 增加 clean 命令可以防止一些缓存问题，是个好习惯
+      run: ./gradlew clean build
