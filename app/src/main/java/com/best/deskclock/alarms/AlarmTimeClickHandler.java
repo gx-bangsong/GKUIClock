@@ -79,10 +79,6 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         mSelectedAlarm = selectedAlarm;
     }
 
-    public Alarm getSelectedAlarm() {
-        return mSelectedAlarm;
-    }
-
     public void setAlarmEnabled(Alarm alarm, boolean newState) {
         if (newState != alarm.enabled) {
             alarm.enabled = newState;
@@ -212,13 +208,6 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
 
         final Intent intent = RingtonePickerActivity.createAlarmRingtonePickerIntent(mContext, alarm);
         mContext.startActivity(intent);
-    }
-
-    public void onHolidayOptionClicked(Alarm alarm) {
-        mSelectedAlarm = alarm;
-        final com.best.deskclock.holiday.HolidayDialogFragment fragment =
-                com.best.deskclock.holiday.HolidayDialogFragment.newInstance((com.best.deskclock.holiday.HolidayDialogFragment.HolidayDialogListener) mFragment);
-        fragment.show(mFragment.getParentFragmentManager(), "holiday_dialog");
     }
 
     public void onEditLabelClicked(Alarm alarm) {
