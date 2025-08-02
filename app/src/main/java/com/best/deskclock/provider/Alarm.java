@@ -162,6 +162,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     public int crescendoDuration;
     // Alarm volume level in steps; not a percentage
     public int alarmVolume;
+    public int holidayOption = 0;
     public int instanceState;
     public int instanceId;
 
