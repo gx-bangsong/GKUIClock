@@ -83,6 +83,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     private static final int ALARM_VOLUME_INDEX = 15;
 
     private static final int COLUMN_COUNT = ALARM_VOLUME_INDEX + 1;
+
     // Public fields
     public long mId;
     public int mYear;
@@ -99,7 +100,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     public int mAutoSilenceDuration;
     public int mSnoozeDuration;
     public int mCrescendoDuration;
-    // Alarm volume level in steps; not a percentage
     public int mAlarmVolume;
 
     public AlarmInstance(Calendar calendar, Long alarmId) {
@@ -140,36 +140,32 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         this.mAlarmVolume = instance.mAlarmVolume;
     }
 
-    public AlarmInstance(Cursor c, boolean joinedTable) {
-        if (joinedTable) {
-                   mId = c.getLong(c.getColumnIndexOrThrow(_ID));
-        mYear = c.getInt(c.getColumnIndexOrThrow(YEAR));
-        mMonth = c.getInt(c.getColumnIndexOrThrow(MONTH));
-        mDay = c.getInt(c.getColumnIndexOrThrow(DAY));
-        mHour = c.getInt(c.getColumnIndexOrThrow(HOUR));
-        mMinute = c.getInt(c.getColumnIndexOrThrow(MINUTES));
-        mLabel = c.getString(c.getColumnIndexOrThrow(LABEL));
-        mVibrate = c.getInt(c.getColumnIndexOrThrow(VIBRATE)) == 1;
-        mFlash = c.getInt(c.getColumnIndexOrThrow(FLASH)) == 1;
-        
-        final int ringtoneIndex = c.getColumnIndex(RINGTONE);
-        if (c.isNull(ringtoneIndex)) {
+    public AlarmInstance(Cursor c) {
+        mId = c.getLong(ID_INDEX);
+        mYear = c.getInt(YEAR_INDEX);
+        mMonth = c.getInt(MONTH_INDEX);
+        mDay = c.getInt(DAY_INDEX);
+        mHour = c.getInt(HOUR_INDEX);
+        mMinute = c.getInt(MINUTES_INDEX);
+        mLabel = c.getString(LABEL_INDEX);
+        mVibrate = c.getInt(VIBRATE_INDEX) == 1;
+        mFlash = c.getInt(FLASH_INDEX) == 1;
+        mAutoSilenceDuration = c.getInt(AUTO_SILENCE_DURATION_INDEX);
+        mSnoozeDuration = c.getInt(SNOOZE_DURATION_INDEX);
+        mCrescendoDuration = c.getInt(CRESCENDO_DURATION_INDEX);
+        mAlarmVolume = c.getInt(ALARM_VOLUME_INDEX);
+
+        if (c.isNull(RINGTONE_INDEX)) {
             mRingtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         } else {
-            mRingtone = Uri.parse(c.getString(ringtoneIndex));
+            mRingtone = Uri.parse(c.getString(RINGTONE_INDEX));
         }
 
-        final int alarmIdIndex = c.getColumnIndex(ALARM_ID);
-        if (!c.isNull(alarmIdIndex)) {
-            mAlarmId = c.getLong(alarmIdIndex);
+        if (!c.isNull(ALARM_ID_INDEX)) {
+            mAlarmId = c.getLong(ALARM_ID_INDEX);
         }
-        
-        mAlarmState = c.getInt(c.getColumnIndexOrThrow(ALARM_STATE));
-        mAutoSilenceDuration = c.getInt(c.getColumnIndexOrThrow(AUTO_SILENCE_DURATION));
-        mSnoozeDuration = c.getInt(c.getColumnIndexOrThrow(SNOOZE_DURATION));
-        mCrescendoDuration = c.getInt(c.getColumnIndexOrThrow(CRESCENDO_DURATION));
-        mAlarmVolume = c.getInt(c.getColumnIndexOrThrow(ALARM_VOLUME));
-    }
+        mAlarmState = c.getInt(ALARM_STATE_INDEX);
+    } // FIX: 添加了之前缺失的右花括号
 
     public static ContentValues createContentValues(AlarmInstance instance) {
         ContentValues values = new ContentValues(COLUMN_COUNT);
@@ -186,8 +182,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         values.put(VIBRATE, instance.mVibrate ? 1 : 0);
         values.put(FLASH, instance.mFlash ? 1 : 0);
         if (instance.mRingtone == null) {
-            // We want to put null in the database, so we'll be able
-            // to pick up on changes to the default alarm
             values.putNull(RINGTONE);
         } else {
             values.put(RINGTONE, instance.mRingtone.toString());
@@ -210,51 +204,24 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         return ContentUris.parseId(contentUri);
     }
 
-    /**
-     * @return the {@link Uri} identifying the alarm instance
-     */
     public static Uri getContentUri(long instanceId) {
         return ContentUris.withAppendedId(CONTENT_URI, instanceId);
     }
 
-    /**
-     * Get alarm instance from instanceId.
-     *
-     * @param cr         provides access to the content model
-     * @param instanceId for the desired instance.
-     * @return instance if found, null otherwise
-     */
     public static AlarmInstance getInstance(ContentResolver cr, long instanceId) {
         try (Cursor cursor = cr.query(getContentUri(instanceId), QUERY_COLUMNS, null, null, null)) {
             if (cursor != null && cursor.moveToFirst()) {
-                return new AlarmInstance(cursor, false);
+                return new AlarmInstance(cursor);
             }
         }
-
         return null;
     }
 
-    /**
-     * Get an alarm instances by alarmId.
-     *
-     * @param contentResolver provides access to the content model
-     * @param alarmId         of instances desired.
-     * @return list of alarms instances that are owned by alarmId.
-     */
-    public static List<AlarmInstance> getInstancesByAlarmId(ContentResolver contentResolver,
-                                                            long alarmId) {
+    public static List<AlarmInstance> getInstancesByAlarmId(ContentResolver contentResolver, long alarmId) {
         return getInstances(contentResolver, ALARM_ID + "=" + alarmId);
     }
 
-    /**
-     * Get the next instance of an alarm given its alarmId
-     *
-     * @param contentResolver provides access to the content model
-     * @param alarmId         of instance desired
-     * @return the next instance of an alarm by alarmId.
-     */
-    public static AlarmInstance getNextUpcomingInstanceByAlarmId(ContentResolver contentResolver,
-                                                                 long alarmId) {
+    public static AlarmInstance getNextUpcomingInstanceByAlarmId(ContentResolver contentResolver, long alarmId) {
         final List<AlarmInstance> alarmInstances = getInstancesByAlarmId(contentResolver, alarmId);
         if (alarmInstances.isEmpty()) {
             return null;
@@ -268,50 +235,27 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         return nextAlarmInstance;
     }
 
-    /**
-     * Get alarm instances in the specified state.
-     */
-    public static List<AlarmInstance> getInstancesByState(
-            ContentResolver contentResolver, int state) {
+    public static List<AlarmInstance> getInstancesByState(ContentResolver contentResolver, int state) {
         return getInstances(contentResolver, ALARM_STATE + "=" + state);
     }
 
-    /**
-     * Get a list of instances given selection.
-     *
-     * @param cr            provides access to the content model
-     * @param selection     A filter declaring which rows to return, formatted as an
-     *                      SQL WHERE clause (excluding the WHERE itself). Passing null will
-     *                      return all rows for the given URI.
-     * @param selectionArgs You may include ?s in selection, which will be
-     *                      replaced by the values from selectionArgs, in the order that they
-     *                      appear in the selection. The values will be bound as Strings.
-     * @return list of alarms matching where clause or empty list if none found.
-     */
-    public static List<AlarmInstance> getInstances(ContentResolver cr, String selection,
-                                                   String... selectionArgs) {
+    public static List<AlarmInstance> getInstances(ContentResolver cr, String selection, String... selectionArgs) {
         final List<AlarmInstance> result = new LinkedList<>();
         try (Cursor cursor = cr.query(CONTENT_URI, QUERY_COLUMNS, selection, selectionArgs, null)) {
             if (cursor != null && cursor.moveToFirst()) {
                 do {
-                    result.add(new AlarmInstance(cursor, false));
+                    result.add(new AlarmInstance(cursor));
                 } while (cursor.moveToNext());
             }
         }
-
         return result;
     }
 
-    public static void addInstance(ContentResolver contentResolver,
-                                   AlarmInstance instance) {
-        // Make sure we are not adding a duplicate instances. This is not a
-        // fix and should never happen. This is only a safe guard against bad code, and you
-        // should fix the root issue if you see the error message.
-        String dupSelector = AlarmInstance.ALARM_ID + " = " + instance.mAlarmId;
+    public static void addInstance(ContentResolver contentResolver, AlarmInstance instance) {
+        String dupSelector = ALARM_ID + " = " + instance.mAlarmId;
         for (AlarmInstance otherInstances : getInstances(contentResolver, dupSelector)) {
             if (otherInstances.getAlarmTime().equals(instance.getAlarmTime())) {
                 LogUtils.i("Detected duplicate instance in DB. Updating " + otherInstances + " to " + instance);
-                // Copy over the new instance values and update the db
                 instance.mId = otherInstances.mId;
                 updateInstance(contentResolver, instance);
                 return;
@@ -334,8 +278,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         contentResolver.delete(getContentUri(instanceId), "", null);
     }
 
-    public static void deleteOtherInstances(Context context, ContentResolver contentResolver,
-                                            long alarmId, long instanceId) {
+    public static void deleteOtherInstances(Context context, ContentResolver contentResolver, long alarmId, long instanceId) {
         final List<AlarmInstance> instances = getInstancesByAlarmId(contentResolver, alarmId);
         for (AlarmInstance instance : instances) {
             if (instance.mId != instanceId) {
@@ -349,11 +292,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         return mLabel.isEmpty() ? context.getString(R.string.default_label) : mLabel;
     }
 
-    /**
-     * Return the time when a alarm should fire.
-     *
-     * @return the time
-     */
     public Calendar getAlarmTime() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.YEAR, mYear);
@@ -374,11 +312,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         mMinute = calendar.get(Calendar.MINUTE);
     }
 
-    /**
-     * Return the time when the notification should be shown.
-     *
-     * @return the time
-     */
     public Calendar getNotificationTime(Context context) {
         Calendar calendar = getAlarmTime();
         int getAlarmNotificationReminderTime = SettingsDAO.getAlarmNotificationReminderTime(getDefaultSharedPreferences(context));
@@ -386,30 +319,17 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         return calendar;
     }
 
-    /**
-     * Return the time when a missed notification should be removed.
-     *
-     * @return the time
-     */
     public Calendar getMissedTimeToLive() {
         Calendar calendar = getAlarmTime();
         calendar.add(Calendar.HOUR, MISSED_TIME_TO_LIVE_HOUR_OFFSET);
         return calendar;
     }
 
-    /**
-     * Return the time when the alarm should stop firing and be marked as missed.
-     *
-     * @return the time when alarm should be silence, or null if never
-     */
     public Calendar getTimeout(Context context) {
         Calendar calendar = getAlarmTime();
 
-        // Alarm silence has been set to "Never"
         if (mAutoSilenceDuration == ALARM_TIMEOUT_NEVER) {
             return null;
-        // Alarm silence has been set to "At the end of the ringtone"
-        // or "Dismiss alarm when ringtone ends" has been ticked in the expanded alarm view
         } else if (mAutoSilenceDuration == ALARM_TIMEOUT_END_OF_RINGTONE) {
             int milliSeconds = RingtoneUtils.getRingtoneDuration(context, mRingtone);
             calendar.add(Calendar.MILLISECOND, milliSeconds);
