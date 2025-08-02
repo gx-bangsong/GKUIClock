@@ -67,7 +67,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
-import com.best.deskclock.holiday.HolidayDialogFragment; // 确保有这个 import
 
 /**
  * A fragment that displays a list of alarm time and allows interaction with them.
@@ -403,7 +402,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
             final Alarm alarm = new Alarm(data);
             final AlarmInstance alarmInstance = alarm.canPreemptivelyDismiss()
-                    ? new AlarmInstance(data)
+                    ? new AlarmInstance(data, true)
                     : null;
             final AlarmItemHolder itemHolder = new AlarmItemHolder(alarm, alarmInstance, mAlarmTimeClickHandler);
             itemHolders.add(itemHolder);
@@ -602,30 +601,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
             setTabScrolledToTop(Utils.isScrolledToTop(mRecyclerView));
         }
     }
-    // FIX: 添加了 onHolidayOptionClicked 的实现
-    @Override
-    public void onHolidayOptionClicked(Alarm alarm) {
-        final HolidayDialogFragment fragment = new HolidayDialogFragment();
-        // 如果需要向对话框传递数据，可以使用 setArguments
-        // Bundle args = new Bundle();
-        // args.putLong("ALARM_ID", alarm.id);
-        // fragment.setArguments(args);
-        
-        // 设置目标 Fragment 以接收回调
-        fragment.setTargetFragment(this, 0);
-        fragment.show(getParentFragmentManager(), "HolidayDialogFragment");
-    }
 
-    // FIX: 添加了 onHolidayOptionSelected 的实现
-    @Override
-    public void onHolidayOptionSelected(int which, long alarmId) {
-        // 在这里处理从对话框返回的选择结果
-        Alarm alarm = mAlarmUpdateHandler.getAlarm(alarmId);
-        if (alarm != null) {
-            alarm.holidayOption = which;
-            mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
-        }
-    }
     /**
      * This runnable executes at midnight and refreshes the display of all alarms. Collapsed alarms
      * that do no repeat will have their "Tomorrow" strings updated to say "Today".

@@ -168,12 +168,6 @@ public final class ClockContract {
          * <p>Type: INTEGER</p>
          */
         String DELETE_AFTER_USE = "delete_after_use";
-        // 在这里添加新的列定义
-    /**
-     * Holiday option setting for the alarm.
-     * <p>Type: INTEGER</p>
-     */
-    String HOLIDAY_OPTION = "holiday_option";
     }
 
     /**
