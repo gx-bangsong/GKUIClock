@@ -22,6 +22,7 @@
     <string name="big_week">大小周(大周)</string>
     <string name="small_week">大小周(小周)</string>
     <string name="single_day_off">单休</string>
+
     <!-- Title of dialog box to choose the alarm time -->
     <string name="time_picker_dialog_title">Select time</string>
     <!-- Title of dialog box to choose the alarm date -->
