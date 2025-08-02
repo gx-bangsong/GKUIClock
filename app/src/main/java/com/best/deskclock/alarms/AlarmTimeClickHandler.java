@@ -210,6 +210,13 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         mContext.startActivity(intent);
     }
 
+    public void onHolidayOptionClicked(Alarm alarm) {
+        mSelectedAlarm = alarm;
+        final com.best.deskclock.holiday.HolidayDialogFragment fragment =
+                com.best.deskclock.holiday.HolidayDialogFragment.newInstance((com.best.deskclock.holiday.HolidayDialogFragment.HolidayDialogListener) mFragment);
+        fragment.show(mFragment.getParentFragmentManager(), "holiday_dialog");
+    }
+
     public void onEditLabelClicked(Alarm alarm) {
         Events.sendAlarmEvent(R.string.action_set_label, R.string.label_deskclock);
         final LabelDialogFragment fragment = LabelDialogFragment.newInstance(alarm, alarm.label, mFragment.getTag());

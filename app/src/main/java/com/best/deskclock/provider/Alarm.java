@@ -153,7 +153,9 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     public int snoozeDuration;
     public int crescendoDuration;
     public int alarmVolume;
-    public int holidayOption; // FIX: Declared the field
+
+    public int holidayOption = 0;
+
     public int instanceState;
     public int instanceId;
 

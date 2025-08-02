@@ -17,6 +17,7 @@
     <string name="alarm_flash">Flash</string>
     <!-- Setting labels on Set alarm screen: Delete alarm once dismissed on or off -->
     <string name="delete_occasional_alarm_after_use_title">Delete alarm once dismissed</string>
+
     <string name="holiday_option_title">节假日设置</string>
     <string name="skip_holiday">Skip holiday</string>
     <string name="big_week">大小周(大周)</string>

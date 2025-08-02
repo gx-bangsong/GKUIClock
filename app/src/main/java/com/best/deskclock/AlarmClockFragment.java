@@ -72,6 +72,8 @@ import com.best.deskclock.holiday.HolidayDialogFragment; // 确保有这个 impo
 /**
  * A fragment that displays a list of alarm time and allows interaction with them.
  */
+import com.best.deskclock.holiday.HolidayDialogFragment;
+
 public final class AlarmClockFragment extends DeskClockFragment implements
         LoaderManager.LoaderCallbacks<Cursor>, ScrollHandler, OnTimeSetListener, HolidayDialogFragment.HolidayDialogListener {
 
@@ -517,6 +519,15 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     @Override
     public void onTimeSet(int hour, int minute) {
         mAlarmTimeClickHandler.onTimeSet(hour, minute);
+    }
+
+    @Override
+    public void onHolidayOptionSelected(int option) {
+        final Alarm alarm = mAlarmTimeClickHandler.getSelectedAlarm();
+        if (alarm != null) {
+            alarm.holidayOption = option;
+            mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+        }
     }
 
     public void startCreatingAlarm() {
