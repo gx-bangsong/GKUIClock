@@ -98,12 +98,6 @@ public final class ClockContract {
          * <p>Type: INTEGER</p>
          */
         String ALARM_VOLUME = "alarmVolume";
-
-        /**
-         * Holiday option for the alarm.
-         * <p>Type: INTEGER</p>
-         */
-        String HOLIDAY_OPTION = "holidayOption";
     }
 
     /**

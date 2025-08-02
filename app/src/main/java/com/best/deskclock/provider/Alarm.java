@@ -125,8 +125,9 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     private static final int SNOOZE_DURATION_INDEX = 14;
     private static final int CRESCENDO_DURATION_INDEX = 15;
     private static final int ALARM_VOLUME_INDEX = 16;
+    private static final int HOLIDAY_OPTION_INDEX = 17;
 
-    private static final int INSTANCE_STATE_INDEX = 17;
+    private static final int INSTANCE_STATE_INDEX = 18;
     public static final int INSTANCE_ID_INDEX = 18;
     public static final int INSTANCE_YEAR_INDEX = 19;
     public static final int INSTANCE_MONTH_INDEX = 20;
@@ -162,7 +163,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     public int crescendoDuration;
     // Alarm volume level in steps; not a percentage
     public int alarmVolume;
-    public int holidayOption = 0;
     public int instanceState;
     public int instanceId;
 
@@ -236,7 +236,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         snoozeDuration = c.getInt(SNOOZE_DURATION_INDEX);
         crescendoDuration = c.getInt(CRESCENDO_DURATION_INDEX);
         alarmVolume = c.getInt(ALARM_VOLUME_INDEX);
-        holidayOption = c.getInt(HOLIDAY_OPTION_INDEX);
 
         if (c.getColumnCount() == ALARM_JOIN_INSTANCE_COLUMN_COUNT) {
             instanceState = c.getInt(INSTANCE_STATE_INDEX);
@@ -272,7 +271,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         snoozeDuration = p.readInt();
         crescendoDuration = p.readInt();
         alarmVolume = p.readInt();
-        holidayOption = p.readInt();
     }
 
     public static ContentValues createContentValues(Alarm alarm) {
@@ -296,7 +294,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         values.put(SNOOZE_DURATION, alarm.snoozeDuration);
         values.put(CRESCENDO_DURATION, alarm.crescendoDuration);
         values.put(ALARM_VOLUME, alarm.alarmVolume);
-        values.put(ClockContract.AlarmsColumns.HOLIDAY_OPTION, alarm.holidayOption);
         if (alarm.alert == null) {
             // We want to put null, so default alarm changes
             values.putNull(RINGTONE);
@@ -479,7 +476,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         p.writeInt(snoozeDuration);
         p.writeInt(crescendoDuration);
         p.writeInt(alarmVolume);
-        p.writeInt(holidayOption);
     }
 
     public int describeContents() {

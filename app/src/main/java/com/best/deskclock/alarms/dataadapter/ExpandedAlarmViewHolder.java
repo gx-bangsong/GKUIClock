@@ -91,6 +91,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final TextView alarmVolumeValue;
     private final Chip delete;
     private final Chip duplicate;
+    private final TextView holidayOption;
 
     private final boolean mHasVibrator;
     private final boolean mHasFlash;
@@ -125,6 +126,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         alarmVolumeValue = itemView.findViewById(R.id.alarm_volume_value);
         delete = itemView.findViewById(R.id.delete);
         duplicate = itemView.findViewById(R.id.duplicate);
+        holidayOption = itemView.findViewById(R.id.holiday_option);
 
         // Collapse handler
         itemView.setOnClickListener(v -> {
@@ -141,6 +143,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         // Edit label handler
         editLabel.setOnClickListener(view ->
                 getAlarmTimeClickHandler().onEditLabelClicked(getItemHolder().item));
+
+        holidayOption.setOnClickListener(view ->
+                getAlarmTimeClickHandler().onHolidayOptionClicked(getItemHolder().item));
 
         // Build button for each day.
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -280,6 +285,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         // and to avoid flickering when turning the alarm on/off
         final boolean labelIsEmpty = alarm.label == null || alarm.label.isEmpty();
         editLabel.setAlpha(labelIsEmpty || alarm.enabled ? 1f : editLabel.getAlpha());
+        holidayOption.setAlpha(1f);
         repeatDays.setAlpha(1f);
         scheduleAlarm.setAlpha(1f);
         selectedDate.setAlpha(1f);
@@ -606,6 +612,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         final Animator editLabelAnimation = ObjectAnimator.ofFloat(editLabel, View.ALPHA, 0f)
                 .setDuration(shortDuration);
 
+        final Animator holidayOptionAnimation = ObjectAnimator.ofFloat(holidayOption, View.ALPHA, 0f)
+                .setDuration(shortDuration);
+
         final Animator repeatDaysAnimation = ObjectAnimator.ofFloat(repeatDays, View.ALPHA, 0f)
                 .setDuration(shortDuration);
 
@@ -738,7 +747,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
 
         final AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(backgroundAnimator, boundsAnimator, repeatDaysAnimation,
-                editLabelAnimation, editLabelIconAnimation, flashAnimation,
+                editLabelAnimation, holidayOptionAnimation, editLabelIconAnimation, flashAnimation,
                 deleteOccasionalAlarmAfterUseAnimation, vibrateAnimation, ringtoneAnimation,
                 deleteAnimation, duplicateAnimation, dismissAnimation, switchAnimator,
                 clockAnimator, ellipseAnimator, scheduleAlarmAnimation, selectedDateAnimation,
@@ -811,6 +820,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         final long longDuration = (long) (duration * ANIM_LONG_DURATION_MULTIPLIER);
 
         final Animator editLabelAnimation = ObjectAnimator.ofFloat(editLabel, View.ALPHA, 1f)
+                .setDuration(longDuration);
+
+        final Animator holidayOptionAnimation = ObjectAnimator.ofFloat(holidayOption, View.ALPHA, 1f)
                 .setDuration(longDuration);
 
         final Animator editLabelIconAnimation = ObjectAnimator.ofFloat(editLabelIcon, View.ALPHA, 1f)
@@ -952,7 +964,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
 
         final AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(backgroundAnimator, boundsAnimator, repeatDaysAnimation,
-                editLabelAnimation, editLabelIconAnimation, flashAnimation, vibrateAnimation,
+                editLabelAnimation, holidayOptionAnimation, editLabelIconAnimation, flashAnimation, vibrateAnimation,
                 deleteOccasionalAlarmAfterUseAnimation, ringtoneAnimation, deleteAnimation,
                 duplicateAnimation, dismissAnimation, arrowAnimation, scheduleAlarmAnimation,
                 selectedDateAnimation, addDateAnimation, removeDateAnimation,
