@@ -11,6 +11,12 @@
     <string name="default_label">Alarm</string>
     <!-- Label title on the expanded alarm view to schedule alarm -->
     <string name="schedule_alarm_title">Schedule alarm</string>
+    <!-- Label title on the expanded alarm view to set holiday -->
+    <string name="holiday_title">Holiday</string>
+    <string name="skip_holiday">Skip holiday</string>
+    <string name="daxiao_da">大小周大周</string>
+    <string name="daxiao_xiao">大小周小周</string>
+    <string name="danxiu">單休</string>
     <!-- Setting labels on Set alarm screen: Vibration on or off -->
     <string name="alarm_vibrate">Vibrate</string>
     <!-- Setting labels on Set alarm screen: Flash on or off -->
