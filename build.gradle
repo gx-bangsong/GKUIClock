@@ -13,3 +13,8 @@ buildscript {
 tasks.register('clean', Delete) {
     delete rootProject.layout.buildDirectory
 }
+
+ext {
+    roomVersion = '2.6.1'
+    gsonVersion = '2.10.1'
+}

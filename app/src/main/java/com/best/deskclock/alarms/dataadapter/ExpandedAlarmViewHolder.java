@@ -91,6 +91,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final TextView alarmVolumeValue;
     private final Chip delete;
     private final Chip duplicate;
+    private final TextView holidayOption;
 
     private final boolean mHasVibrator;
     private final boolean mHasFlash;
@@ -125,6 +126,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         alarmVolumeValue = itemView.findViewById(R.id.alarm_volume_value);
         delete = itemView.findViewById(R.id.delete);
         duplicate = itemView.findViewById(R.id.duplicate);
+        holidayOption = itemView.findViewById(R.id.holiday_option);
 
         // Collapse handler
         itemView.setOnClickListener(v -> {
@@ -141,6 +143,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         // Edit label handler
         editLabel.setOnClickListener(view ->
                 getAlarmTimeClickHandler().onEditLabelClicked(getItemHolder().item));
+
+        holidayOption.setOnClickListener(view ->
+                getAlarmTimeClickHandler().onHolidayOptionClicked(getItemHolder().item));
 
         // Build button for each day.
         final LayoutInflater inflater = LayoutInflater.from(context);
@@ -280,6 +285,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         // and to avoid flickering when turning the alarm on/off
         final boolean labelIsEmpty = alarm.label == null || alarm.label.isEmpty();
         editLabel.setAlpha(labelIsEmpty || alarm.enabled ? 1f : editLabel.getAlpha());
+        holidayOption.setAlpha(1f);
         repeatDays.setAlpha(1f);
         scheduleAlarm.setAlpha(1f);
         selectedDate.setAlpha(1f);
