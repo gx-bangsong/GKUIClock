@@ -36,6 +36,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
      */
     public static final long INVALID_ID = -1;
 
+    public int holidayOption;
+
     public static final Parcelable.Creator<Alarm> CREATOR = new Parcelable.Creator<>() {
         public Alarm createFromParcel(Parcel p) {
             return new Alarm(p);

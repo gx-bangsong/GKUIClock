@@ -31,12 +31,16 @@ public class HolidayDialogFragment extends DialogFragment {
 
     private static final String ARG_ALARM = "alarm";
 
-    public static void show(FragmentManager manager, Alarm alarm) {
+    public static HolidayDialogFragment newInstance(Alarm alarm) {
         final HolidayDialogFragment dialog = new HolidayDialogFragment();
         final Bundle args = new Bundle();
         args.putParcelable(ARG_ALARM, alarm);
         dialog.setArguments(args);
-        dialog.show(manager, "holiday");
+        return dialog;
+    }
+
+    public static void show(FragmentManager manager, HolidayDialogFragment fragment) {
+        fragment.show(manager, "holiday");
     }
 
     @NonNull
@@ -53,8 +57,9 @@ public class HolidayDialogFragment extends DialogFragment {
 
         return new AlertDialog.Builder(requireContext())
                 .setTitle(R.string.holiday_title)
-                .setItems(items, (dialog, which) -> {
+                .setSingleChoiceItems(items, alarm.holidayOption, (dialog, which) -> {
                     alarm.holidayOption = which;
+                    dismiss();
                 })
                 .create();
     }

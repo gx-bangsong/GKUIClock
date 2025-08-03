@@ -213,7 +213,7 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
 
     public void onHolidayOptionClicked(Alarm alarm) {
         final HolidayDialogFragment fragment = HolidayDialogFragment.newInstance(alarm);
-        HolidayDialogFragment.show(mFragment.getParentFragmentManager(), fragment);
+        fragment.show(mFragment.getParentFragmentManager(), "holiday");
     }
 
     public void onEditLabelClicked(Alarm alarm) {
