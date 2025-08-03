@@ -241,7 +241,7 @@
         android:drawableEnd="@drawable/ic_selector_checkbox"
         android:drawablePadding="10dp"
         android:text="@string/delete_occasional_alarm_after_use_title"
-        app:layout_constraintTop_toBottomOf="@id/flash_onoff"
+        app:layout_constraintTop_toBottomOf="@id/holiday_option"
         tools:ignore="RtlSymmetry"
         tools:checked="true" />
 
