@@ -88,4 +88,4 @@ Since the app is based on Apache 2.0 licensed AOSP Clock, an [Apache 2.0](LICENS
 - [qw123wh](https://github.com/qw123wh)
 - [crDroid Android](https://github.com/crdroidandroid/android_packages_apps_DeskClock)
 - [LineageOS](https://github.com/LineageOS/android_packages_apps_DeskClock)
-- [BlackyHawkyClock](github.com/BlackyHawky/Clock)
+- [BlackyHawkyClock](https://github.com/BlackyHawky/Clock)
