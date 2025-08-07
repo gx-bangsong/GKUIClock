@@ -9,18 +9,17 @@
 
 - [功能](#features)
   * [通病](#common-issues)
-- [Contributing](#contributing-)
-  * [Reporting Issues](#reporting-issues)
-  * [Translation](#translation)
-  * [Code Contribution](#code-contribution)
+- [贡献](#contributing-)
+  * [报告问题](#reporting-issues)
+  * [翻译](#translation)
+  * [贡献代码](#code-contribution)
 - [License](#license)
-- [Screenshots](#screenshots)
-- [Credits](#credits)
+- [截图](#screenshots)
+- [来源](#credits)
 
 # 功能
 * 跳过节假日；
 * 可设置大小周/单休工作模式；
-* 设置在特定日期响起的闹钟;
 * 翻转/摇晃手机以静音/关闭闹钟;
 * 用音量/电源键以推迟/关闭闹钟;
 * 部分骁龙机型可以关机后仍响铃;
@@ -49,59 +48,10 @@
 
 ## 通病
 
-Issues may occur on specific devices due to the limited number of devices to test the application.
+由于缺乏测试设备，某些问题可能在这些设备上出现.
 
-⚠ _<b>As I'm not an expert developer, some problems may unfortunately not be solved without help.</b>_ ⚠
+⚠ _<b>我不是专家,一些问题没有帮助可能解决不了.</b>_ ⚠
 
-# Contributing ❤
-
-## Reporting Issues
-
-Whether you encountered a bug, or want to see a new feature in Clock, you can contribute to the project by opening a new issue [here](https://github.com/BlackyHawky/Clock/issues). Your help is always welcome!
-
-Before opening a new issue, be sure to check the following:
-- **Does the issue already exist?** Make sure a similar issue has not been reported by browsing [existing issues](https://github.com/BlackyHawky/Clock/issues). Please search open and closed issues.
-- **Is the issue still relevant?** Make sure your issue is not already fixed in the latest version of Clock.
-- **Did you use the issue template?** It is important to make life of our kind contributors easier by avoiding issues that miss key information to their resolution.
-  Note that issues that ignore part of the issue template will likely get treated with very low priority, as often they are needlessly hard to read or understand (e.g. huge screenshots, or addressing multiple topics).
-
-## Translation
-
-### _Thank you to everyone who contributes to the translation of the app._ 🙏
-
-Translations can be added using [Weblate](https://translate.codeberg.org/projects/clock/). You will need an account to update translations and add languages. Add the language you want to translate to in Languages -> Manage translated languages in the top menu bar.
-Updating translations in a PR will not be accepted, as it may cause conflicts with Weblate translations.
-
-<details>
-<summary><b>Click here to see the translation status</b></summary>
-<br>
-
-[![Translation status](https://translate.codeberg.org/widget/clock/clock/multi-auto.svg)](https://translate.codeberg.org/engage/clock/)
-</details>
-
-## Code Contribution
-
-### Getting Started
-
-Clock project is based on Gradle and Android Gradle Plugin. To get started, you can install [Android Studio](https://developer.android.com/studio), and import project 'from Version Control / Git / Github' by providing this git repository [URL](https://github.com/BlackyHawky/Clock.git) (or git SSH URL).
-Of course you can also use any other compatible IDE, or work with text editor and command line.
-
-Once everything is up correctly, you're ready to go!
-
-### Guidelines
-
-Clock is a complex application, when contributing, you must take a step back and make sure your contribution:
-- **Is actually wanted**. Best check related open issues before you start working on a PR. Issues with "help wanted" label are accepted, but still it would be good if you announced that you are working on it.
-  If there is no issue related to your intended contribution, it's a good idea to open a new one to avoid disappointment of the contribution not being accepted. For small changes or fixing obvious bugs this step is not necessary.
-- **Is only about a single thing**. Mixing unrelated contributions into a single PR is hard to review and can get messy.
-- **Has a proper description**. What your contribution does is usually less obvious to reviewers than for yourself. A good description helps a lot for understanding what is going on, and for separating wanted from unintended changes in behavior.
-- **Uses already in-place mechanism and take advantage of them**. In other terms, does not reinvent the wheel or uses shortcuts that could alter the consistency of the existing code.
-- **Has a low footprint**. Some parts of the code are executed very frequently, and the keyboard should stay responsive even on older devices.
-- **Does not bring any non-free code or proprietary binary blobs**. This also applies to code/binaries with unknown licenses. Make sure you do not introduce any closed-source library from Google.
-  If your contribution contains code that is not your own, provide a link to the source.
-- **Complies with the user privacy principle Clock follows**.
-
-Please leave dependency upgrades to the maintainers, unless it's an actual security issue.
 
 # License
 
@@ -113,10 +63,10 @@ See repo's [LICENSE](/LICENSE) file.
 
 Since the app is based on Apache 2.0 licensed AOSP Clock, an [Apache 2.0](LICENSE-Apache-2.0) license file is provided too.
 
-# Screenshots
+# 截图
 
 <details>
-<summary><b>Click here to see screenshots</b></summary>
+<summary><b>查看截图</b></summary>
 <br>
  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/01.jpg" alt="Screenshot 01" width="200" />
  <img src="/fastlane/metadata/android/en-US/images/phoneScreenshots/02.jpg" alt="Screenshot 02" width="200" />
@@ -138,3 +88,4 @@ Since the app is based on Apache 2.0 licensed AOSP Clock, an [Apache 2.0](LICENS
 - [qw123wh](https://github.com/qw123wh)
 - [crDroid Android](https://github.com/crdroidandroid/android_packages_apps_DeskClock)
 - [LineageOS](https://github.com/LineageOS/android_packages_apps_DeskClock)
+- [BlackyHawkyClock](github.com/BlackyHawky/Clock)
