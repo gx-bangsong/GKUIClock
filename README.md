@@ -1,12 +1,14 @@
 <!--suppress CheckImageSize -->
 # GKUIClock
+基于BlackyHawkyClock的开源项目，并添加跳过节假日等本土化功能
+
 
 
 
 ## 目录
 
 - [功能](#features)
-  * [Common Issues](#common-issues)
+  * [通病](#common-issues)
 - [Contributing](#contributing-)
   * [Reporting Issues](#reporting-issues)
   * [Translation](#translation)
@@ -16,32 +18,34 @@
 - [Credits](#credits)
 
 # 功能
-* Set the alarms to a specific date;
-* Flip and shake action to dismiss/postpone alarm;
-* Turn off/postpone the alarm with the power button or volume buttons;
-* For some Snapdragon devices only, the alarm is triggered when they are switched off;
-  * Unfortunately, this feature may not work on some devices despite the presence of the _“com.qualcomm.qti.poweroffalarm”_ system app. See the discussion [here](https://github.com/BlackyHawky/Clock/issues/88).
-* Swipe to delete an alarm;
-* Duplicate alarms;
-* Customizable alarm title;
-* Customizable ringtone;
-* Ability to play ringtones randomly;
-* Light, dark or system theme;
-* AMOLED mode for dark theme;
-* Digital or analog clock style;
-* Display home time when traveling;
-* Display the time in many cities around the world;
-* Timer and stopwatch included;
-* Possibility of sharing your stopwatch with your contacts;
-* Customizable interface;
-* Customizable screensaver;
-* Modern widgets;
-* Customizable widgets;
-* Support for tiles in quick settings (for Android 7+);
-* Backup and restore application data (except custom ringtones);
+* 跳过节假日；
+* 可设置大小周/单休工作模式；
+* 设置在特定日期响起的闹钟;
+* 翻转/摇晃手机以静音/关闭闹钟;
+* 用音量/电源键以推迟/关闭闹钟;
+* 部分骁龙机型可以关机后仍响铃;
+  * 不幸的是, 尽管有 _“com.qualcomm.qti.poweroffalarm”_ 开头的应用，该功能可能无效，  [详情请点击](https://github.com/BlackyHawky/Clock/issues/88).
+* 滑动删除闹钟;
+* 复制闹钟;
+* 自定义闹钟标题;
+* 自定义铃声;
+* 随机铃声;
+* 亮/暗/跟随系统设置主题;
+* AMOLED 暗色主题;
+* 电子/传统时钟样式;
+* 出门在外时显示家乡时区;
+* 显示多个城市的时区;
+* 秒表和计时器;
+* 可以与你的联系人分享你的计时器;
+* 可自定义界面;
+* 可自定义屏保;
+* 焕然一新的小组件;
+* 可自定义小组件;
+* 支持控制中心磁贴 (Android 7+);
+* 可备份闹钟 (除自定义铃声外均可备份);
 * Material design;
-* Dynamic colors for Android 12+;
-* Support for [Reproducible Builds](https://reproducible-builds.org/). See the discussion [here](https://github.com/BlackyHawky/Clock/issues/140).
+* 支持动态取色（Android 12+）;
+* 支持 [Reproducible Builds](https://reproducible-builds.org/).  [详情请点击](https://github.com/BlackyHawky/Clock/issues/140).
 
 ## 通病
 
