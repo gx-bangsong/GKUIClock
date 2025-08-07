@@ -1,15 +1,11 @@
 <!--suppress CheckImageSize -->
-# Clock
-Clock is a customizable and privacy-conscious open-source clock, based on AOSP Clock.
+# GKUIClock
 
-[<img src="/images/badge_github.png" alt="Get it on GitHub" height="80">](https://github.com/BlackyHawky/Clock/releases)
-[<img src="/images/badge_f-droid.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.best.deskclock/)
-[<img src="/images/badge_izzy_on_droid.png" alt="Get it on IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/com.best.deskclock/)
-[<img src="/images/badge_openApk.png" alt="Get it on OpenApk" height="80">](https://www.openapk.net/clock/com.best.deskclock/)
 
-## Table of Contents
 
-- [Features](#features)
+## 目录
+
+- [功能](#features)
   * [Common Issues](#common-issues)
 - [Contributing](#contributing-)
   * [Reporting Issues](#reporting-issues)
@@ -19,7 +15,7 @@ Clock is a customizable and privacy-conscious open-source clock, based on AOSP C
 - [Screenshots](#screenshots)
 - [Credits](#credits)
 
-# Features
+# 功能
 * Set the alarms to a specific date;
 * Flip and shake action to dismiss/postpone alarm;
 * Turn off/postpone the alarm with the power button or volume buttons;
@@ -47,7 +43,7 @@ Clock is a customizable and privacy-conscious open-source clock, based on AOSP C
 * Dynamic colors for Android 12+;
 * Support for [Reproducible Builds](https://reproducible-builds.org/). See the discussion [here](https://github.com/BlackyHawky/Clock/issues/140).
 
-## Common Issues
+## 通病
 
 Issues may occur on specific devices due to the limited number of devices to test the application.
 
