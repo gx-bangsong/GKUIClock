@@ -94,6 +94,11 @@ public final class DataModel {
      */
     private RingtoneModel mRingtoneModel;
 
+    /**
+     * The preferences for the application.
+     */
+    private SharedPreferences mPrefs;
+
     private DataModel() {
     }
 
@@ -107,6 +112,7 @@ public final class DataModel {
     public void init(Context context, SharedPreferences prefs) {
         if (mContext != context) {
             mContext = context.getApplicationContext();
+            mPrefs = prefs;
 
             final String themeValue = prefs.getString(KEY_THEME, SYSTEM_THEME);
             switch (themeValue) {
@@ -126,6 +132,21 @@ public final class DataModel {
             mStopwatchModel = new StopwatchModel(mContext, prefs, mNotificationModel);
             mTimerModel = new TimerModel(mContext, prefs, mRingtoneModel, mNotificationModel);
         }
+    }
+
+    /**
+     * @return the holiday data url.
+     */
+    public String getHolidayDataUrl() {
+        return SettingsDAO.getHolidayDataUrl(mPrefs);
+    }
+
+    /**
+     * @param url the holiday data url
+     */
+    public void setHolidayDataUrl(String url) {
+        enforceMainLooper();
+        SettingsDAO.setHolidayDataUrl(mPrefs, url);
     }
 
     /**

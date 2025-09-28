@@ -646,4 +646,16 @@
     <string name="disconnect_bluetooth_device_title">请断开蓝牙设备的连接以访问此设置</string>
     <string name="system_media_volume_summary">仅在连接蓝牙设备时有效</string>
     <string name="widget_apply_horizontal_padding_title">将边距应用于微件两侧</string>
+    <!-- Category title for holiday alarm settings -->
+    <string name="holiday_alarm_category_title">节假日闹钟</string>
+    <!-- Title for the preference to update holiday data -->
+    <string name="update_holiday_data_title">更新节假日数据</string>
+    <!-- Summary for the preference to update holiday data -->
+    <string name="update_holiday_data_summary">手动更新节假日和工作日数据</string>
+    <!-- Title for the preference to set the holiday data URL -->
+    <string name="holiday_data_url_title">节假日数据 URL</string>
+    <!-- Summary for the preference to set the holiday data URL -->
+    <string name="holiday_data_url_summary">设置节假日和工作日数据的 URL</string>
+    <!-- Dialog message for the preference to set the holiday data URL -->
+    <string name="holiday_data_url_dialog_message">输入节假日和工作日数据的 URL</string>
 </resources>

@@ -88,6 +88,8 @@ public class PreferencesKeys {
     public static final String KEY_MATERIAL_TIME_PICKER_STYLE = "key_material_time_picker_style";
     public static final String KEY_MATERIAL_DATE_PICKER_STYLE = "key_material_date_picker_style";
     public static final String KEY_ALARM_DISPLAY_CUSTOMIZATION = "key_alarm_display_customization";
+    public static final String KEY_UPDATE_HOLIDAY_DATA = "key_update_holiday_data";
+    public static final String KEY_HOLIDAY_DATA_URL = "key_holiday_data_url";
 
     // Alarm Display Customization
     public static final String KEY_ALARM_CLOCK_STYLE = "key_alarm_clock_style";

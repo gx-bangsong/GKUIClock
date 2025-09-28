@@ -942,6 +942,21 @@ public final class SettingsDAO {
         return prefs.getInt(KEY_RINGTONE_TITLE_COLOR, DEFAULT_RINGTONE_TITLE_COLOR);
     }
 
+    /**
+     * @return the holiday data url.
+     */
+    public static String getHolidayDataUrl(SharedPreferences prefs) {
+        // Default value must match the one in res/values/strings.xml
+        return prefs.getString(KEY_HOLIDAY_DATA_URL, DEFAULT_HOLIDAY_DATA_URL);
+    }
+
+    /**
+     * @param url the holiday data url
+     */
+    public static void setHolidayDataUrl(SharedPreferences prefs, String url) {
+        prefs.edit().putString(KEY_HOLIDAY_DATA_URL, url).apply();
+    }
+
     private static ClockStyle getClockStyle(SharedPreferences prefs, String key) {
         final String clockStyle = prefs.getString(key, DEFAULT_CLOCK_STYLE);
         // Use hardcoded locale to perform toUpperCase, because in some languages toUpperCase adds
