@@ -15,6 +15,7 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_ENABLE_DELETE_OCCA
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ENABLE_PER_ALARM_VOLUME;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_FLIP_ACTION;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_HOLIDAY_DATA_URL;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_MATERIAL_DATE_PICKER_STYLE;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_MATERIAL_TIME_PICKER_STYLE;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_POWER_BUTTON;
@@ -23,9 +24,11 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_SHAKE_ACTION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_SHAKE_INTENSITY;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_SYSTEM_MEDIA_VOLUME;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_TURN_ON_BACK_FLASH_FOR_TRIGGERED_ALARM;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_UPDATE_HOLIDAY_DATA;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VOLUME_BUTTONS;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_WEEK_START;
 
+import android.app.Application;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -50,6 +53,7 @@ import com.best.deskclock.alarms.AlarmUpdateHandler;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.data.Weekdays;
+import com.best.deskclock.holiday.HolidayRepository;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.ringtone.RingtonePickerActivity;
 import com.best.deskclock.utils.AlarmUtils;
@@ -85,6 +89,9 @@ public class AlarmSettingsFragment extends ScreenFragment
     ListPreference mMaterialTimePickerStylePref;
     ListPreference mMaterialDatePickerStylePref;
     Preference mAlarmDisplayCustomizationPref;
+    Preference mUpdateHolidayDataPref;
+    Preference mHolidayDataUrlPref;
+    private HolidayRepository mHolidayRepository;
 
     @Override
     protected String getFragmentTitle() {
@@ -96,6 +103,9 @@ public class AlarmSettingsFragment extends ScreenFragment
         super.onCreate(savedInstanceState);
 
         addPreferencesFromResource(R.xml.settings_alarm);
+
+        final Application application = requireActivity().getApplication();
+        mHolidayRepository = new HolidayRepository(application);
 
         mAlarmRingtonePref = findPreference(KEY_DEFAULT_ALARM_RINGTONE);
         mEnablePerAlarmVolumePref = findPreference(KEY_ENABLE_PER_ALARM_VOLUME);
@@ -118,6 +128,8 @@ public class AlarmSettingsFragment extends ScreenFragment
         mMaterialTimePickerStylePref = findPreference(KEY_MATERIAL_TIME_PICKER_STYLE);
         mMaterialDatePickerStylePref = findPreference(KEY_MATERIAL_DATE_PICKER_STYLE);
         mAlarmDisplayCustomizationPref = findPreference(KEY_ALARM_DISPLAY_CUSTOMIZATION);
+        mUpdateHolidayDataPref = findPreference(KEY_UPDATE_HOLIDAY_DATA);
+        mHolidayDataUrlPref = findPreference(KEY_HOLIDAY_DATA_URL);
 
         setupPreferences();
     }
@@ -229,6 +241,12 @@ public class AlarmSettingsFragment extends ScreenFragment
                 // Set result so DeskClock knows to refresh itself
                 requireActivity().setResult(REQUEST_CHANGE_SETTINGS);
             }
+
+            case KEY_HOLIDAY_DATA_URL -> {
+                final String url = (String) newValue;
+                DataModel.getDataModel().setHolidayDataUrl(url);
+                pref.setSummary(url);
+            }
         }
 
         return true;
@@ -246,6 +264,8 @@ public class AlarmSettingsFragment extends ScreenFragment
                     startActivity(RingtonePickerActivity.createAlarmRingtonePickerIntentForSettings(context));
 
             case KEY_ALARM_DISPLAY_CUSTOMIZATION -> animateAndShowFragment(new AlarmDisplayCustomizationFragment());
+
+            case KEY_UPDATE_HOLIDAY_DATA -> mHolidayRepository.updateWorkdayData();
         }
 
         return true;
@@ -400,6 +420,11 @@ public class AlarmSettingsFragment extends ScreenFragment
         mMaterialDatePickerStylePref.setSummary(mMaterialDatePickerStylePref.getEntry());
 
         mAlarmDisplayCustomizationPref.setOnPreferenceClickListener(this);
+
+        mUpdateHolidayDataPref.setOnPreferenceClickListener(this);
+
+        mHolidayDataUrlPref.setOnPreferenceChangeListener(this);
+        mHolidayDataUrlPref.setSummary(DataModel.getDataModel().getHolidayDataUrl());
     }
 
     private void initAudioDeviceCallback() {

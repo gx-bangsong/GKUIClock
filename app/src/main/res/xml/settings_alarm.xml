@@ -252,4 +252,29 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/holiday_alarm_category_title"
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false"
+        tools:layout="@layout/settings_preference_category_layout">
+
+        <Preference
+            android:key="key_update_holiday_data"
+            android:title="@string/update_holiday_data_title"
+            android:summary="@string/update_holiday_data_summary"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false"
+            tools:layout="@layout/settings_preference_layout" />
+
+        <EditTextPreference
+            android:key="key_holiday_data_url"
+            android:title="@string/holiday_data_url_title"
+            android:summary="@string/holiday_data_url_summary"
+            android:dialogMessage="@string/holiday_data_url_dialog_message"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false"
+            tools:layout="@layout/settings_preference_layout" />
+
+    </PreferenceCategory>
+
 </PreferenceScreen>

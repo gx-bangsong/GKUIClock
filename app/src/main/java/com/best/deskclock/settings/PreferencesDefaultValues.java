@@ -89,6 +89,7 @@ public class PreferencesDefaultValues {
     public static final String SPINNER_TIME_PICKER_STYLE = "spinner";
     public static final String DEFAULT_DATE_PICKER_STYLE = "calendar";
     public static final String SPINNER_DATE_PICKER_STYLE = "spinner";
+    public static final String DEFAULT_HOLIDAY_DATA_URL = "https://raw.githubusercontent.com/lanceliao/china-holiday-calender/master/holidayAPI.json";
 
 
     // Alarm Display Customization

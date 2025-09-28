@@ -1325,6 +1325,19 @@
     <string name="first_launch_important_info_message_for_SDK34">• &lt;b&gt;FULL SCREEN NOTIFICATIONS;&lt;/b&gt; &lt;br&gt; &lt;br&gt;</string>
     <string name="first_launch_dialog_title">Quit</string>
     <string name="first_launch_dialog_message">Are you sure you want to leave the application?</string>
+    <!-- Category title for holiday alarm settings -->
+    <string name="holiday_alarm_category_title">Holiday alarm</string>
+    <!-- Title for the preference to update holiday data -->
+    <string name="update_holiday_data_title">Update holiday data</string>
+    <!-- Summary for the preference to update holiday data -->
+    <string name="update_holiday_data_summary">Manually update holiday and work schedule data</string>
+    <!-- Title for the preference to set the holiday data URL -->
+    <string name="holiday_data_url_title">Holiday data URL</string>
+    <!-- Summary for the preference to set the holiday data URL -->
+    <string name="holiday_data_url_summary">Set the URL for holiday and work schedule data</string>
+    <!-- Dialog message for the preference to set the holiday data URL -->
+    <string name="holiday_data_url_dialog_message">Enter the URL for the holiday and work schedule data</string>
+
     <!--
     Widgets
     -->

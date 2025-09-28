@@ -18,6 +18,8 @@ package com.best.deskclock.holiday;
 
 import android.app.Application;
 
+import com.best.deskclock.data.DataModel;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -40,10 +42,10 @@ public class HolidayRepository {
         mExecutorService = Executors.newSingleThreadExecutor();
     }
 
-    public void downloadHolidays() {
+    public void updateWorkdayData() {
         mExecutorService.execute(() -> {
             try {
-                URL url = new URL("https://raw.githubusercontent.com/lanceliao/china-holiday-calender/master/holidayAPI.json");
+                URL url = new URL(DataModel.getDataModel().getHolidayDataUrl());
                 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
                 Type listType = new TypeToken<List<Holiday>>() {}.getType();
                 List<Holiday> holidays = new Gson().fromJson(in, listType);
