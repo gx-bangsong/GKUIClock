@@ -49,6 +49,7 @@ public class HolidayDialogFragment extends DialogFragment {
         final Alarm alarm = getArguments().getParcelable(ARG_ALARM);
 
         final CharSequence[] items = {
+                getString(R.string.label_off),
                 getString(R.string.skip_holiday),
                 getString(R.string.daxiao_da),
                 getString(R.string.daxiao_xiao),
@@ -59,6 +60,7 @@ public class HolidayDialogFragment extends DialogFragment {
                 .setTitle(R.string.holiday_title)
                 .setSingleChoiceItems(items, alarm.holidayOption, (dialog, which) -> {
                     alarm.holidayOption = which;
+                    getParentFragmentManager().setFragmentResult("holiday_option", new Bundle());
                     dismiss();
                 })
                 .create();

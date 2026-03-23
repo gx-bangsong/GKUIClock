@@ -5,8 +5,8 @@ package com.best.deskclock;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE;
 
-import static com.best.deskclock.settings.PreferencesDefaultValues.ALARM_TIMEOUT_END_OF_RINGTONE;
-import static com.best.deskclock.settings.PreferencesDefaultValues.ALARM_TIMEOUT_NEVER;
+import static com.best.deskclock.settings.PreferencesDefaultValues.TIMEOUT_END_OF_RINGTONE;
+import static com.best.deskclock.settings.PreferencesDefaultValues.TIMEOUT_NEVER;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -185,9 +185,9 @@ public class AutoSilenceDurationDialogFragment extends DialogFragment {
         mEndOfRingtoneCheckbox = view.findViewById(R.id.end_of_ringtone);
 
         mEditMinutes.setText(String.valueOf(editMinutes));
-        if (editMinutes == ALARM_TIMEOUT_END_OF_RINGTONE) {
+        if (editMinutes == TIMEOUT_END_OF_RINGTONE) {
             mEditMinutes.setText("");
-        } else if (editMinutes == ALARM_TIMEOUT_NEVER) {
+        } else if (editMinutes == TIMEOUT_NEVER) {
             mEditMinutes.setText(String.valueOf(0));
         }
         mEditMinutes.setEnabled(!isEndOfRingtone);
@@ -260,7 +260,7 @@ public class AutoSilenceDurationDialogFragment extends DialogFragment {
         int minutes = 0;
 
         if (mEndOfRingtoneCheckbox.isChecked()) {
-            minutes = ALARM_TIMEOUT_END_OF_RINGTONE;
+            minutes = TIMEOUT_END_OF_RINGTONE;
         } else {
             String minutesText = mEditMinutes.getText() != null ? mEditMinutes.getText().toString() : "";
 
@@ -269,7 +269,7 @@ public class AutoSilenceDurationDialogFragment extends DialogFragment {
             }
 
             if (minutes == 0) {
-                minutes = ALARM_TIMEOUT_NEVER;
+                minutes = TIMEOUT_NEVER;
             }
         }
 

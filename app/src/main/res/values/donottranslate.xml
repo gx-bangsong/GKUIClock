@@ -1,27 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-    Copyright (C) 2007 The Android Open Source Project
-    modified
-    SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
--->
-
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <!-- String of debug application title in "about" parameters. -->
+
     <string name="about_debug_app_title">Clock debug</string>
-    <!-- String matching the lock screen format for displaying 12-hour times. -->
-    <string name="lock_screen_12_hour_format">h&#58;mm</string>
-    <!-- String matching the lock screen format for displaying 24-hour times. -->
-    <string name="lock_screen_24_hour_format">kk&#58;mm</string>
-    <!-- Format for displaying the day of week with a preceding slash divider. -->
-    <string name="abbrev_wday">&#160;/ EEE</string>
-    <!-- String matching the lock screen format for displaying the date. -->
+
+    <string name="lock_screen_12_hour_format">h:mm</string>
+
+    <string name="lock_screen_24_hour_format">kk:mm</string>
+
+    <string name="abbrev_wday"> / EEE</string>
+
     <string name="abbrev_wday_month_day_no_year">EEEMMMd</string>
-    <!-- Format for describing the date, for accessibility. -->
+
     <string name="full_wday_month_day_no_year">EEEEMMMMd</string>
-    <!-- ⏰ (A custom font replaces the A glyph with a clock icon) -->
+
     <string name="clock_emoji">A</string>
 
-    <!-- Category names for events describe the type of object that was manipulated. -->
+
     <string name="category_alarm">Alarm</string>
     <string name="category_clock">Clock</string>
     <string name="category_timer">Timer</string>
@@ -30,7 +24,7 @@
     <string name="category_analog_widget">Analog Widget</string>
     <string name="category_digital_widget">Digital Widget</string>
 
-    <!-- Action names for events describe what type of manipulation was performed. -->
+
     <string name="action_dismiss">Dismiss</string>
     <string name="action_snooze">Snooze</string>
     <string name="action_create">Create</string>
@@ -62,14 +56,14 @@
     <string name="action_set_crescendo_duration">Set Crescendo Duration</string>
     <string name="action_set_alarm_volume">Set Alarm Volume</string>
 
-    <!-- Label names for events describe the entity responsible for the event. -->
+
     <string name="label_deskclock">DeskClock</string>
     <string name="label_notification">Notification</string>
     <string name="label_intent">Intent</string>
     <string name="label_hardware_button">HardwareButton</string>
     <string name="label_shortcut">Shortcut</string>
 
-    <!-- Label names for Debug mode. -->
+
     <string name="app_label_debug">Clock debug</string>
     <string name="debug_category_title">Debug</string>
     <string name="toast_message_debug_displayed">Debug settings displayed</string>
@@ -81,24 +75,24 @@
     <string name="enable_local_logging_title">Enable local logging</string>
     <string name="enable_local_logging_summary">This setting may cause slowdowns; disable it to remove Debug mode</string>
 
-    <!-- ************************** -->
-    <!-- **     STRING-ARRAY     ** -->
-    <!-- ************************** -->
 
-    <!-- Entries listed in the ListPreference when selecting the theme. -->
+
+
+
+
     <string-array name="array_theme">
         <item>@string/system_theme</item>
         <item>@string/light_theme</item>
         <item>@string/dark_theme</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the theme entries above. -->
+
     <string-array name="theme_setting_entries" translatable="false">
         <item>0</item>
         <item>1</item>
         <item>2</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when selecting the color. -->
+
     <string-array name="array_accent_color">
         <item>@string/label_default</item>
         <item>@string/blue_gray_accent_color</item>
@@ -113,7 +107,7 @@
         <item>@string/yellow_accent_color</item>
         <item>@string/blue_accent_color</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the color entries above. -->
+
     <string-array name="accent_color_setting_entries" translatable="false">
         <item>0</item>
         <item>1</item>
@@ -129,31 +123,31 @@
         <item>11</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when selecting the theme. -->
+
     <string-array name="dark_theme_mode_array_theme">
         <item>@string/label_default</item>
         <item>@string/amoled_dark_theme_mode</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the theme entries above. -->
+
     <string-array name="dark_theme_mode_setting_values" translatable="false">
         <item>0</item>
         <item>1</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when selecting the tab title visibility. -->
+
     <string-array name="tab_title_visibility_entries">
         <item>@string/tab_title_visibility_always</item>
         <item>@string/tab_title_visibility_never</item>
         <item>@string/tab_title_visibility_when_selected</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the theme entries above. -->
+
     <string-array name="tab_title_visibility_values" translatable="false">
         <item>0</item>
         <item>1</item>
         <item>2</item>
     </string-array>
 
-    <!-- Alarm confirmation toast: Describes how long from now until alarm fires -->
+
     <string-array name="alarm_set">
         <item>@string/alarm_confirmation_toast_1</item>
         <item>@string/alarm_confirmation_toast_2</item>
@@ -165,7 +159,7 @@
         <item>@string/alarm_confirmation_toast_8</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when invoking the notification reminder preference. -->
+
     <string-array name="alarm_notification_reminder_entries">
         <item>@string/alarm_notification_reminder_30_minutes</item>
         <item>@string/alarm_notification_reminder_1_hour</item>
@@ -176,7 +170,7 @@
         <item>@string/alarm_notification_reminder_10_hours</item>
         <item>@string/alarm_notification_reminder_12_hours</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the alarm_notification_reminder_entries above. -->
+
     <string-array name="alarm_notification_reminder_values" translatable="false">
         <item>30</item>
         <item>60</item>
@@ -188,7 +182,7 @@
         <item>720</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when invoking the auto silence preference fort timers. -->
+
     <string-array name="timer_auto_silence_entries">
         <item>@string/auto_silence_5_seconds</item>
         <item>@string/auto_silence_10_seconds</item>
@@ -198,7 +192,7 @@
         <item>@string/auto_silence_end_of_ringtone</item>
         <item>@string/auto_silence_never</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the auto_silence_entries above. -->
+
     <string-array name="timer_auto_silence_values" translatable="false">
         <item>5</item>
         <item>10</item>
@@ -209,30 +203,30 @@
         <item>-1</item>
     </string-array>
 
-    <!-- Entries listed in ListPreference for start day. -->
+
     <string-array name="week_start_entries">
         <item>@string/week_start_saturday</item>
         <item>@string/week_start_sunday</item>
         <item>@string/week_start_monday</item>
     </string-array>
-    <!-- Values for ListPreference for start day of week. -->
+
     <string-array name="week_start_values" translatable="false">
-        <!-- Calendar.SATURDAY -->
+
         <item>7</item>
-        <!-- Calendar.SUNDAY -->
+
         <item>1</item>
-        <!-- Calendar.MONDAY -->
+
         <item>2</item>
     </string-array>
 
-    <!-- Entries listed in the setting for the volume button actions. -->
+
     <string-array name="volume_button_setting_entries">
         <item>@string/button_action_snooze</item>
         <item>@string/button_action_dismiss</item>
         <item>@string/button_action_control_volume</item>
         <item>@string/button_action_nothing</item>
     </string-array>
-    <!-- Values for the volume buttons setting. -->
+
     <string-array name="volume_button_setting_values" translatable="false">
         <item>1</item>
         <item>2</item>
@@ -240,79 +234,77 @@
         <item>-1</item>
     </string-array>
 
-    <!-- Entries listed in the power button and flip and shake settings. -->
+
     <string-array name="action_setting_entries">
         <item>@string/button_action_snooze</item>
         <item>@string/button_action_dismiss</item>
         <item>@string/button_action_nothing</item>
     </string-array>
-    <!-- Values for the power button and flip and shake settings. -->
+
     <string-array name="side_button_setting_values" translatable="false">
         <item>1</item>
         <item>2</item>
         <item>0</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when invoking the clock style preference. -->
+
     <string-array name="clock_style_entries">
         <item>@string/clock_style_analog</item>
         <item>@string/clock_style_analog_material</item>
         <item>@string/clock_style_digital</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the clock_style_entries above. -->
+
     <string-array name="clock_style_values" translatable="false">
         <item>analog</item>
         <item>analog_material</item>
         <item>digital</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when invoking the time picker style preference. -->
+
     <string-array name="time_picker_style_entries">
         <item>@string/clock_style_analog</item>
         <item>@string/clock_style_digital</item>
         <item>@string/clock_style_spinner</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the time_picker_style_entries above. -->
+
     <string-array name="time_picker_style_values" translatable="false">
         <item>analog</item>
         <item>digital</item>
         <item>spinner</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when invoking the date picker style preference. -->
+
     <string-array name="date_picker_style_entries">
         <item>@string/date_picker_style_calendar</item>
         <item>@string/date_picker_style_text</item>
         <item>@string/clock_style_spinner</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the date_picker_style_entries above. -->
+
     <string-array name="date_picker_style_values" translatable="false">
         <item>calendar</item>
         <item>text</item>
         <item>spinner</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when invoking the timer creation view style preference. -->
+
     <string-array name="timer_creation_view_style_entries">
         <item>@string/timer_creation_view_style_keypad</item>
         <item>@string/clock_style_spinner</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the
-    timer_creation_view_style_entries above. -->
+
     <string-array name="timer_creation_view_style_values" translatable="false">
         <item>keypad</item>
         <item>spinner</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when invoking the timer sort preference -->
+
     <string-array name="sort_timer_entries">
         <item>@string/sort_timer_manually</item>
         <item>@string/sort_timer_ascending_duration</item>
         <item>@string/sort_timer_descending_duration</item>
         <item>@string/sort_timer_name</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match
-         the sort_timer_entries above. -->
+
     <string-array name="sort_timer_values" translatable="false">
         <item>0</item>
         <item>1</item>
@@ -320,7 +312,7 @@
         <item>3</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when invoking the default time to add to timer preference -->
+
     <string-array name="default_time_to_add_to_timer_entries">
         <item>@string/default_time_to_add_to_timer_1_minute</item>
         <item>@string/default_time_to_add_to_timer_2_minutes</item>
@@ -335,8 +327,7 @@
         <item>@string/default_time_to_add_to_timer_30_minutes</item>
         <item>@string/default_time_to_add_to_timer_1_hour</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match
-         the timer_minutes_to_add_entries above. -->
+
     <string-array name="default_time_to_add_to_timer_values" translatable="false">
         <item>1</item>
         <item>2</item>
@@ -352,7 +343,7 @@
         <item>60</item>
     </string-array>
 
-    <!-- Jocular content that user may append when sharing the lap times -->
+
     <string-array name="sw_share_strings" translatable="true">
         <item>@string/jocular_content_message_1</item>
         <item>@string/jocular_content_message_2</item>
@@ -366,7 +357,7 @@
         <item>@string/jocular_content_message_10</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when invoking the stopwatch actions preference. -->
+
     <string-array name="stopwatch_actions_entries">
         <item>@string/button_action_nothing</item>
         <item>@string/sw_start_pause_action</item>
@@ -374,7 +365,7 @@
         <item>@string/sw_lap_button</item>
         <item>@string/sw_share_button</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the stopwatch_actions_entries above. -->
+
     <string-array name="stopwatch_actions_values" translatable="false">
         <item>0</item>
         <item>1</item>
@@ -383,7 +374,7 @@
         <item>4</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when selecting the default tab to display. -->
+
     <string-array name="tab_entries">
         <item>@string/last_tab_used_title</item>
         <item>@string/menu_alarm</item>
@@ -391,8 +382,7 @@
         <item>@string/menu_timer</item>
         <item>@string/menu_stopwatch</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the tab entries above
-         and respect the order of the bottom navigation menu. -->
+
     <string-array name="tab_values">
         <item>-1</item>
         <item>0</item>
@@ -401,7 +391,7 @@
         <item>3</item>
     </string-array>
 
-    <!-- Entries listed in the ListPreference when selecting the language. -->
+
     <string-array name="language_entries">
         <item>@string/settings_language_system</item>
         <item>@string/settings_language_english_us</item>
@@ -422,7 +412,7 @@
         <item>@string/settings_language_czech</item>
         <item>@string/settings_language_chinese_traditional_tw</item>
     </string-array>
-    <!-- Values that are retrieved from the ListPreference. These must match the language_entries above. -->
+
     <string-array name="language_values" translatable="false">
         <item>system_language_code</item>
         <item>en_US</item>
@@ -443,4 +433,121 @@
         <item>cs</item>
         <item>zh_TW</item>
     </string-array>
-</resources>
+<string name="action_set_delay">Set Delay</string>
+    <string-array name="vibration_pattern_entries">
+        <item>@string/label_default</item>
+        <item>@string/vibration_pattern_soft</item>
+        <item>@string/vibration_pattern_strong</item>
+        <item>@string/vibration_pattern_heartbeat</item>
+        <item>@string/vibration_pattern_escalating</item>
+        <item>@string/vibration_pattern_tick_tock</item>
+    </string-array>
+
+    <string-array name="vibration_pattern_values" translatable="false">
+        <item>default</item>
+        <item>soft</item>
+        <item>strong</item>
+        <item>heartbeat</item>
+        <item>escalating</item>
+        <item>tick_tock</item>
+    </string-array>
+
+
+    <string-array name="clock_dial_entries">
+        <item>@string/clock_dial_with_numbers</item>
+        <item>@string/clock_dial_without_numbers</item>
+    </string-array>
+
+    <string-array name="clock_dial_values" translatable="false">
+        <item>dial_with_numbers</item>
+        <item>dial_without_numbers</item>
+    </string-array>
+
+
+    <string-array name="clock_dial_material_entries">
+        <item>@string/clock_dial_sun</item>
+        <item>@string/clock_dial_flower</item>
+    </string-array>
+
+    <string-array name="clock_dial_material_values" translatable="false">
+        <item>dial_sun</item>
+        <item>dial_flower</item>
+    </string-array>
+
+
+    <string-array name="analog_widget_clock_dial_entries">
+        <item>@string/label_default</item>
+        <item>@string/clock_dial_with_numbers</item>
+        <item>@string/clock_dial_without_numbers</item>
+    </string-array>
+
+    <string-array name="analog_widget_clock_dial_values" translatable="false">
+        <item>default</item>
+        <item>dial_with_numbers</item>
+        <item>dial_without_numbers</item>
+    </string-array>
+
+
+    <string-array name="clock_second_hand_entries">
+        <item>@string/label_default</item>
+        <item>@string/clock_second_hand_vintage</item>
+    </string-array>
+
+    <string-array name="clock_second_hand_values" translatable="false">
+        <item>default</item>
+        <item>second_hand_vintage</item>
+    </string-array>
+
+
+    <string-array name="sort_alarm_entries">
+        <item>@string/sort_alarm_time</item>
+        <item>@string/sort_next_alarm_time</item>
+        <item>@string/sort_name</item>
+        <item>@string/sort_descending_creation_order</item>
+        <item>@string/sort_ascending_creation_order</item>
+    </string-array>
+
+    <string-array name="sort_alarm_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+    </string-array>
+
+
+    <string-array name="sort_cities_entries">
+        <item>@string/sort_cities_ascending_time_zone</item>
+        <item>@string/sort_cities_descending_time_zone</item>
+        <item>@string/sort_name</item>
+        <item>@string/sort_manually</item>
+    </string-array>
+
+    <string-array name="sort_cities_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+<string name="about_nightly_app_title">Clock nightly</string>
+
+    <string name="action_set_vibration_pattern">Set Vibration Pattern</string>
+    <string name="action_set_missed_alarm_repeat_limit">Set Missed Alarm Repeat Limit</string>
+    <string-array name="missed_alarm_repeat_limit_entries">
+        <item>@string/label_never</item>
+        <item>@string/missed_alarm_repeat_limit_1_time</item>
+        <item>@string/missed_alarm_repeat_limit_3_times</item>
+        <item>@string/missed_alarm_repeat_limit_5_times</item>
+        <item>@string/missed_alarm_repeat_limit_10_times</item>
+    </string-array>
+
+    <string-array name="missed_alarm_repeat_limit_values" translatable="false">
+        <item>-1</item>
+        <item>1</item>
+        <item>3</item>
+        <item>5</item>
+        <item>10</item>
+    </string-array>
+
+
+    </resources>
