@@ -36,4 +36,10 @@ public interface HolidayDao {
 
     @Query("SELECT * FROM holiday WHERE compDays LIKE '%' || :date || '%'")
     Holiday getCompDayByDate(String date);
+
+    @Query("SELECT * FROM holiday")
+    List<Holiday> getAllHolidays();
+
+    @Query("DELETE FROM holiday")
+    void deleteAll();
 }

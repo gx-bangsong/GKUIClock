@@ -16,6 +16,7 @@ import android.os.PowerManager.WakeLock;
 
 import com.best.deskclock.alarms.AlarmNotifications;
 import com.best.deskclock.alarms.AlarmStateManager;
+import com.best.deskclock.holiday.HolidayRepository;
 import com.best.deskclock.controller.Controller;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
@@ -96,6 +97,12 @@ public class AlarmInitReceiver extends BroadcastReceiver {
         if (Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)) {
             DataModel.getDataModel().updateAllNotifications();
             Controller.getController().updateShortcuts();
+        }
+
+        // Update holiday data on boot or app update
+        if (Intent.ACTION_BOOT_COMPLETED.equals(action)
+                || Intent.ACTION_MY_PACKAGE_REPLACED.equals(action)) {
+            HolidayRepository.getInstance(context).updateWorkdayData();
         }
 
         // Update alarm status once receive the status update broadcast

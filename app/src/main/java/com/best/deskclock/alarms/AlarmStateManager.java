@@ -11,7 +11,7 @@ import static android.content.Context.ALARM_SERVICE;
 
 import static com.best.deskclock.DeskClockApplication.getDefaultSharedPreferences;
 import static com.best.deskclock.settings.PreferencesDefaultValues.ALARM_SNOOZE_DURATION_DISABLED;
-import static com.best.deskclock.settings.PreferencesDefaultValues.ALARM_TIMEOUT_NEVER;
+import static com.best.deskclock.settings.PreferencesDefaultValues.TIMEOUT_NEVER;
 import static com.best.deskclock.utils.AlarmUtils.ACTION_NEXT_ALARM_CHANGED_BY_CLOCK;
 
 import android.app.AlarmManager;
@@ -38,6 +38,7 @@ import com.best.deskclock.R;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.events.Events;
+import com.best.deskclock.holiday.HolidayUtils;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.utils.AlarmUtils;
@@ -243,11 +244,25 @@ public final class AlarmStateManager extends BroadcastReceiver {
             // Schedule the next repeating instance which may be before the current instance if a
             // time jump has occurred. Otherwise, if the current instance is the next instance
             // and has already been fired, schedule the subsequent instance.
-            AlarmInstance nextRepeatedInstance = alarm.createInstanceAfter(getCurrentTime());
+            Calendar nextAlarmTime = HolidayUtils.getNextWorkdayAlarmTime(context, alarm.holidayOption, alarm, getCurrentTime());
             if (instance.mAlarmState > AlarmInstance.FIRED_STATE
-                    && nextRepeatedInstance.getAlarmTime().equals(instance.getAlarmTime())) {
-                nextRepeatedInstance = alarm.createInstanceAfter(instance.getAlarmTime());
+                    && nextAlarmTime.equals(instance.getAlarmTime())) {
+                nextAlarmTime = HolidayUtils.getNextWorkdayAlarmTime(context, alarm.holidayOption, alarm, instance.getAlarmTime());
             }
+
+            AlarmInstance nextRepeatedInstance = new AlarmInstance(nextAlarmTime, alarm.id);
+            nextRepeatedInstance.mVibrate = alarm.vibrate;
+            nextRepeatedInstance.mFlash = alarm.flash;
+            nextRepeatedInstance.mLabel = alarm.label;
+            nextRepeatedInstance.mRingtone = RingtoneUtils.isRandomRingtone(alarm.alert)
+                    ? RingtoneUtils.getRandomRingtoneUri()
+                    : RingtoneUtils.isRandomCustomRingtone(alarm.alert)
+                    ? RingtoneUtils.getRandomCustomRingtoneUri()
+                    : alarm.alert;
+            nextRepeatedInstance.mAutoSilenceDuration = alarm.autoSilenceDuration;
+            nextRepeatedInstance.mSnoozeDuration = alarm.snoozeDuration;
+            nextRepeatedInstance.mCrescendoDuration = alarm.crescendoDuration;
+            nextRepeatedInstance.mAlarmVolume = alarm.alarmVolume;
 
             LogUtils.i("Creating new instance for repeating alarm " + alarm.id + " at " +
                     AlarmUtils.getFormattedTime(context, nextRepeatedInstance.getAlarmTime()));
@@ -462,7 +477,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // If the "Alarm silence" setting has not been set to "Never", we don't want alarms
         // to be seen as missed but snoozed.
         // This avoids having to create multiple alarms for the same reason.
-        if (instance.mAutoSilenceDuration != ALARM_TIMEOUT_NEVER) {
+        if (instance.mAutoSilenceDuration != TIMEOUT_NEVER) {
             setSnoozeState(context, instance, true);
             return;
         }

@@ -16,7 +16,7 @@
 
 package com.best.deskclock.holiday;
 
-import android.app.Application;
+import android.content.Context;
 
 import com.best.deskclock.data.DataModel;
 
@@ -33,13 +33,25 @@ import java.util.concurrent.Executors;
 
 public class HolidayRepository {
 
+    private static volatile HolidayRepository sInstance;
     private final HolidayDao mHolidayDao;
     private final ExecutorService mExecutorService;
 
-    public HolidayRepository(Application application) {
-        HolidayDatabase db = HolidayDatabase.getDatabase(application);
+    private HolidayRepository(Context context) {
+        HolidayDatabase db = HolidayDatabase.getDatabase(context);
         mHolidayDao = db.holidayDao();
         mExecutorService = Executors.newSingleThreadExecutor();
+    }
+
+    public static HolidayRepository getInstance(Context context) {
+        if (sInstance == null) {
+            synchronized (HolidayRepository.class) {
+                if (sInstance == null) {
+                    sInstance = new HolidayRepository(context);
+                }
+            }
+        }
+        return sInstance;
     }
 
     public void updateWorkdayData() {
@@ -63,5 +75,9 @@ public class HolidayRepository {
 
     public Holiday getCompDayByDate(String date) {
         return mHolidayDao.getCompDayByDate(date);
+    }
+
+    public List<Holiday> getAllHolidays() {
+        return mHolidayDao.getAllHolidays();
     }
 }

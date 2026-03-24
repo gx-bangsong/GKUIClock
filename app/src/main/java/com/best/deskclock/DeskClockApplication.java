@@ -17,6 +17,7 @@ import androidx.preference.PreferenceManager;
 import com.best.deskclock.controller.Controller;
 import com.best.deskclock.controller.ThemeController;
 import com.best.deskclock.data.DataModel;
+import com.best.deskclock.holiday.HolidayRepository;
 import com.best.deskclock.events.LogEventTracker;
 import com.best.deskclock.uidata.UiDataModel;
 import com.best.deskclock.utils.LogUtils;
@@ -43,6 +44,9 @@ public class DeskClockApplication extends Application {
         Controller.getController().setContext(applicationContext);
         Controller.getController().addEventTracker(new LogEventTracker(applicationContext));
         Controller.getController().updateShortcuts();
+
+        // Download holiday data on start
+        HolidayRepository.getInstance(applicationContext).updateWorkdayData();
     }
 
     public static Context getContext() {
