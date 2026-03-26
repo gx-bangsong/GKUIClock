@@ -64,10 +64,10 @@ public class DeskClockBackupAgent extends BackupAgent {
 
             if (alarm.enabled) {
                 // Create the next alarm instance to schedule.
-                AlarmInstance alarmInstance = alarm.createInstanceAfter(this, now);
+                AlarmInstance alarmInstance = alarm.createInstanceAfter(context, now);
 
                 // Add the next alarm instance to the database.
-                AlarmInstance.addInstance(contentResolver, alarmInstance);
+                alarmInstance.addInstance(contentResolver);
 
                 // Schedule the next alarm instance in AlarmManager.
                 AlarmStateManager.registerInstance(context, alarmInstance, true);

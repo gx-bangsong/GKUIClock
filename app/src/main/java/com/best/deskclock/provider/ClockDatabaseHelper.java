@@ -30,8 +30,10 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 21;
     private static final int MINIMUM_SUPPORTED_VERSION = 15;
 
+    private final Context mContext;
     public ClockDatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        mContext = context;
     }
 
     private static void createAlarmsTable(SQLiteDatabase db, String alarmsTableName) {
@@ -180,7 +182,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                     // Save new version of alarm and create alarm instance for it
                     db.insert(TEMP_ALARMS_TABLE_NAME, null, Alarm.createContentValues(alarm));
                     if (alarm.enabled) {
-                        AlarmInstance newInstance = alarm.createInstanceAfter(context, currentTime);
+                        AlarmInstance newInstance = alarm.createInstanceAfter(mContext, currentTime);
                         db.insert(TEMP_INSTANCES_TABLE_NAME, null,
                                 AlarmInstance.createContentValues(newInstance));
                     }

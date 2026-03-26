@@ -260,4 +260,11 @@ public class WidgetUtils {
             }
         }
     }
+
+    /**
+     * Updates all digital widgets.
+     */
+    public static void updateAllDigitalWidgets(Context context) {
+        // Implementation placeholder
+    }
 }

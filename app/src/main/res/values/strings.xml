@@ -1574,4 +1574,19 @@
 
     <string name="vibration_category_title">Vibration</string>
 
-    </resources>
+        <string name="vibration_pattern_default_title">Default</string>
+    <string name="vibration_pattern_soft_title">Soft</string>
+    <string name="vibration_pattern_strong_title">Strong</string>
+    <string name="vibration_pattern_heartbeat_title">Heartbeat</string>
+    <string name="vibration_pattern_escalating_title">Escalating</string>
+    <string name="vibration_pattern_tick_tock_title">Tick tock</string>
+    <string name="vibration_start_delay_end_of_ringtone">End of ringtone</string>
+    <string name="disconnect_external_audio_device_title">Disconnect external audio device to adjust volume</string>
+    <string name="external_audio_device_volume_title">External audio device volume</string>
+    <string name="connect_external_audio_device_title">Connect external audio device to adjust volume</string>
+    <string name="holiday_option_skip_holiday">Statutory Workdays (Skip Holiday)</string>
+    <string name="holiday_option_big_small_da">Big Week (6 days work)</string>
+    <string name="holiday_option_big_small_xiao">Small Week (5 days work)</string>
+    <string name="holiday_option_single_day_off">Single Day Off (6 days work)</string>
+    <string name="holiday_option_none">None</string>
+</resources>

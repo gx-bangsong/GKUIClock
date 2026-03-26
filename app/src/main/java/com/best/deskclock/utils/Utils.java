@@ -18,6 +18,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Looper;
 import android.os.VibrationEffect;
@@ -234,4 +235,49 @@ public class Utils {
         }
     }
 
+
+    /**
+     * @param fileName the file name to be converted.
+     * @return a safe file name.
+     */
+    public static String toSafeFileName(String fileName) {
+        return fileName.replaceAll("[^a-zA-Z0-9.-]", "_");
+    }
+
+    /**
+     * Copies a file from the given URI to the device-protected storage.
+     *
+     * @param context the context.
+     * @param uri the URI of the file to be copied.
+     * @param fileName the name of the file to be created in the device-protected storage.
+     * @return the URI of the copied file.
+     */
+    public static Uri copyFileToDeviceProtectedStorage(Context context, Uri uri, String fileName) {
+        final Context deviceProtectedContext = context.createDeviceProtectedStorageContext();
+        try (java.io.InputStream inputStream = context.getContentResolver().openInputStream(uri);
+             java.io.FileOutputStream outputStream = deviceProtectedContext.openFileOutput(fileName, Context.MODE_PRIVATE)) {
+            if (inputStream != null) {
+                byte[] buffer = new byte[1024];
+                int length;
+                while ((length = inputStream.read(buffer)) > 0) {
+                    outputStream.write(buffer, 0, length);
+                }
+                return Uri.fromFile(deviceProtectedContext.getFileStreamPath(fileName));
+            }
+        } catch (java.io.IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * Initializes cached values.
+     */
+    public static java.util.Map<String, Object> initCachedValues(java.util.List<String> keys, java.util.function.Function<String, Object> fetcher) {
+        java.util.Map<String, Object> map = new java.util.HashMap<>();
+        for (String key : keys) {
+            map.put(key, fetcher.apply(key));
+        }
+        return map;
+    }
 }

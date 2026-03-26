@@ -70,7 +70,7 @@ public class PreferencesDefaultValues {
     public static final int DEFAULT_ALARM_SNOOZE_DURATION = 10;
     public static final int ALARM_SNOOZE_DURATION_DISABLED = -1;
     public static final boolean DEFAULT_ENABLE_PER_ALARM_MISSED_REPEAT_LIMIT = true;
-    public static final String DEFAULT_MISSED_ALARM_REPEAT_LIMIT = "-1";
+    public static final String DEFAULT_MISSED_ALARM_REPEAT_LIMIT = "0";
     public static final boolean DEFAULT_ENABLE_PER_ALARM_VOLUME_CRESCENDO_DURATION = true;
     public static final boolean DEFAULT_ENABLE_PER_ALARM_VOLUME = false;
     public static final int DEFAULT_ALARM_VOLUME = 5;
@@ -132,11 +132,7 @@ public class PreferencesDefaultValues {
     public static final int DEFAULT_BLUR_INTENSITY = 20;
     public static int getDefaultAlarmInversePrimaryColor(Context context) {
         return MaterialColors.getColor(context, com.google.android.material.R.attr.colorPrimaryInverse, Color.BLACK);
-        public static final int DEFAULT_ALARM_DIGITAL_CLOCK_FONT_SIZE = 70;
-    public static final String DEFAULT_TIME_TO_ADD_TO_TIMER = "1";
-    public static final int DEFAULT_ALARM_VOLUME_CRESCENDO_DURATION = 0;
-    public static final int DEFAULT_TIMER_VOLUME_CRESCENDO_DURATION = 0;
-}
+    }
 
     // Timer
     public static final String DEFAULT_TIMER_CREATION_VIEW_STYLE = "keypad";
@@ -252,4 +248,13 @@ public class PreferencesDefaultValues {
     public static final String DEFAULT_TIME_TO_ADD_TO_TIMER = "1";
     public static final int DEFAULT_ALARM_VOLUME_CRESCENDO_DURATION = 0;
     public static final int DEFAULT_TIMER_VOLUME_CRESCENDO_DURATION = 0;
+    public static final int DEFAULT_EXTERNAL_AUDIO_DEVICE_VOLUME = 70;
+    public static final int ALARM_TIMEOUT_END_OF_RINGTONE = -2;
+    public static final int ALARM_TIMEOUT_NEVER = -1;
+    public static final boolean DEFAULT_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE = false;
+    public static final boolean DEFAULT_DISPLAY_SNOOZE_SELECTOR = true;
+    public static final int DEFAULT_SNOOZE_ZONE_COLOR = Color.WHITE;
+    public static final int DEFAULT_SNOOZE_BUTTON_COLOR = Color.WHITE;
+    public static final int DEFAULT_SNOOZE_TEXT_COLOR = Color.BLACK;
+    public static final boolean DEFAULT_MATERIAL_YOU_ANALOG_WIDGET_WITH_SECOND_HAND = false;
 }

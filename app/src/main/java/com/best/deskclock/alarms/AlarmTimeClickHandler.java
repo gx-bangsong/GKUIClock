@@ -285,7 +285,7 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         Events.sendAlarmEvent(R.string.action_set_delay, R.string.label_deskclock);
 
         final AlarmDelayPickerDialogFragment fragment =
-                AlarmDelayPickerDialogFragment.newInstance(0, 0);
+                AlarmDelayPickerDialogFragment.newInstance(mSelectedAlarm, mFragment.getTag());
         AlarmDelayPickerDialogFragment.show(mFragment.getParentFragmentManager(), fragment);
     }
 
