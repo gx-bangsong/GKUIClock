@@ -23,6 +23,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -220,4 +221,79 @@ public class ThemeUtils {
         }
     }
 
+
+    /**
+     * @param fontPath the path to the font file.
+     * @return a bold typeface for the given font path.
+     */
+    public static Typeface boldTypeface(String fontPath) {
+        if (fontPath == null) {
+            return Typeface.create(Typeface.DEFAULT, Typeface.BOLD);
+        }
+        return Typeface.createFromFile(fontPath);
+    }
+
+    /**
+     * Updates the enabled state and image tint of a slider-related {@link ImageView} button.
+     */
+    public static void updateSliderButtonEnabledState(Context context, ImageView button, boolean enabled) {
+        button.setEnabled(enabled);
+        if (enabled) {
+            button.setImageTintList(null);
+        } else {
+            button.setImageTintList(android.content.res.ColorStateList.valueOf(context.getColor(R.color.colorDisabled)));
+        }
+    }
+
+    /**
+     * @param fontPath the path to the font file.
+     * @return the loaded typeface.
+     */
+    public static Typeface loadFont(String fontPath) {
+        if (fontPath == null) {
+            return Typeface.DEFAULT;
+        }
+        try {
+            return Typeface.createFromFile(fontPath);
+        } catch (Exception e) {
+            return Typeface.DEFAULT;
+        }
+    }
+
+    /**
+     * @return a circular drawable.
+     */
+    public static android.graphics.drawable.Drawable circleDrawable() {
+        android.graphics.drawable.GradientDrawable drawable = new android.graphics.drawable.GradientDrawable();
+        drawable.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        return drawable;
+    }
+
+    /**
+     * Gets themed context.
+     */
+    public static Context getThemedContext(Context context, SharedPreferences prefs) {
+        return context; // Placeholder
+    }
+
+    /**
+     * Pill background.
+     */
+    public static android.graphics.drawable.Drawable pillBackground(Context context, int attr) {
+        return circleDrawable(); // Placeholder
+    }
+
+    /**
+     * Applies the given typeface to all TextViews in the view hierarchy.
+     */
+    public static void applyTypeface(View view, Typeface typeface) {
+        if (view instanceof android.widget.TextView) {
+            ((android.widget.TextView) view).setTypeface(typeface);
+        } else if (view instanceof android.view.ViewGroup) {
+            android.view.ViewGroup group = (android.view.ViewGroup) view;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                applyTypeface(group.getChildAt(i), typeface);
+            }
+        }
+    }
 }

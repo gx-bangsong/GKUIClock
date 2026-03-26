@@ -98,7 +98,7 @@ public abstract class AlarmItemViewHolder extends ItemAdapter.ItemViewHolder<Ala
         preemptiveDismissButton.setOnClickListener(v -> {
             final AlarmInstance alarmInstance = getItemHolder().getAlarmInstance();
             if (alarmInstance != null) {
-                getItemHolder().getAlarmTimeClickHandler().dismissAlarmInstance(getItemHolder().item, alarmInstance);
+                getItemHolder().getAlarmTimeClickHandler().dismissAlarmInstance(alarmInstance);
             }
         });
     }
@@ -179,7 +179,7 @@ public abstract class AlarmItemViewHolder extends ItemAdapter.ItemViewHolder<Ala
     }
 
     protected void bindPreemptiveDismissButton(Context context, Alarm alarm, AlarmInstance alarmInstance) {
-        final boolean canBind = alarm.canPreemptivelyDismiss() && alarmInstance != null;
+        final boolean canBind = alarm.canPreemptivelyDismiss(context) && alarmInstance != null;
 
         if (canBind) {
             preemptiveDismissButton.setVisibility(VISIBLE);

@@ -499,4 +499,13 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
                 ", mAlarmVolume=" + mAlarmVolume +
                 '}';
     }
+    public static void addInstance(android.content.ContentResolver cr, AlarmInstance instance) {
+        instance.addInstance(cr);
+    }
+    public static void updateInstance(android.content.ContentResolver cr, AlarmInstance instance) {
+        instance.updateInstance(cr);
+    }
+    public static android.content.ContentValues createContentValues(AlarmInstance instance) {
+        return instance.createContentValues();
+    }
 }

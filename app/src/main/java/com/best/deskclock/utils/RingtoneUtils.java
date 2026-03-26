@@ -295,4 +295,38 @@ public class RingtoneUtils {
         return SdkUtils.isAtLeastAndroid9() ? audioManager.getStreamMinVolume(AudioManager.STREAM_ALARM) : 0;
     }
 
+
+    /**
+     * @return {@code true} if an external audio device is connected.
+     * {@code false} otherwise.
+     */
+    public static boolean hasExternalAudioDeviceConnected(Context context, SharedPreferences prefs) {
+        if (!SettingsDAO.isAutoRoutingToBluetoothDeviceEnabled(prefs)) {
+            return false;
+        }
+
+        final AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+        final AudioDeviceInfo[] devices = audioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS);
+        for (AudioDeviceInfo device : devices) {
+            if (isExternalAudioDevice(device)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @return {@code true} if the given device is an external audio device.
+     * {@code false} otherwise.
+     */
+    public static boolean isExternalAudioDevice(AudioDeviceInfo device) {
+        final int type = device.getType();
+        return type == AudioDeviceInfo.TYPE_BLUETOOTH_A2DP
+                || type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO
+                || type == AudioDeviceInfo.TYPE_WIRED_HEADSET
+                || type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES
+                || type == AudioDeviceInfo.TYPE_USB_DEVICE
+                || type == AudioDeviceInfo.TYPE_USB_ACCESSORY
+                || type == AudioDeviceInfo.TYPE_USB_HEADSET;
+    }
 }

@@ -371,4 +371,32 @@ public class PreferencesKeys {
     public static final String KEY_MATERIAL_YOU_NEXT_ALARM_WIDGET_CUSTOM_ALARM_COLOR = "key_material_you_next_alarm_widget_custom_alarm_color";
     public static final String KEY_MATERIAL_YOU_NEXT_ALARM_WIDGET_MAXIMUM_FONT_SIZE = "key_material_you_next_alarm_widget_maximum_font_size";
 
+    public static final String KEY_EXTERNAL_AUDIO_DEVICE_VOLUME = "key_external_audio_device_volume";
+    public static final String KEY_HOLIDAY_DATA_URL = "key_holiday_data_url";
+    public static final String KEY_UPDATE_HOLIDAY_DATA = "key_update_holiday_data";
+    public static final String KEY_ABOUT_BLACKYHAWKY = "key_about_blackyhawky";
+    public static final String KEY_ABOUT_QW123WH = "key_about_qw123wh";
+    public static final String KEY_ABOUT_ODMFL = "key_about_odmfl";
+    public static final String KEY_ABOUT_NILSU11 = "key_about_nilsu11";
+    public static final String KEY_ABOUT_LINEAGEOS = "key_about_lineageos";
+    public static final String KEY_ABOUT_CRDROID = "key_about_crdroid";
+    public static final String KEY_TIMER_AUTO_SILENCE = "key_timer_auto_silence_duration";
+    public static final String KEY_DEFAULT_TIME_TO_ADD_TO_TIMER = "key_default_time_to_add_to_timer";
+    public static final String KEY_DISPLAY_ALARM_SECONDS_HAND = "key_display_alarm_seconds_hand";
+    public static final String KEY_PREVIEW_ALARM = "key_preview_alarm";
+    public static final String KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE = "key_auto_routing_to_external_audio_device";
+    public static final String KEY_DISPLAY_SNOOZE_SELECTOR = "key_display_snooze_selector";
+    public static final String KEY_SNOOZE_ZONE_COLOR = "key_snooze_zone_color";
+    public static final String KEY_SNOOZE_MINUS_BUTTON_COLOR = "key_snooze_minus_button_color";
+    public static final String KEY_SNOOZE_PLUS_BUTTON_COLOR = "key_snooze_plus_button_color";
+    public static final String KEY_SNOOZE_SELECTOR_TEXT_COLOR = "key_snooze_selector_text_color";
+    public static final String KEY_SNOOZE_MINUS_SYMBOL_COLOR = "key_snooze_minus_symbol_color";
+    public static final String KEY_SNOOZE_PLUS_SYMBOL_COLOR = "key_snooze_plus_symbol_color";
+    public static final String KEY_REPEAT_MISSED_ALARM = "key_missed_alarm_repeat_limit";
+    public static final String KEY_ALARM_SECONDS_HAND_COLOR = "key_alarm_seconds_hand_color";
+    public static final String KEY_VERTICAL_DIGITAL_WIDGET_DATE_DEFAULT_COLOR = "key_vertical_digital_widget_date_default_color";
+    public static final String KEY_IGNORE_BATTERY_OPTIMIZATIONS = "key_ignore_battery_optimizations";
+    public static final String KEY_NOTIFICATION_PERMISSION = "key_notification_permission";
+    public static final String KEY_FULL_SCREEN_NOTIFICATION_PERMISSION = "key_full_screen_notification_permission";
+    public static final String KEY_SHOW_LOCKSCREEN_PERMISSION = "key_show_lockscreen_permission";
 }

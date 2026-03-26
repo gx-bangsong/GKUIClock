@@ -133,7 +133,7 @@ public class AlarmInitReceiver extends BroadcastReceiver {
                             c.setTimeInMillis(snoozeTime);
                             alarmInstance.setAlarmTime(c);
                             alarmInstance.mAlarmState = AlarmInstance.SNOOZE_STATE;
-                            AlarmInstance.updateInstance(cr, alarmInstance);
+                            alarmInstance.updateInstance(cr);
                         }
                     }
                 }

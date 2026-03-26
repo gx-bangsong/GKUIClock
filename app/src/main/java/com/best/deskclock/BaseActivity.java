@@ -45,6 +45,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.best.deskclock.data.SettingsDAO;
+import com.best.deskclock.DeskClock;
+import com.best.deskclock.settings.SettingsActivity;
 import com.best.deskclock.utils.SdkUtils;
 import com.best.deskclock.utils.ThemeUtils;
 import com.best.deskclock.utils.Utils;
@@ -200,7 +202,7 @@ public class BaseActivity extends AppCompatActivity {
      */
     private void applyNavigationBarColor(String darkMode) {
         if (SdkUtils.isAtLeastAndroid10()) {
-            if (this instanceof DeskClock) {
+            if (this instanceof com.best.deskclock.DeskClock) {
                 EdgeToEdge.enable(this);
                 getWindow().setNavigationBarContrastEnforced(false);
             }
@@ -210,7 +212,7 @@ public class BaseActivity extends AppCompatActivity {
 
             if (ThemeUtils.isNight(getResources()) && darkMode.equals(AMOLED_DARK_MODE)) {
                 getWindow().setNavigationBarColor(Color.BLACK);
-            } else if (this instanceof DeskClock) {
+            } else if (this instanceof com.best.deskclock.DeskClock) {
                 getWindow().setNavigationBarColor(MaterialColors.getColor(this,
                         isPhoneInLandscapeMode || !isCardBackgroundDisplayed
                                 ? android.R.attr.colorBackground

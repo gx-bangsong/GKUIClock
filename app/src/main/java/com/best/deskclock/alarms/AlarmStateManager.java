@@ -238,7 +238,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
             } else {
                 LogUtils.i("Disabling parent alarm: " + alarm.id);
                 alarm.enabled = false;
-                Alarm.updateAlarm(cr, alarm);
+                alarm.updateAlarm(cr);
             }
         } else {
             // Schedule the next repeating instance which may be before the current instance if a
@@ -266,7 +266,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
 
             LogUtils.i("Creating new instance for repeating alarm " + alarm.id + " at " +
                     AlarmUtils.getFormattedTime(context, nextRepeatedInstance.getAlarmTime()));
-            AlarmInstance.addInstance(cr, nextRepeatedInstance);
+            nextRepeatedInstance.addInstance(cr);
             registerInstance(context, nextRepeatedInstance, true);
         }
     }
@@ -334,7 +334,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // Update alarm in db
         ContentResolver contentResolver = context.getContentResolver();
         instance.mAlarmState = AlarmInstance.SILENT_STATE;
-        AlarmInstance.updateInstance(contentResolver, instance);
+        instance.updateInstance(contentResolver);
 
         // Setup instance notification and scheduling timers
         AlarmNotifications.clearNotification(context, instance);
@@ -356,7 +356,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // Update alarm state in db
         ContentResolver contentResolver = context.getContentResolver();
         instance.mAlarmState = AlarmInstance.NOTIFICATION_STATE;
-        AlarmInstance.updateInstance(contentResolver, instance);
+        instance.updateInstance(contentResolver);
 
         // Setup instance notification and scheduling timers
         AlarmNotifications.showUpcomingNotification(context, instance);
@@ -388,7 +388,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
             }
         }
 
-        AlarmInstance.updateInstance(contentResolver, instance);
+        instance.updateInstance(contentResolver);
 
         if (instance.mAlarmId != null) {
             // if the time changed *backward* and pushed an instance from missed back to fired,
@@ -493,7 +493,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // Update alarm state
         ContentResolver contentResolver = context.getContentResolver();
         instance.mAlarmState = AlarmInstance.MISSED_STATE;
-        AlarmInstance.updateInstance(contentResolver, instance);
+        instance.updateInstance(contentResolver);
 
         // Setup instance notification and scheduling timers
         AlarmNotifications.showMissedNotification(context, instance);
@@ -523,7 +523,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // Update alarm in database
         final ContentResolver contentResolver = context.getContentResolver();
         instance.mAlarmState = AlarmInstance.PREDISMISSED_STATE;
-        AlarmInstance.updateInstance(contentResolver, instance);
+        instance.updateInstance(contentResolver);
 
         // Setup instance notification and scheduling timers
         AlarmNotifications.clearNotification(context, instance);
@@ -545,7 +545,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         LogUtils.i("Setting dismissed state to instance " + instance.mId);
         instance.mAlarmState = AlarmInstance.DISMISSED_STATE;
         final ContentResolver contentResolver = context.getContentResolver();
-        AlarmInstance.updateInstance(contentResolver, instance);
+        instance.updateInstance(contentResolver);
 
         cancelPowerOffAlarm(context, instance);
     }
@@ -661,7 +661,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
                 // Make sure we re-enable the parent alarm of the instance
                 // because it will get activated by by the below code
                 Objects.requireNonNull(alarm).enabled = true;
-                Alarm.updateAlarm(cr, alarm);
+                alarm.updateAlarm(cr);
             }
         } else if (instance.mAlarmState == AlarmInstance.PREDISMISSED_STATE) {
             if (currentTime.before(alarmTime)) {

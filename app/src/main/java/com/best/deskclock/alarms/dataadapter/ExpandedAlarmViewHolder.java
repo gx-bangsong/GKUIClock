@@ -26,6 +26,7 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -1278,9 +1279,6 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         private final LayoutInflater mLayoutInflater;
         private final boolean mHasVibrator;
         private final boolean mHasFlash;
-    private final SharedPreferences mPrefs;
-    private final Typeface mGeneralTypeface;
-    private final Typeface mGeneralBoldTypeface;
 
         public Factory(Context context) {
             mLayoutInflater = LayoutInflater.from(context);
@@ -1293,5 +1291,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             final View itemView = mLayoutInflater.inflate(viewType, parent, false);
             return new ExpandedAlarmViewHolder(itemView, mHasVibrator, mHasFlash);
         }
+    }
+
+    private String formatAlarmDate(Alarm alarm) {
+        return "Placeholder Date"; // Placeholder
     }
 }

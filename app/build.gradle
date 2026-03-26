@@ -25,6 +25,8 @@ android {
     signingConfigs {
         release {
             if (keystorePropertiesFile.exists()) {
+            buildConfigField "boolean", "IS_DEBUG_BUILD", "false"
+            buildConfigField "boolean", "IS_NIGHTLY_BUILD", "false"
                 storeFile = file("$rootDir/keystore.jks")
                 storePassword = keystoreProperties["storePassword"]
                 keyAlias = keystoreProperties["keyAlias"]
@@ -37,6 +39,10 @@ android {
 
     buildTypes {
         release {
+            buildConfigField "boolean", "IS_DEBUG_BUILD", "false"
+            buildConfigField "boolean", "IS_DEBUG_BUILD", "false"
+            buildConfigField "boolean", "IS_NIGHTLY_BUILD", "false"
+            buildConfigField "boolean", "IS_NIGHTLY_BUILD", "false"
             debuggable = false
             manifestPlaceholders = [appName: "@string/app_label"]
             if (keystorePropertiesFile.exists()) {
@@ -48,6 +54,8 @@ android {
         }
 
         debug {
+            buildConfigField "boolean", "IS_DEBUG_BUILD", "true"
+            buildConfigField "boolean", "IS_NIGHTLY_BUILD", "false"
             manifestPlaceholders = [appName: "@string/app_label_debug"]
             versionNameSuffix = "-debug"
             applicationIdSuffix = ".debug"

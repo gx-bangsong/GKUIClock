@@ -63,7 +63,7 @@ import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.ringtone.RingtonePreviewKlaxon;
 import com.best.deskclock.utils.RingtoneUtils;
 import com.best.deskclock.utils.ThemeUtils;
-import com.best.deskclock.utils.WidgetUtils;
+import com.best.alarmclock.WidgetUtils;
 import com.google.android.material.color.MaterialColors;
 import com.google.android.material.slider.Slider;
 

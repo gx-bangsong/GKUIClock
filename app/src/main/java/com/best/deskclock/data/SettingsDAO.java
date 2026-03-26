@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.graphics.Color;
 
 import androidx.annotation.NonNull;
 
@@ -1532,5 +1533,51 @@ public final class SettingsDAO {
      */
     public static void setHolidayDataUrl(SharedPreferences prefs, String url) {
         prefs.edit().putString(KEY_HOLIDAY_DATA_URL, url).apply();
+    }
+
+    /**
+     * @return {@code true} if auto routing to bluetooth device is enabled.
+     * {@code false} otherwise.
+     */
+    public static boolean isAutoRoutingToBluetoothDeviceEnabled(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_AUTO_ROUTING_TO_BLUETOOTH_DEVICE, DEFAULT_AUTO_ROUTING_TO_BLUETOOTH_DEVICE);
+    }
+
+    /**
+     * @return the bluetooth volume value.
+     */
+    public static int getBluetoothVolumeValue(SharedPreferences prefs) {
+        return prefs.getInt(KEY_BLUETOOTH_VOLUME, DEFAULT_BLUETOOTH_VOLUME);
+    }
+
+    /**
+     * @return {@code true} if restore backup is finished.
+     * {@code false} otherwise.
+     */
+    public static boolean isRestoreBackupFinished(SharedPreferences prefs) {
+        return prefs.getBoolean("key_restore_backup_finished", true);
+    }
+
+    /**
+     * @param finished {@code true} if restore backup is finished.
+     * {@code false} otherwise.
+     */
+    public static void setRestoreBackupFinished(SharedPreferences prefs, boolean finished) {
+        prefs.edit().putBoolean("key_restore_backup_finished", finished).apply();
+    }
+
+    /**
+     * @return {@code true} if the alarm seconds hand is displayed.
+     * {@code false} otherwise.
+     */
+    public static boolean isAlarmSecondsHandDisplayed(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_DISPLAY_ALARM_SECONDS_HAND, DEFAULT_DISPLAY_ALARM_SECOND_HAND);
+    }
+
+    /**
+     * @return a value indicating the alarm seconds hand color.
+     */
+    public static int getAlarmSecondsHandColor(SharedPreferences prefs, Context context) {
+        return prefs.getInt("key_alarm_seconds_hand_color", Color.RED);
     }
 }

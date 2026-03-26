@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    SPDX-License-Identifier: GPL-3.0-only
+-->
+
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/thumbnail"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <View
+        android:id="@+id/border"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="@android:color/white" />
+
+    <View
+        android:id="@+id/colorPreview"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:layout_gravity="center" />
+
+</FrameLayout>

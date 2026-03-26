@@ -864,4 +864,40 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
                 '}';
     }
 
+    public com.best.deskclock.provider.AlarmInstance createInstanceAfter(android.content.Context context, java.util.Calendar time) {
+        return createInstanceAfter(time);
+    }
+    public static boolean isTomorrow(Alarm alarm, java.util.Calendar now) {
+        return alarm.isTomorrow(now);
+    }
+    public static Alarm addAlarm(android.content.ContentResolver cr, Alarm alarm) {
+        return alarm.addAlarm(cr);
+    }
+    public static void updateAlarm(android.content.ContentResolver cr, Alarm alarm) {
+        alarm.updateAlarm(cr);
+    }
+    public static android.content.ContentValues createContentValues(Alarm alarm) {
+        return alarm.createContentValues();
+    }
+    public Alarm(long id, boolean enabled, int year, int month, int day, int hour, int minutes, boolean vibrate, boolean flash, Weekdays daysOfWeek, String label, String alert, boolean deleteAfterUse, int autoSilenceDuration, int snoozeDuration, int missedAlarmRepeatLimit, int crescendoDuration) {
+        this.id = id;
+        this.enabled = enabled;
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.hour = hour;
+        this.minutes = minutes;
+        this.vibrate = vibrate;
+        this.flash = flash;
+        this.daysOfWeek = daysOfWeek;
+        this.label = label;
+        this.alert = android.net.Uri.parse(alert);
+        this.deleteAfterUse = deleteAfterUse;
+        this.autoSilenceDuration = autoSilenceDuration;
+        this.snoozeDuration = snoozeDuration;
+        this.missedAlarmRepeatLimit = missedAlarmRepeatLimit;
+        this.crescendoDuration = crescendoDuration;
+        this.alarmVolume = 11; // Default
+        this.vibrationPattern = "default";
+    }
 }

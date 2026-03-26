@@ -18,6 +18,9 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_SNOOZE_DURAT
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_VIBRATION_CATEGORY;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_VOLUME_CRESCENDO_DURATION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_VOLUME_SETTING;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_VOLUME_CRESCENDO_DURATION;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_VOLUME_SETTING;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_VOLUME_SETTING;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_AUTO_SILENCE_DURATION;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_DEFAULT_ALARM_RINGTONE;
@@ -47,6 +50,8 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_TURN_ON_BACK_FLASH
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VIBRATION_PATTERN;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VOLUME_BUTTONS;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_WEEK_START;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_UPDATE_HOLIDAY_DATA;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_HOLIDAY_DATA_URL;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -143,6 +148,7 @@ public class AlarmSettingsFragment extends ScreenFragment
     SwitchPreferenceCompat mDeleteOccasionalAlarmByDefaultPref;
     ListPreference mMaterialTimePickerStylePref;
     ListPreference mMaterialDatePickerStylePref;
+    Preference mHolidayDataUrlPref;
     Preference mAlarmDisplayCustomizationPref;
 
     private final ActivityResultLauncher<Intent> fontPickerLauncher =
@@ -502,13 +508,13 @@ public class AlarmSettingsFragment extends ScreenFragment
             int currentValue = alarmSnoozeDurationPreference.getSnoozeDuration();
             AlarmSnoozeDurationDialogFragment dialogFragment =
                     AlarmSnoozeDurationDialogFragment.newInstance(pref.getKey(), currentValue,
-                            currentValue == ALARM_SNOOZE_DURATION_DISABLED);
+                            String.valueOf(currentValue));
             AlarmSnoozeDurationDialogFragment.show(getParentFragmentManager(), dialogFragment);
         } else if (pref instanceof VolumeCrescendoDurationPreference volumeCrescendoDurationPreference) {
             int currentValue = volumeCrescendoDurationPreference.getVolumeCrescendoDuration();
             VolumeCrescendoDurationDialogFragment dialogFragment =
                     VolumeCrescendoDurationDialogFragment.newInstance(pref.getKey(), currentValue,
-                            currentValue == DEFAULT_VOLUME_CRESCENDO_DURATION);
+                            String.valueOf(currentValue));
             VolumeCrescendoDurationDialogFragment.show(getParentFragmentManager(), dialogFragment);
         } else if (pref instanceof VibrationPatternPreference vibrationPatternPreference) {
             String currentValue = vibrationPatternPreference.getPattern();
@@ -519,7 +525,7 @@ public class AlarmSettingsFragment extends ScreenFragment
             int currentValue = vibrationStartDelayPreference.getVibrationStartDelay();
             VibrationStartDelayDialogFragment dialogFragment =
                     VibrationStartDelayDialogFragment.newInstance(pref.getKey(), currentValue,
-                            currentValue == DEFAULT_VIBRATION_START_DELAY);
+                            String.valueOf(currentValue));
             VibrationStartDelayDialogFragment.show(getParentFragmentManager(), dialogFragment);
         } else {
             super.onDisplayPreferenceDialog(pref);
@@ -832,4 +838,21 @@ public class AlarmSettingsFragment extends ScreenFragment
         void update(Alarm alarm);
     }
 
+
+    private void clearFile(String path) {
+        if (path != null) {
+            final java.io.File file = new java.io.File(path);
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+    }
+
+    private void selectCustomFile(Preference preference, ActivityResultLauncher<Intent> launcher,
+                                  String mimeType, String currentPath, boolean isFont, String defaultTitle) {
+        final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType(mimeType);
+        launcher.launch(intent);
+    }
 }

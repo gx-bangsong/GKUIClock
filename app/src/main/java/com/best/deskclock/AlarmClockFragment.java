@@ -399,7 +399,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         final List<AlarmItemHolder> itemHolders = new ArrayList<>(data.getCount());
         for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
             final Alarm alarm = new Alarm(data);
-            final AlarmInstance alarmInstance = alarm.canPreemptivelyDismiss()
+            final AlarmInstance alarmInstance = alarm.canPreemptivelyDismiss(requireContext())
                     ? new AlarmInstance(data, true)
                     : null;
             final AlarmItemHolder itemHolder = new AlarmItemHolder(alarm, alarmInstance, mAlarmTimeClickHandler);
