@@ -27,7 +27,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     static final String ALARMS_TABLE_NAME = "alarm_templates";
     static final String INSTANCES_TABLE_NAME = "alarm_instances";
 
-    private static final int DATABASE_VERSION = 21;
+    private static final int DATABASE_VERSION = 22;
     private static final int MINIMUM_SUPPORTED_VERSION = 15;
 
     private final Context mContext;
@@ -47,6 +47,8 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                 ClockContract.AlarmsColumns.DAYS_OF_WEEK + " INTEGER NOT NULL, " +
                 ClockContract.AlarmsColumns.ENABLED + " INTEGER NOT NULL, " +
                 ClockContract.AlarmsColumns.VIBRATE + " INTEGER NOT NULL, " +
+                ClockContract.AlarmsColumns.VIBRATION_PATTERN + " TEXT DEFAULT 'default', " +
+                ClockContract.AlarmsColumns.HOLIDAY_OPTION + " INTEGER NOT NULL DEFAULT 0, " +
                 ClockContract.AlarmsColumns.FLASH + " INTEGER NOT NULL, " +
                 ClockContract.AlarmsColumns.LABEL + " TEXT NOT NULL, " +
                 ClockContract.AlarmsColumns.RINGTONE + " TEXT, " +
@@ -68,6 +70,8 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                 ClockContract.InstancesColumns.HOUR + " INTEGER NOT NULL, " +
                 ClockContract.InstancesColumns.MINUTES + " INTEGER NOT NULL, " +
                 ClockContract.InstancesColumns.VIBRATE + " INTEGER NOT NULL, " +
+                ClockContract.InstancesColumns.VIBRATION_PATTERN + " TEXT DEFAULT 'default', " +
+                ClockContract.InstancesColumns.HOLIDAY_OPTION + " INTEGER NOT NULL DEFAULT 0, " +
                 ClockContract.InstancesColumns.FLASH + " INTEGER NOT NULL, " +
                 ClockContract.InstancesColumns.LABEL + " TEXT NOT NULL, " +
                 ClockContract.InstancesColumns.RINGTONE + " TEXT, " +
@@ -195,6 +199,16 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
 
             LogUtils.i("dismissAlarmWhenRingtoneEnds, alarmSnoozeActions and increasingVolume" +
                     " columns removed for version 21 upgrade.");
+
+        // Add vibrationPattern and holidayOption columns
+        if (oldVersion < 22) {
+            db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN vibrationPattern TEXT DEFAULT 'default';");
+            db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN holidayOption INTEGER NOT NULL DEFAULT 0;");
+            db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN vibrationPattern TEXT DEFAULT 'default';");
+            db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN holidayOption INTEGER NOT NULL DEFAULT 0;");
+
+            LogUtils.i("Added vibrationPattern and holidayOption columns for version 22 upgrade.");
+        }
         }
     }
 
