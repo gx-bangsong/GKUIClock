@@ -62,7 +62,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <com.best.deskclock.uicomponents.TextTime
+    <com.best.deskclock.widget.TextTime
         android:id="@+id/digital_clock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

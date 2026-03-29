@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 package com.best.deskclock.settings;
+import com.best.deskclock.settings.custompreference.CustomSeekbarPreference;
 
 import static com.best.deskclock.DeskClock.REQUEST_CHANGE_SETTINGS;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_DEFAULT_TIME_TO_ADD_TO_TIMER;
