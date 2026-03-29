@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 package com.best.deskclock.settings;
+import com.best.deskclock.settings.custompreference.CustomSeekbarPreference;
 
 import static android.appwidget.AppWidgetManager.ACTION_APPWIDGET_UPDATE;
 import static android.appwidget.AppWidgetManager.EXTRA_APPWIDGET_ID;

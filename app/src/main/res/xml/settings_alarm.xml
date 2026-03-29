@@ -168,8 +168,8 @@
             app:singleLineTitle="false"
             tools:layout="@layout/settings_preference_layout" />
 
-        <com.best.deskclock.settings.custompreference.CustomSeekbarPreference
-            android:key="key_bluetooth_volume"
+        <com.best.deskclock.settings.custompreference.CustomSliderPreference
+            android:key="key_external_audio_device_volume"
             android:title="@string/bluetooth_volume_title"
             android:summary="@string/label_default"
             android:defaultValue="70"
@@ -274,7 +274,7 @@
             app:singleLineTitle="false"
             tools:layout="@layout/settings_preference_layout" />
 
-        <com.best.deskclock.settings.custompreference.CustomSeekbarPreference
+        <com.best.deskclock.settings.custompreference.CustomSliderPreference
             android:key="key_shake_intensity"
             android:title="@string/shake_intensity_title"
             android:summary="@string/label_default"

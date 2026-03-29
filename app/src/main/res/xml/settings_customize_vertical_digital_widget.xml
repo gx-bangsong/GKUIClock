@@ -135,7 +135,7 @@
         app:iconSpaceReserved="false"
         tools:layout="@layout/settings_preference_category_layout">
 
-        <com.best.deskclock.settings.CustomSeekbarPreference
+        <com.best.deskclock.settings.custompreference.CustomSeekbarPreference
             android:key="key_vertical_digital_widget_maximum_clock_font_size"
             android:title="@string/digital_widget_max_clock_font_size_title"
             android:summary="@string/label_default"

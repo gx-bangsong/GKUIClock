@@ -71,7 +71,7 @@
             app:singleLineTitle="false"
             tools:layout="@layout/settings_preference_layout" />
 
-        <com.best.deskclock.settings.CustomSeekbarPreference
+        <com.best.deskclock.settings.custompreference.CustomSeekbarPreference
             android:key="key_screensaver_brightness"
             android:title="@string/screensaver_brightness_title"
             android:summary="@string/label_default"

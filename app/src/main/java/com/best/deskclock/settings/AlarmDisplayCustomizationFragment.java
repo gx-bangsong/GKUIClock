@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 package com.best.deskclock.settings;
+import com.best.deskclock.settings.custompreference.CustomSeekbarPreference;
 
 import static android.app.Activity.OVERRIDE_TRANSITION_OPEN;
 import static com.best.deskclock.settings.PreferencesDefaultValues.AMOLED_DARK_MODE;
