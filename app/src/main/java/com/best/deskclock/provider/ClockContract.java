@@ -61,6 +61,13 @@ public final class ClockContract {
         String VIBRATION_PATTERN = "vibrationPattern";
 
         /**
+         * Alarm holiday option.
+         *
+         * <p>Type: INTEGER</p>
+         */
+        String HOLIDAY_OPTION = "holidayOption";
+
+        /**
          * True if flash should turn on
          * <p>Type: BOOLEAN</p>
          */
