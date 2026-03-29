@@ -1,0 +1,24 @@
+<<<<<<< SEARCH
+            ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.CRESCENDO_DURATION,
+            ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME,
+            HOLIDAY_OPTION
+    };
+=======
+            ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.CRESCENDO_DURATION,
+            ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME
+    };
+>>>>>>> REPLACE
+<<<<<<< SEARCH
+    public static final int INSTANCE_CRESCENDO_DURATION_INDEX = 35;
+    public static final int INSTANCE_ALARM_VOLUME_INDEX = 36;
+    public static final int INSTANCE_HOLIDAY_OPTION_INDEX = 37;
+
+    private static final int COLUMN_COUNT = HOLIDAY_OPTION_INDEX + 1;
+    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_HOLIDAY_OPTION_INDEX + 1;
+=======
+    public static final int INSTANCE_CRESCENDO_DURATION_INDEX = 35;
+    public static final int INSTANCE_ALARM_VOLUME_INDEX = 36;
+
+    private static final int COLUMN_COUNT = HOLIDAY_OPTION_INDEX + 1;
+    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_ALARM_VOLUME_INDEX + 1;
+>>>>>>> REPLACE
