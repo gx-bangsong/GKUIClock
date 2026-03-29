@@ -75,7 +75,7 @@
         app:layout_constraintTop_toBottomOf="@id/edit_label"
         tools:text="08:30" />
 
-    <com.best.deskclock.uicomponents.AutoSizingTextView
+    <com.best.deskclock.widget.AutoSizingTextView
         android:id="@+id/days_of_week"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
