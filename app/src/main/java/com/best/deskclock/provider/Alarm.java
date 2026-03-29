@@ -170,14 +170,13 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.MISSED_ALARM_REPEAT_COUNT,
             ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.MISSED_ALARM_REPEAT_LIMIT,
             ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.CRESCENDO_DURATION,
-            ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME,
-            HOLIDAY_OPTION
+            ClockDatabaseHelper.INSTANCES_TABLE_NAME + "." + ClockContract.InstancesColumns.ALARM_VOLUME
     };
     /**
      * These save calls to cursor.getColumnIndexOrThrow()
      * THEY MUST BE KEPT IN SYNC WITH ABOVE QUERY COLUMNS
      */
-    private static final int ID_INDEX = 0;
+    public static final int ID_INDEX = 0;
     private static final int YEAR_INDEX = 1;
     private static final int MONTH_INDEX = 2;
     private static final int DAY_INDEX = 3;
@@ -189,16 +188,16 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     private static final int VIBRATION_PATTERN_INDEX = 9;
     private static final int FLASH_INDEX = 10;
     private static final int LABEL_INDEX = 11;
-    private static final int RINGTONE_INDEX = 12;
+    public static final int RINGTONE_INDEX = 12;
     private static final int DELETE_AFTER_USE_INDEX = 13;
     private static final int AUTO_SILENCE_DURATION_INDEX = 14;
     private static final int SNOOZE_DURATION_INDEX = 15;
     private static final int MISSED_ALARM_REPEAT_LIMIT_INDEX = 16;
     private static final int CRESCENDO_DURATION_INDEX = 17;
     private static final int ALARM_VOLUME_INDEX = 18;
-    private static final int HOLIDAY_OPTION_INDEX = 19;
+    public static final int HOLIDAY_OPTION_INDEX = 19;
 
-    private static final int INSTANCE_STATE_INDEX = 20;
+    public static final int INSTANCE_STATE_INDEX = 20;
     public static final int INSTANCE_ID_INDEX = 21;
     public static final int INSTANCE_YEAR_INDEX = 22;
     public static final int INSTANCE_MONTH_INDEX = 23;
@@ -215,10 +214,10 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     public static final int INSTANCE_MISSED_ALARM_REPEAT_LIMIT_INDEX = 34;
     public static final int INSTANCE_CRESCENDO_DURATION_INDEX = 35;
     public static final int INSTANCE_ALARM_VOLUME_INDEX = 36;
-    public static final int INSTANCE_HOLIDAY_OPTION_INDEX = 37;
+    public static final int INSTANCE_HOLIDAY_OPTION_INDEX = HOLIDAY_OPTION_INDEX;
 
     private static final int COLUMN_COUNT = HOLIDAY_OPTION_INDEX + 1;
-    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_HOLIDAY_OPTION_INDEX + 1;
+    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_ALARM_VOLUME_INDEX + 1;
     // Public fields
     public long id;
     public boolean enabled;

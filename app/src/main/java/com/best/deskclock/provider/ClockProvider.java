@@ -79,7 +79,11 @@ public class ClockProvider extends ContentProvider {
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.VIBRATE);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.VIBRATION_PATTERN,
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.VIBRATION_PATTERN);
+        sAlarmsWithInstancesProjection.put(AlarmsColumns.VIBRATION_PATTERN,
+                ALARMS_TABLE_NAME + "." + AlarmsColumns.VIBRATION_PATTERN);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.HOLIDAY_OPTION,
+                ALARMS_TABLE_NAME + "." + AlarmsColumns.HOLIDAY_OPTION);
+        sAlarmsWithInstancesProjection.put(AlarmsColumns.HOLIDAY_OPTION,
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.HOLIDAY_OPTION);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.FLASH,
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.FLASH);
@@ -94,6 +98,8 @@ public class ClockProvider extends ContentProvider {
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.SNOOZE_DURATION,
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.SNOOZE_DURATION);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.MISSED_ALARM_REPEAT_LIMIT,
+                ALARMS_TABLE_NAME + "." + AlarmsColumns.MISSED_ALARM_REPEAT_LIMIT);
+        sAlarmsWithInstancesProjection.put(AlarmsColumns.MISSED_ALARM_REPEAT_LIMIT,
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.MISSED_ALARM_REPEAT_LIMIT);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.CRESCENDO_DURATION,
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.CRESCENDO_DURATION);
