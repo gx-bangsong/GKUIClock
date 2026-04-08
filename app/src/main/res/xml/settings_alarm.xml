@@ -152,7 +152,7 @@
             tools:layout="@layout/settings_preference_layout" />
 
         <com.best.deskclock.settings.custompreference.CustomSwitchPreference
-            android:key="key_auto_routing_to_bluetooth_device"
+            android:key="key_auto_routing_to_external_audio_device"
             android:title="@string/auto_routing_to_bluetooth_device_title"
             android:defaultValue="false"
             app:iconSpaceReserved="false"
