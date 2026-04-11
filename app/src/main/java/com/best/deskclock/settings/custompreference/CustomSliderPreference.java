@@ -102,8 +102,20 @@ public class CustomSliderPreference extends Preference {
     private Runnable mRingtoneStopRunnable;
     private boolean mIsPreviewPlaying = false;
 
-    public CustomSliderPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+    public CustomSliderPreference(Context context) {
+        this(context, null);
+    }
+
+    public CustomSliderPreference(Context context, AttributeSet attrs) {
+        this(context, attrs, androidx.preference.R.attr.preferenceStyle);
+    }
+
+    public CustomSliderPreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public CustomSliderPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         setLayoutResource(R.layout.settings_preference_slider_layout);
     }
 
@@ -127,6 +139,9 @@ public class CustomSliderPreference extends Preference {
         holder.itemView.setClickable(false);
 
         mSlider = (Slider) holder.findViewById(R.id.slider);
+        if (mSlider == null) {
+            return;
+        }
         configureSliderBounds();
         mSlider.setStepSize(1f);
 

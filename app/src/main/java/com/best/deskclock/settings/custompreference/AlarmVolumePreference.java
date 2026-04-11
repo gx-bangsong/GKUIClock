@@ -53,8 +53,20 @@ public class AlarmVolumePreference extends Preference {
     private Runnable mRingtoneStopRunnable;
     private boolean mIsPreviewPlaying = false;
 
+    public AlarmVolumePreference(Context context) {
+        this(context, null);
+    }
+
     public AlarmVolumePreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, androidx.preference.R.attr.preferenceStyle);
+    }
+
+    public AlarmVolumePreference(Context context, AttributeSet attrs, int defStyleAttr) {
+        this(context, attrs, defStyleAttr, 0);
+    }
+
+    public AlarmVolumePreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        super(context, attrs, defStyleAttr, defStyleRes);
         setLayoutResource(R.layout.settings_preference_slider_layout);
     }
 
@@ -79,6 +91,9 @@ public class AlarmVolumePreference extends Preference {
         mMinVolume = RingtoneUtils.getAlarmMinVolume(mAudioManager);
         int maxVolume = mAudioManager.getStreamMaxVolume(STREAM_ALARM) - mMinVolume;
         mSlider = (Slider) holder.findViewById(R.id.slider);
+        if (mSlider == null) {
+            return;
+        }
         mSlider.setValueTo(maxVolume);
         mSlider.setValueFrom(0f);
         mSlider.setStepSize(1f);
