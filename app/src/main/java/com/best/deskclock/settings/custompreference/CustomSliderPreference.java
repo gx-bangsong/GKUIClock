@@ -104,6 +104,7 @@ public class CustomSliderPreference extends Preference {
 
     public CustomSliderPreference(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        setLayoutResource(R.layout.settings_preference_slider_layout);
     }
 
     /**

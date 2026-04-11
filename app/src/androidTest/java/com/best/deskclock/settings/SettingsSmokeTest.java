@@ -5,6 +5,7 @@ import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
 
+import androidx.test.core.app.ActivityScenario;
 import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.LargeTest;
@@ -28,5 +29,13 @@ public class SettingsSmokeTest {
     public void testAppLaunches() {
         // Just verify DeskClock launches and displays the "Clock" tab or similar
         onView(withText(R.string.menu_clock)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testSettingsActivityLaunches() {
+        // Specifically launch SettingsActivity to ensure it doesn't crash on start
+        try (ActivityScenario<SettingsActivity> scenario = ActivityScenario.launch(SettingsActivity.class)) {
+            onView(withText(R.string.settings)).check(matches(isDisplayed()));
+        }
     }
 }
