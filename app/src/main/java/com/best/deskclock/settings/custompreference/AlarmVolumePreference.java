@@ -55,6 +55,7 @@ public class AlarmVolumePreference extends Preference {
 
     public AlarmVolumePreference(Context context, AttributeSet attrs) {
         super(context, attrs);
+        setLayoutResource(R.layout.settings_preference_slider_layout);
     }
 
     @Override

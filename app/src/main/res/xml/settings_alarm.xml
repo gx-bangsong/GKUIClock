@@ -125,7 +125,7 @@
             android:summary="0"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false"
-            tools:layout="@layout/settings_preference_seekbar_layout" />
+            tools:layout="@layout/settings_preference_slider_layout" />
 
         <com.best.deskclock.settings.custompreference.CustomSwitchPreference
             android:key="key_enable_per_alarm_volume_crescendo_duration"
