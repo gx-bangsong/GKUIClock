@@ -39,6 +39,7 @@ public class ColorPickerPreference extends ColorPreference {
         }
 
         super.onBindViewHolder(holder);
+        PreferenceStyler.apply(holder);
 
         View thumbnail = addThumbnail(holder.itemView);
         if (thumbnail != null) {

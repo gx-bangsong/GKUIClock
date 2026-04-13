@@ -44,6 +44,6 @@ public class CustomPreferenceCategory extends PreferenceCategory {
         SharedPreferences prefs = getDefaultSharedPreferences(getContext());
 
         TextView prefTitle = (TextView) holder.findViewById(android.R.id.title);
-        prefTitle.setTypeface(ThemeUtils.boldTypeface(SettingsDAO.getGeneralFont(prefs)));
+        if (prefTitle != null) prefTitle.setTypeface(ThemeUtils.boldTypeface(SettingsDAO.getGeneralFont(prefs)));
     }
 }

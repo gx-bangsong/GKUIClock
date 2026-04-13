@@ -52,22 +52,23 @@ public class PermissionsManagementPreference extends Preference {
         Typeface regularTypeFace = ThemeUtils.loadFont(fontPath);
 
         super.onBindViewHolder(holder);
+        PreferenceStyler.apply(holder);
 
         final TextView requirementTitle = (TextView) holder.findViewById(R.id.requirement_title);
         final TextView requirementAdvice = (TextView) holder.findViewById(R.id.requirement_advice);
         final TextView statusTitle = (TextView) holder.findViewById(R.id.status_title);
         mStatusState = (TextView) holder.findViewById(R.id.status_state);
 
-        requirementTitle.setTypeface(regularTypeFace);
-        requirementAdvice.setTypeface(regularTypeFace);
-        statusTitle.setTypeface(regularTypeFace);
-        mStatusState.setTypeface(regularTypeFace);
+        if (requirementTitle != null) requirementTitle.setTypeface(regularTypeFace);
+        if (requirementAdvice != null) requirementAdvice.setTypeface(regularTypeFace);
+        if (statusTitle != null) statusTitle.setTypeface(regularTypeFace);
+        if (mStatusState != null) mStatusState.setTypeface(regularTypeFace);
 
         if (isShowLockScreenPermissionPreference()) {
-            statusTitle.setText(mContext.getString(R.string.permission_info_title));
-            mStatusState.setVisibility(GONE);
+            if (statusTitle != null) statusTitle.setText(mContext.getString(R.string.permission_info_title));
+            if (mStatusState != null) mStatusState.setVisibility(GONE);
         } else {
-            statusTitle.setText(mContext.getString(R.string.permission_status_title));
+            if (statusTitle != null) statusTitle.setText(mContext.getString(R.string.permission_status_title));
 
             if (isIgnoreBatteryOtimizationsPreference()) {
                 setStatusText(PermissionUtils.isIgnoringBatteryOptimizations(mContext));
@@ -77,11 +78,11 @@ public class PermissionsManagementPreference extends Preference {
                 setStatusText(PermissionUtils.areFullScreenNotificationsEnabled(mContext));
             }
 
-            mStatusState.setVisibility(VISIBLE);
+            if (mStatusState != null) mStatusState.setVisibility(VISIBLE);
         }
 
         ImageButton detailsButton = (ImageButton) holder.findViewById(R.id.details_button);
-        detailsButton.setOnClickListener(v -> displayPermissionDetailsDialog());
+        if (detailsButton != null) detailsButton.setOnClickListener(v -> displayPermissionDetailsDialog());
 
     }
 

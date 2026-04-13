@@ -130,6 +130,7 @@ public class CustomSliderPreference extends Preference {
             return;
         }
 
+        PreferenceStyler.apply(holder);
         super.onBindViewHolder(holder);
 
         mContext = getContext();
@@ -149,8 +150,11 @@ public class CustomSliderPreference extends Preference {
         setSliderProgress(sliderSummary);
 
         mSliderMinus = (ImageView) holder.findViewById(R.id.slider_minus_icon);
+        if (mSliderMinus == null) return;
         mSliderPlus = (ImageView) holder.findViewById(R.id.slider_plus_icon);
+        if (mSliderPlus == null) return;
         mResetSlider = (TextView) holder.findViewById(R.id.reset_slider_value);
+        if (mResetSlider == null) return;
 
         configureSliderButtonDrawables();
         setupSliderButton(mSliderMinus, isExternalAudioDeviceVolumePreference() ? -10 : -5, sliderSummary);

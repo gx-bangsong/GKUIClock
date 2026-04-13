@@ -56,6 +56,9 @@ public class PreferenceStyler {
         SharedPreferences prefs = getDefaultSharedPreferences(context);
 
         MaterialCardView prefCardView = (MaterialCardView) holder.findViewById(R.id.pref_card_view);
+        if (prefCardView == null) {
+            return;
+        }
         boolean isCardBackgroundDisplayed = SettingsDAO.isCardBackgroundDisplayed(prefs);
         boolean isCardBorderDisplayed = SettingsDAO.isCardBorderDisplayed(prefs);
 

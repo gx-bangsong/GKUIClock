@@ -3,7 +3,7 @@
     SPDX-License-Identifier: GPL-3.0-only
 -->
 
-<ScrollView
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/scrollView"
     android:layout_width="match_parent"
@@ -18,4 +18,4 @@
         android:textSize="16sp"
         android:textColor="?attr/colorOnSurfaceVariant" />
 
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

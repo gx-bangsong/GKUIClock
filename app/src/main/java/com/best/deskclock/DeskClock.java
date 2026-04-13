@@ -50,11 +50,13 @@ import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager.widget.ViewPager.OnPageChangeListener;
 
 import com.best.deskclock.alarms.AlarmVolumeDialogFragment;
+import com.best.deskclock.alarms.AlarmMissedRepeatLimitDialogFragment;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.DataModel.SilentSetting;
 import com.best.deskclock.data.OnSilentSettingsListener;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.events.Events;
+import com.best.deskclock.holiday.HolidayDialogFragment;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.settings.PermissionsManagementActivity;
 import com.best.deskclock.settings.SettingsActivity;
@@ -80,7 +82,7 @@ public class DeskClock extends BaseActivity
         AutoSilenceDurationDialogFragment.AutoSilenceDurationDialogHandler,
         AlarmSnoozeDurationDialogFragment.SnoozeDurationDialogHandler,
         VolumeCrescendoDurationDialogFragment.VolumeCrescendoDurationDialogHandler,
-        AlarmVolumeDialogFragment.VolumeValueDialogHandler {
+        AlarmVolumeDialogFragment.VolumeValueDialogHandler, AlarmMissedRepeatLimitDialogFragment.AlarmMissedRepeatLimitDialogHandler, HolidayDialogFragment.HolidayDialogHandler {
 
     public static final int REQUEST_CHANGE_SETTINGS = 10;
     public static final int REQUEST_CHANGE_PERMISSIONS = 20;
@@ -501,6 +503,21 @@ public class DeskClock extends BaseActivity
      * Called by the AlarmVolumeDialogFragment class after the dialog is finished.
      */
     @Override
+    public void onDialogMissedRepeatLimitSet(Alarm alarm, int repeatLimit, String tag) {
+        final Fragment frag = getSupportFragmentManager().findFragmentByTag(tag);
+        if (frag instanceof AlarmClockFragment) {
+            ((AlarmClockFragment) frag).setMissedAlarmRepeatLimit(alarm, repeatLimit);
+        }
+    }
+
+    @Override
+    public void onDialogHolidayOptionSet(Alarm alarm, int holidayOption) {
+        final Fragment frag = getSelectedDeskClockFragment();
+        if (frag instanceof AlarmClockFragment) {
+            ((AlarmClockFragment) frag).setHolidayOption(alarm, holidayOption);
+        }
+    }
+
     public void onVolumeValueSet(Alarm alarm, int volumeValue, String tag) {
         final Fragment frag = getSupportFragmentManager().findFragmentByTag(tag);
         if (frag instanceof AlarmClockFragment) {
