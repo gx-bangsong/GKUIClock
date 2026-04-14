@@ -37,6 +37,10 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.best.deskclock.timer.quick.QuickTimer;
+import com.best.deskclock.timer.quick.QuickTimerAdapter;
+import com.best.deskclock.timer.quick.QuickTimerRepository;
+import com.best.deskclock.timer.quick.QuickTimerSetupDialogFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.best.deskclock.DeskClock;
@@ -71,6 +75,8 @@ public final class TimerFragment extends DeskClockFragment {
     private TimerSetupView mCreateTimerView;
     private CustomTimerSpinnerSetupView mCreateTimerSpinnerView;
     private TimerAdapter mAdapter;
+    private QuickTimerRepository mQuickTimerRepository;
+    private QuickTimerAdapter mQuickTimerAdapter;
     private View mTimersView;
     private View mCurrentView;
     private ItemTouchHelper mItemTouchHelper;
@@ -117,6 +123,32 @@ public final class TimerFragment extends DeskClockFragment {
         mTimersView = view.findViewById(R.id.timer_view);
         mCreateTimerView = view.findViewById(R.id.timer_setup);
         mCreateTimerSpinnerView = view.findViewById(R.id.timer_spinner_setup);
+        mQuickTimerRepository = QuickTimerRepository.getInstance(mContext);
+        mQuickTimerAdapter = new QuickTimerAdapter(mContext, new QuickTimerAdapter.OnQuickTimerClickListener() {
+            @Override
+            public void onQuickTimerClick(QuickTimer quickTimer) {
+                startQuickTimer(quickTimer.duration, quickTimer.label);
+            }
+
+            @Override
+            public void onAddQuickTimerClick() {
+                showQuickTimerSetupDialog();
+            }
+
+            @Override
+            public void onQuickTimerLongClick(QuickTimer quickTimer) {
+                mQuickTimerRepository.delete(quickTimer);
+            }
+        });
+
+        RecyclerView keyboardCarousel = mCreateTimerView.findViewById(R.id.quick_timer_carousel);
+        keyboardCarousel.setAdapter(mQuickTimerAdapter);
+        RecyclerView spinnerCarousel = mCreateTimerSpinnerView.findViewById(R.id.quick_timer_carousel);
+        spinnerCarousel.setAdapter(mQuickTimerAdapter);
+
+        mQuickTimerRepository.getAllQuickTimers().observe(getViewLifecycleOwner(), quickTimers -> {
+            mQuickTimerAdapter.setQuickTimers(quickTimers);
+        });
         mIsTablet = ThemeUtils.isTablet();
         mIsLandscape = ThemeUtils.isLandscape();
 
@@ -311,6 +343,30 @@ public final class TimerFragment extends DeskClockFragment {
                 Utils.setVibrationTime(mContext, 10);
             });
         }
+    }
+
+    private void startQuickTimer(long duration, String label) {
+        mCreatingTimer = true;
+        try {
+            String defaultTimeToAddToTimer = String.valueOf(SettingsDAO.getDefaultTimeToAddToTimer(mPrefs));
+            final Timer timer = DataModel.getDataModel().addTimer(duration, label != null ? label : "",
+                    defaultTimeToAddToTimer, false);
+            Events.sendTimerEvent(R.string.action_create, R.string.label_deskclock);
+            DataModel.getDataModel().startTimer(timer);
+            Events.sendTimerEvent(R.string.action_start, R.string.label_deskclock);
+            Utils.setVibrationTime(mContext, 50);
+        } finally {
+            mCreatingTimer = false;
+        }
+        animateToView(mTimersView, false);
+    }
+
+    private void showQuickTimerSetupDialog() {
+        QuickTimerSetupDialogFragment dialog = new QuickTimerSetupDialogFragment();
+        dialog.setListener((duration, label) -> {
+            mQuickTimerRepository.insert(new QuickTimer(duration, label));
+        });
+        dialog.show(getParentFragmentManager(), "QuickTimerSetup");
     }
 
     @Override

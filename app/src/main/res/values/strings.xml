@@ -1589,4 +1589,5 @@
     <string name="holiday_option_big_small_xiao">Small Week (5 days work)</string>
     <string name="holiday_option_single_day_off">Single Day Off (6 days work)</string>
     <string name="holiday_option_none">None</string>
+    <string name="add_quick_timer_title">Add quick timer</string>
 </resources>
