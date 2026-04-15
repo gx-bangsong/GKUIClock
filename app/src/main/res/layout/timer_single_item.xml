@@ -57,7 +57,7 @@
         android:src="@drawable/ic_add_circle"
         android:scaleType="centerInside"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Add to quick timers"
+        android:contentDescription="@string/add_to_quick_timers_description"
         app:tint="?attr/colorPrimary"
         app:layout_constraintEnd_toStartOf="@+id/delete_timer"
         app:layout_constraintTop_toTopOf="parent" />

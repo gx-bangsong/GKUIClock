@@ -550,4 +550,6 @@
     </string-array>
 
 
+    <string name="add_quick_timer_title" translatable="false">Add quick timer</string>
+    <string name="add_to_quick_timers_description" translatable="false">Add to quick timers</string>
     </resources>

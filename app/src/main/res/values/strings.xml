@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<resources xmlns:ns0="urn:oasis:names:tc:xliff:document:1.2" xmlns:ns1="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" xmlns:ns0="urn:oasis:names:tc:xliff:document:1.2" xmlns:ns1="http://schemas.android.com/tools">
 
 
     <string name="app_label">Clock</string>
@@ -1589,5 +1589,4 @@
     <string name="holiday_option_big_small_xiao">Small Week (5 days work)</string>
     <string name="holiday_option_single_day_off">Single Day Off (6 days work)</string>
     <string name="holiday_option_none">None</string>
-    <string name="add_quick_timer_title">Add quick timer</string>
 </resources>
