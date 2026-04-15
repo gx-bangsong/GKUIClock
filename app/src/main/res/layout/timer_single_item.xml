@@ -45,7 +45,7 @@
         app:drawableStartCompat="@drawable/ic_label"
         app:drawableTint="?attr/colorOnSurfaceVariant"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/delete_timer"
+        app:layout_constraintEnd_toStartOf="@id/add_to_quick_timers"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
@@ -106,20 +106,6 @@
             android:textSize="70sp"
             tools:text="01:23" />
 
-    <ImageButton
-        android:id="@+id/add_to_quick_timers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="12dp"
-        android:src="@drawable/ic_add_circle"
-        android:scaleType="centerInside"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Add to quick timers"
-        app:tint="?attr/colorPrimary"
-        app:layout_constraintEnd_toStartOf="@+id/delete_timer"
-        app:layout_constraintTop_toTopOf="parent" />
-
         <ImageButton
             android:id="@+id/reset"
             android:layout_width="32dp"
@@ -132,20 +118,6 @@
             app:tint="?attr/colorPrimary" />
 
     </com.best.deskclock.widget.CircleButtonsLayout>
-
-    <ImageButton
-        android:id="@+id/add_to_quick_timers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginTop="12dp"
-        android:src="@drawable/ic_add_circle"
-        android:scaleType="centerInside"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:contentDescription="Add to quick timers"
-        app:tint="?attr/colorPrimary"
-        app:layout_constraintEnd_toStartOf="@+id/delete_timer"
-        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/timer_edit_new_duration_button"
