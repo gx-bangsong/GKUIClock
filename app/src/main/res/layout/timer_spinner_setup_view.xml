@@ -6,8 +6,9 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/durationPickerLayout"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:layout_gravity="center_horizontal"
     android:gravity="center_horizontal"
     android:layout_width="wrap_content"
@@ -15,77 +16,93 @@
     android:paddingHorizontal="8dp"
     android:paddingTop="20dp">
 
-    <!-- hour -->
     <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:gravity="center_horizontal">
 
-        <TextView
+        <!-- hour -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/label_hours"
-            android:textColor="?attr/colorPrimary" />
+            android:orientation="vertical">
 
-        <NumberPicker
-            android:id="@+id/hour"
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/label_hours"
+                android:textColor="?attr/colorPrimary" />
+
+            <NumberPicker
+                android:id="@+id/hour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="8dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:theme="@style/NumberPickerStyle" />
+
+        </LinearLayout>
+
+        <!-- minute -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginVertical="8dp"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:theme="@style/NumberPickerStyle" />
+            android:layout_marginHorizontal="14dp"
+            android:orientation="vertical">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/label_minutes"
+                android:textColor="?attr/colorPrimary" />
+
+            <NumberPicker
+                android:id="@+id/minute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="8dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:theme="@style/NumberPickerStyle" />
+
+        </LinearLayout>
+
+        <!-- second -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="@string/label_seconds"
+                android:textColor="?attr/colorPrimary" />
+
+            <NumberPicker
+                android:id="@+id/second"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="8dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:theme="@style/NumberPickerStyle" />
+
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- minute -->
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/quick_timer_carousel"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="14dp"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/label_minutes"
-            android:textColor="?attr/colorPrimary" />
-
-        <NumberPicker
-            android:id="@+id/minute"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="8dp"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:theme="@style/NumberPickerStyle" />
-
-    </LinearLayout>
-
-    <!-- second -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/label_seconds"
-            android:textColor="?attr/colorPrimary" />
-
-        <NumberPicker
-            android:id="@+id/second"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="8dp"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:theme="@style/NumberPickerStyle" />
-
-    </LinearLayout>
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal"
+        android:clipToPadding="false"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
 </LinearLayout>

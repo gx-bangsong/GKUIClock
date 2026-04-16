@@ -80,6 +80,7 @@ public class AlarmVolumePreference extends Preference {
         mContext = getContext();
         mPrefs = getDefaultSharedPreferences(mContext);
 
+        PreferenceStyler.apply(holder);
         super.onBindViewHolder(holder);
 
         mAudioManager = (AudioManager) mContext.getSystemService(AUDIO_SERVICE);
@@ -103,9 +104,11 @@ public class AlarmVolumePreference extends Preference {
         updateSliderSummary(sliderSummary);
 
         mSliderMinus = (ImageView) holder.findViewById(R.id.slider_minus_icon);
+        if (mSliderMinus == null) return;
         mSliderMinus.setImageDrawable(AppCompatResources.getDrawable(mContext, R.drawable.ic_volume_down));
 
         mSliderPlus = (ImageView) holder.findViewById(R.id.slider_plus_icon);
+        if (mSliderPlus == null) return;
         mSliderPlus.setImageDrawable(AppCompatResources.getDrawable(mContext, R.drawable.ic_volume_up));
 
         setupVolumeSliderButton(mSliderMinus, -1);
@@ -113,6 +116,7 @@ public class AlarmVolumePreference extends Preference {
         updateSliderButtonStates();
 
         final TextView resetSlider = (TextView) holder.findViewById(R.id.reset_slider_value);
+        if (resetSlider == null) return;
         resetSlider.setVisibility(GONE);
 
         final ContentObserver volumeObserver = new ContentObserver(mSlider.getHandler()) {

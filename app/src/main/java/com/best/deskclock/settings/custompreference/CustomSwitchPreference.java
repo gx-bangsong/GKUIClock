@@ -39,6 +39,7 @@ public class CustomSwitchPreference extends SwitchPreferenceCompat {
 
         if (holder.itemView.isInEditMode()) {
             ViewGroup widgetFrame = (ViewGroup) holder.findViewById(android.R.id.widget_frame);
+            if (widgetFrame == null) return;
             widgetFrame.removeAllViews();
 
             LayoutInflater inflater = LayoutInflater.from(getContext());

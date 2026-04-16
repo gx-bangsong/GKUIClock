@@ -853,6 +853,10 @@ public class AlarmSettingsFragment extends ScreenFragment
         final Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType(mimeType);
-        launcher.launch(intent);
+        try {
+            launcher.launch(intent);
+        } catch (android.content.ActivityNotFoundException e) {
+            CustomToast.show(requireContext(), "No file manager found");
+        }
     }
 }

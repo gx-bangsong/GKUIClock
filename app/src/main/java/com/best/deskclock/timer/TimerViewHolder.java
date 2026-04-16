@@ -12,6 +12,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import com.best.deskclock.timer.quick.QuickTimer;
+import com.best.deskclock.timer.quick.QuickTimerRepository;
 
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.recyclerview.widget.RecyclerView;
@@ -50,6 +52,7 @@ public class TimerViewHolder extends RecyclerView.ViewHolder {
         View timerTimeText = view.findViewById(R.id.timer_time_text);
         View playPauseButton = view.findViewById(R.id.play_pause);
         View deleteButton = view.findViewById(R.id.delete_timer);
+        View addToQuickTimersButton = view.findViewById(R.id.add_to_quick_timers);
 
         View.OnClickListener playPauseListener = v -> {
             Utils.setVibrationTime(context, 50);
@@ -120,6 +123,14 @@ public class TimerViewHolder extends RecyclerView.ViewHolder {
         }
 
         playPauseButton.setOnClickListener(playPauseListener);
+
+        if (addToQuickTimersButton != null) {
+            addToQuickTimersButton.setOnClickListener(v -> {
+                QuickTimerRepository repository = QuickTimerRepository.getInstance(context);
+                repository.insert(new QuickTimer(getTimer().getLength(), getTimer().getLabel()));
+                Utils.setVibrationTime(context, 10);
+            });
+        }
 
         deleteButton.setOnClickListener(v -> {
             Utils.setVibrationTime(context, 10);

@@ -30,6 +30,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import com.best.deskclock.utils.LogUtils;
 
 public class HolidayRepository {
 
@@ -64,7 +65,7 @@ public class HolidayRepository {
                 mHolidayDao.insertAll(holidays);
                 in.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                LogUtils.e("Error updating holiday data", e);
             }
         });
     }

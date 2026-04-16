@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.chip.Chip
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/quick_timer_chip"
+    style="@style/Widget.MaterialComponents.Chip.Action"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="8dp"
+    app:chipCornerRadius="16dp"
+    app:chipBackgroundColor="?attr/colorSecondaryContainer"
+    app:chipStrokeColor="?attr/colorOutline"
+    app:chipStrokeWidth="1dp"
+    android:textColor="?attr/colorOnSecondary" />

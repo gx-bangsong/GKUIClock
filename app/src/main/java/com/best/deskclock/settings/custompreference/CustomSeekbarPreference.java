@@ -118,6 +118,7 @@ public class CustomSeekbarPreference extends SeekBarPreference {
         Typeface typeFace = ThemeUtils.loadFont(fontPath);
 
         final MaterialCardView prefCardView = (MaterialCardView) holder.findViewById(R.id.pref_card_view);
+        if (prefCardView == null) return;
         final boolean isCardBackgroundDisplayed = SettingsDAO.isCardBackgroundDisplayed(mPrefs);
         final boolean isCardBorderDisplayed = SettingsDAO.isCardBorderDisplayed(mPrefs);
 
@@ -143,6 +144,7 @@ public class CustomSeekbarPreference extends SeekBarPreference {
         seekBarTitle.setTypeface(typeFace);
 
         mSeekBar = (SeekBar) holder.findViewById(R.id.seekbar);
+        if (mSeekBar == null) return;
         configureSeekBarMinValue();
 
         final TextView seekBarSummary = (TextView) holder.findViewById(android.R.id.summary);
@@ -151,8 +153,11 @@ public class CustomSeekbarPreference extends SeekBarPreference {
         setSeekBarProgress(seekBarSummary);
 
         mSeekBarMinus = (ImageView) holder.findViewById(R.id.seekbar_minus_icon);
+        if (mSeekBarMinus == null) return;
         mSeekBarPlus = (ImageView) holder.findViewById(R.id.seekbar_plus_icon);
+        if (mSeekBarPlus == null) return;
         mResetSeekBar = (TextView) holder.findViewById(R.id.reset_seekbar_value);
+        if (mResetSeekBar == null) return;
 
         configureSeekBarButtonDrawables();
         setupSeekBarButton(mSeekBarMinus, isBluetoothVolumePreference() ? -10 : -5, seekBarSummary);

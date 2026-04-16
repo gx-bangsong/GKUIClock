@@ -33,6 +33,7 @@ public class CustomAboutTitlePreference extends Preference {
             return;
         }
 
+        PreferenceStyler.apply(holder);
         super.onBindViewHolder(holder);
 
         Context context = holder.itemView.getContext();
