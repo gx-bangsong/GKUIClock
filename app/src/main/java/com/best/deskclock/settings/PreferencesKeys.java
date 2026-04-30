@@ -394,7 +394,6 @@ public class PreferencesKeys {
     public static final String KEY_SNOOZE_PLUS_SYMBOL_COLOR = "key_snooze_plus_symbol_color";
     public static final String KEY_REPEAT_MISSED_ALARM = "key_missed_alarm_repeat_limit";
     public static final String KEY_ALARM_SECONDS_HAND_COLOR = "key_alarm_seconds_hand_color";
-    public static final String KEY_VERTICAL_DIGITAL_WIDGET_DATE_DEFAULT_COLOR = "key_vertical_digital_widget_date_default_color";
     public static final String KEY_IGNORE_BATTERY_OPTIMIZATIONS = "key_ignore_battery_optimizations";
     public static final String KEY_NOTIFICATION_PERMISSION = "key_notification_permission";
     public static final String KEY_FULL_SCREEN_NOTIFICATION_PERMISSION = "key_full_screen_notification_permission";

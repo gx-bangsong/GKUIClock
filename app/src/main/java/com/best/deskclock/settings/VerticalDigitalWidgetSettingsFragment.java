@@ -12,7 +12,7 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_VERTICAL_DIGITAL_W
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VERTICAL_DIGITAL_WIDGET_CUSTOM_HOURS_COLOR;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VERTICAL_DIGITAL_WIDGET_CUSTOM_MINUTES_COLOR;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VERTICAL_DIGITAL_WIDGET_CUSTOM_NEXT_ALARM_COLOR;
-import static com.best.deskclock.settings.PreferencesKeys.KEY_VERTICAL_DIGITAL_WIDGET_DATE_DEFAULT_COLOR;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_VERTICAL_DIGITAL_WIDGET_DEFAULT_DATE_COLOR;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VERTICAL_DIGITAL_WIDGET_DEFAULT_HOURS_COLOR;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VERTICAL_DIGITAL_WIDGET_DEFAULT_MINUTES_COLOR;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_VERTICAL_DIGITAL_WIDGET_DEFAULT_NEXT_ALARM_COLOR;
@@ -75,7 +75,7 @@ public class VerticalDigitalWidgetSettingsFragment extends ScreenFragment
         mCustomHoursColorPref = findPreference(KEY_VERTICAL_DIGITAL_WIDGET_CUSTOM_HOURS_COLOR);
         mDefaultMinutesColorPref = findPreference(KEY_VERTICAL_DIGITAL_WIDGET_DEFAULT_MINUTES_COLOR);
         mCustomMinutesColorPref = findPreference(KEY_VERTICAL_DIGITAL_WIDGET_CUSTOM_MINUTES_COLOR);
-        mDefaultDateColorPref = findPreference(KEY_VERTICAL_DIGITAL_WIDGET_DATE_DEFAULT_COLOR);
+        mDefaultDateColorPref = findPreference(KEY_VERTICAL_DIGITAL_WIDGET_DEFAULT_DATE_COLOR);
         mCustomDateColorPref = findPreference(KEY_VERTICAL_DIGITAL_WIDGET_CUSTOM_DATE_COLOR);
         mDefaultNextAlarmColorPref = findPreference(KEY_VERTICAL_DIGITAL_WIDGET_DEFAULT_NEXT_ALARM_COLOR);
         mCustomNextAlarmColorPref = findPreference(KEY_VERTICAL_DIGITAL_WIDGET_CUSTOM_NEXT_ALARM_COLOR);
@@ -135,7 +135,7 @@ public class VerticalDigitalWidgetSettingsFragment extends ScreenFragment
                 Utils.setVibrationTime(requireContext(), 50);
             }
 
-            case KEY_VERTICAL_DIGITAL_WIDGET_DATE_DEFAULT_COLOR -> {
+            case KEY_VERTICAL_DIGITAL_WIDGET_DEFAULT_DATE_COLOR -> {
                 mCustomDateColorPref.setVisible(!(boolean) newValue);
                 Utils.setVibrationTime(requireContext(), 50);
             }

@@ -27,12 +27,27 @@
         app:layout_constraintGuide_percent="0.5" />
 
     <include
+        android:id="@+id/timer_setup_time_view"
         layout="@layout/timer_setup_time"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toEndOf="@+id/timer_time_vertical_start_edge"
         app:layout_constraintEnd_toStartOf="@id/timer_time_vertical_end_edge"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/quick_timer_carousel"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/quick_timer_carousel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:clipToPadding="false"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintStart_toEndOf="@+id/timer_time_vertical_start_edge"
+        app:layout_constraintEnd_toStartOf="@id/timer_time_vertical_end_edge"
+        app:layout_constraintTop_toBottomOf="@id/timer_setup_time_view"
         app:layout_constraintBottom_toBottomOf="parent" />
 
     <include
