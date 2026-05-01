@@ -247,7 +247,7 @@ public final class WidgetDAO {
      * {@code false} otherwise.
      */
     public static boolean isVerticalDigitalWidgetDefaultDateColor(SharedPreferences prefs) {
-        return prefs.getBoolean(KEY_VERTICAL_DIGITAL_WIDGET_DATE_DEFAULT_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
+        return prefs.getBoolean(KEY_VERTICAL_DIGITAL_WIDGET_DEFAULT_DATE_COLOR, DEFAULT_WIDGETS_DEFAULT_COLOR);
     }
 
     /**

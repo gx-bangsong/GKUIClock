@@ -166,12 +166,12 @@ public final class AlarmClockFragment extends DeskClockFragment implements
             }
         };
 
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        if (mRecyclerView != null) { mRecyclerView.setLayoutManager(mLayoutManager); }
         // Due to the ViewPager and the location of FAB, set a bottom padding and/or a right padding
         // to prevent the alarm list from being hidden by the FAB (e.g. when scrolling down).
         final int rightPadding = ThemeUtils.convertDpToPixels(isPhoneInLandscapeMode ? 85 : 0, mContext);
         final int bottomPadding = ThemeUtils.convertDpToPixels(isTablet ? 110 : isPhoneInLandscapeMode ? 5 : 95, mContext);
-        mRecyclerView.setPadding(0, 0, rightPadding, bottomPadding);
+        if (mRecyclerView != null) { mRecyclerView.setPadding(0, 0, rightPadding, bottomPadding); }
 
         mItemAdapter.setHasStableIds();
         mItemAdapter.withViewTypes(new CollapsedAlarmViewHolder.Factory(inflater),
@@ -201,14 +201,16 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         });
 
         final ScrollPositionWatcher scrollPositionWatcher = new ScrollPositionWatcher();
-        mRecyclerView.addOnLayoutChangeListener(scrollPositionWatcher);
-        mRecyclerView.addOnScrollListener(scrollPositionWatcher);
-        mRecyclerView.setAdapter(mItemAdapter);
+        if (mRecyclerView != null) {
+            mRecyclerView.addOnLayoutChangeListener(scrollPositionWatcher);
+            mRecyclerView.addOnScrollListener(scrollPositionWatcher);
+            mRecyclerView.setAdapter(mItemAdapter);
+        }
 
         final ItemAnimator itemAnimator = new ItemAnimator();
         itemAnimator.setChangeDuration(300L);
         itemAnimator.setMoveDuration(300L);
-        mRecyclerView.setItemAnimator(itemAnimator);
+        if (mRecyclerView != null) { mRecyclerView.setItemAnimator(itemAnimator); }
 
         if (!ThemeUtils.areSystemAnimationsDisabled(requireContext())) {
             new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
