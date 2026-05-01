@@ -121,14 +121,16 @@ public final class ClockFragment extends DeskClockFragment {
         DataModel.getDataModel().addCityListener(mCityAdapter);
 
         mCityList = fragmentView.findViewById(R.id.cities);
-        mCityList.setLayoutManager(new LinearLayoutManager(mContext));
-        mCityList.setAdapter(mCityAdapter);
-        mCityList.setItemAnimator(null);
-        mCityList.addOnScrollListener(scrollPositionWatcher);
-        // Due to the ViewPager and the location of FAB, set a bottom padding to prevent
-        // the city list from being hidden by the FAB (e.g. when scrolling down).
-        mCityList.setPadding(0, 0, 0, ThemeUtils.convertDpToPixels(
-                mIsTablet && mIsPortrait ? 106 : mIsPortrait ? 91 : 0, mContext));
+        if (mCityList != null) {
+            mCityList.setLayoutManager(new LinearLayoutManager(mContext));
+            mCityList.setAdapter(mCityAdapter);
+            mCityList.setItemAnimator(null);
+            mCityList.addOnScrollListener(scrollPositionWatcher);
+        }
+        if (mCityList != null) {
+            mCityList.setPadding(0, 0, 0, ThemeUtils.convertDpToPixels(
+                    mIsTablet && mIsPortrait ? 106 : mIsPortrait ? 91 : 0, mContext));
+        }
 
         // On landscape mode, the clock frame will be a distinct view.
         // Otherwise, it'll be added on as a header to the main listview.

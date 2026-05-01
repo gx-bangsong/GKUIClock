@@ -142,9 +142,13 @@ public final class TimerFragment extends DeskClockFragment {
         });
 
         RecyclerView keyboardCarousel = mCreateTimerView.findViewById(R.id.quick_timer_carousel);
-        keyboardCarousel.setAdapter(mQuickTimerAdapter);
+        if (keyboardCarousel != null) {
+            keyboardCarousel.setAdapter(mQuickTimerAdapter);
+        }
         RecyclerView spinnerCarousel = mCreateTimerSpinnerView.findViewById(R.id.quick_timer_carousel);
-        spinnerCarousel.setAdapter(mQuickTimerAdapter);
+        if (spinnerCarousel != null) {
+            spinnerCarousel.setAdapter(mQuickTimerAdapter);
+        }
 
         mQuickTimerRepository.getAllQuickTimers().observe(getViewLifecycleOwner(), quickTimers -> {
             mQuickTimerAdapter.setQuickTimers(quickTimers);

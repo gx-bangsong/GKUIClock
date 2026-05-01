@@ -154,19 +154,23 @@ public final class StopwatchFragment extends DeskClockFragment {
         final View v = inflater.inflate(R.layout.stopwatch_fragment, container, false);
         mTime = v.findViewById(R.id.stopwatch_circle);
         mLapsList = v.findViewById(R.id.laps_list);
-        ((SimpleItemAnimator) Objects.requireNonNull(mLapsList.getItemAnimator())).setSupportsChangeAnimations(false);
-        mLapsList.setLayoutManager(mLapsLayoutManager);
+        if (mLapsList != null) {
+            if (mLapsList.getItemAnimator() != null) {
+                ((SimpleItemAnimator) mLapsList.getItemAnimator()).setSupportsChangeAnimations(false);
+            }
+            mLapsList.setLayoutManager(mLapsLayoutManager);
 
-        // In landscape layouts, the laps list can reach the top of the screen and thus can cause
-        // a drop shadow to appear. The same is not true for portrait landscapes.
-        if (mIsLandscape) {
-            final ScrollPositionWatcher scrollPositionWatcher = new ScrollPositionWatcher();
-            mLapsList.addOnLayoutChangeListener(scrollPositionWatcher);
-            mLapsList.addOnScrollListener(scrollPositionWatcher);
+            if (mIsLandscape) {
+                final ScrollPositionWatcher scrollPositionWatcher = new ScrollPositionWatcher();
+                mLapsList.addOnLayoutChangeListener(scrollPositionWatcher);
+                mLapsList.addOnScrollListener(scrollPositionWatcher);
+            } else {
+                setTabScrolledToTop(true);
+            }
+            mLapsList.setAdapter(mLapsAdapter);
         } else {
             setTabScrolledToTop(true);
         }
-        mLapsList.setAdapter(mLapsAdapter);
 
         // Timer text serves as a virtual start/stop button.
         mMainTimeText = v.findViewById(R.id.stopwatch_time_text);

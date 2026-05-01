@@ -1,0 +1,102 @@
+--- a/app/src/main/java/com/best/deskclock/AlarmClockFragment.java
++++ b/app/src/main/java/com/best/deskclock/AlarmClockFragment.java
+@@ -166,7 +166,9 @@
+             }
+         };
+
+-        mRecyclerView.setLayoutManager(mLayoutManager);
++        if (mRecyclerView != null) {
++            mRecyclerView.setLayoutManager(mLayoutManager);
++        }
+         // Due to the ViewPager and the location of FAB, set a bottom padding and/or a right padding
+         // to prevent the alarm list from being hidden by the FAB (e.g. when scrolling down).
+         final int rightPadding = ThemeUtils.convertDpToPixels(isPhoneInLandscapeMode ? 85 : 0, mContext);
+@@ -171,7 +173,9 @@
+         final int rightPadding = ThemeUtils.convertDpToPixels(isPhoneInLandscapeMode ? 85 : 0, mContext);
+         final int bottomPadding = ThemeUtils.convertDpToPixels(isTablet ? 110 : isPhoneInLandscapeMode ? 5 : 95, mContext);
+-        mRecyclerView.setPadding(0, 0, rightPadding, bottomPadding);
++        if (mRecyclerView != null) {
++            mRecyclerView.setPadding(0, 0, rightPadding, bottomPadding);
++        }
+
+         mItemAdapter.setHasStableIds();
+         mItemAdapter.withViewTypes(new CollapsedAlarmViewHolder.Factory(inflater),
+@@ -201,9 +205,11 @@
+
+         final ScrollPositionWatcher scrollPositionWatcher = new ScrollPositionWatcher();
+-        mRecyclerView.addOnLayoutChangeListener(scrollPositionWatcher);
+-        mRecyclerView.addOnScrollListener(scrollPositionWatcher);
+-        mRecyclerView.setAdapter(mItemAdapter);
++        if (mRecyclerView != null) {
++            mRecyclerView.addOnLayoutChangeListener(scrollPositionWatcher);
++            mRecyclerView.addOnScrollListener(scrollPositionWatcher);
++            mRecyclerView.setAdapter(mItemAdapter);
++        }
+
+         final ItemAnimator itemAnimator = new ItemAnimator();
+         itemAnimator.setChangeDuration(300L);
+--- a/app/src/main/java/com/best/deskclock/ClockFragment.java
++++ b/app/src/main/java/com/best/deskclock/ClockFragment.java
+@@ -121,11 +121,13 @@
+         DataModel.getDataModel().addCityListener(mCityAdapter);
+
+         mCityList = fragmentView.findViewById(R.id.cities);
+-        mCityList.setLayoutManager(new LinearLayoutManager(mContext));
+-        mCityList.setAdapter(mCityAdapter);
+-        mCityList.setItemAnimator(null);
+-        mCityList.addOnScrollListener(scrollPositionWatcher);
++        if (mCityList != null) {
++            mCityList.setLayoutManager(new LinearLayoutManager(mContext));
++            mCityList.setAdapter(mCityAdapter);
++            mCityList.setItemAnimator(null);
++            mCityList.addOnScrollListener(scrollPositionWatcher);
++        }
+         // Due to the ViewPager and the location of FAB, set a bottom padding to prevent
+         // the city list from being hidden by the FAB (e.g. when scrolling down).
+-        mCityList.setPadding(0, 0, 0, ThemeUtils.convertDpToPixels(
+-                mIsTablet && mIsPortrait ? 106 : mIsPortrait ? 91 : 0, mContext));
++        if (mCityList != null) {
++            mCityList.setPadding(0, 0, 0, ThemeUtils.convertDpToPixels(
++                    mIsTablet && mIsPortrait ? 106 : mIsPortrait ? 91 : 0, mContext));
++        }
+
+         // On landscape mode, the clock frame will be a distinct view.
+--- a/app/src/main/java/com/best/deskclock/stopwatch/StopwatchFragment.java
++++ b/app/src/main/java/com/best/deskclock/stopwatch/StopwatchFragment.java
+@@ -154,19 +154,23 @@
+         final View v = inflater.inflate(R.layout.stopwatch_fragment, container, false);
+         mTime = v.findViewById(R.id.stopwatch_circle);
+         mLapsList = v.findViewById(R.id.laps_list);
+-        ((SimpleItemAnimator) Objects.requireNonNull(mLapsList.getItemAnimator())).setSupportsChangeAnimations(false);
+-        mLapsList.setLayoutManager(mLapsLayoutManager);
+-
+-        // In landscape layouts, the laps list can reach the top of the screen and thus can cause
+-        // a drop shadow to appear. The same is not true for portrait landscapes.
+-        if (mIsLandscape) {
+-            final ScrollPositionWatcher scrollPositionWatcher = new ScrollPositionWatcher();
+-            mLapsList.addOnLayoutChangeListener(scrollPositionWatcher);
+-            mLapsList.addOnScrollListener(scrollPositionWatcher);
+-        } else {
+-            setTabScrolledToTop(true);
+-        }
+-        mLapsList.setAdapter(mLapsAdapter);
++        if (mLapsList != null) {
++            if (mLapsList.getItemAnimator() != null) {
++                ((SimpleItemAnimator) mLapsList.getItemAnimator()).setSupportsChangeAnimations(false);
++            }
++            mLapsList.setLayoutManager(mLapsLayoutManager);
++
++            // In landscape layouts, the laps list can reach the top of the screen and thus can cause
++            // a drop shadow to appear. The same is not true for portrait landscapes.
++            if (mIsLandscape) {
++                final ScrollPositionWatcher scrollPositionWatcher = new ScrollPositionWatcher();
++                mLapsList.addOnLayoutChangeListener(scrollPositionWatcher);
++                mLapsList.addOnScrollListener(scrollPositionWatcher);
++            } else {
++                setTabScrolledToTop(true);
++            }
++            mLapsList.setAdapter(mLapsAdapter);
++        }
+
+         // Timer text serves as a virtual start/stop button.
+         mMainTimeText = v.findViewById(R.id.stopwatch_time_text);
