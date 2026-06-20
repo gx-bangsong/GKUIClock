@@ -18,6 +18,7 @@ import com.best.deskclock.R;
 import com.best.deskclock.events.Events;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
+import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.utils.AlarmUtils;
 import com.best.deskclock.utils.Utils;
 import com.best.deskclock.widget.toast.SnackbarManager;
@@ -62,6 +63,7 @@ public final class AlarmUpdateHandler {
 
                 // Add alarm to db
                 Alarm newAlarm = alarm.addAlarm(cr);
+                ShiftCalendarManager.getInstance(mAppContext).updateShiftAlarms();
 
                 // Be ready to scroll to this alarm on UI later.
                 mScrollHandler.setSmoothScrollStableId(newAlarm.id);
@@ -119,12 +121,14 @@ public final class AlarmUpdateHandler {
                     // as the primary key in the AlarmInstance table, this will replace
                     // the existing instance.
                     AlarmInstance.updateInstance(cr, newInstance);
+                    ShiftCalendarManager.getInstance(mAppContext).updateShiftAlarms();
                     // Update the notification for this instance.
                     AlarmNotifications.updateNotification(mAppContext, newInstance);
                 }
                 return;
             }
             // Otherwise, this is a major update and we're going to re-create the alarm
+            ShiftCalendarManager.getInstance(mAppContext).updateShiftAlarms();
             AlarmStateManager.deleteAllInstances(mAppContext, alarm.id);
 
             final AlarmInstance finalInstance = alarm.enabled ? setupAlarmInstance(alarm) : null;
@@ -151,6 +155,7 @@ public final class AlarmUpdateHandler {
                 // Nothing to do here, just return.
                 return;
             }
+            ShiftCalendarManager.getInstance(mAppContext).updateShiftAlarms();
             AlarmStateManager.deleteAllInstances(mAppContext, alarm.id);
             final boolean deleted = Alarm.deleteAlarm(mAppContext.getContentResolver(), alarm.id);
 

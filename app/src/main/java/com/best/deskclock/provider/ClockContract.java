@@ -123,7 +123,7 @@ public final class ClockContract {
     /**
      * Constants for the Alarms table, which contains the user created alarms.
      */
-    protected interface AlarmsColumns extends AlarmSettingColumns, BaseColumns {
+    public interface AlarmsColumns extends AlarmSettingColumns, BaseColumns {
 
         /**
          * The content:// style URL for this table.
@@ -193,7 +193,7 @@ public final class ClockContract {
     /**
      * Constants for the Instance table, which contains the state of each alarm.
      */
-    protected interface InstancesColumns extends AlarmSettingColumns, BaseColumns {
+    public interface InstancesColumns extends AlarmSettingColumns, BaseColumns {
 
         /**
          * The content:// style URL for this table.

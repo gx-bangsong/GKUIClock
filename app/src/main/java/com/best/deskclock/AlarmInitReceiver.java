@@ -21,6 +21,7 @@ import com.best.deskclock.controller.Controller;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.provider.AlarmInstance;
+import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.NotificationUtils;
 import com.best.deskclock.utils.SdkUtils;
@@ -146,6 +147,8 @@ public class AlarmInitReceiver extends BroadcastReceiver {
                 if (!DeskClockBackupAgent.processRestoredData(context)) {
                     // Update all the alarm instances on time change event
                     AlarmStateManager.fixAlarmInstances(context);
+                ShiftCalendarManager.getInstance(context).updateShiftAlarms();
+                ShiftCalendarManager.getInstance(context).registerObserver();
                 }
             } finally {
                 result.finish();

@@ -56,6 +56,7 @@ import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.uidata.UiDataModel;
 import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.ThemeUtils;
+import com.best.deskclock.utils.ShiftAlarmUtils;
 import com.best.deskclock.utils.Utils;
 import com.best.deskclock.widget.EmptyViewController;
 import com.best.deskclock.widget.toast.SnackbarManager;
@@ -401,6 +402,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         final List<AlarmItemHolder> itemHolders = new ArrayList<>(data.getCount());
         for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
             final Alarm alarm = new Alarm(data);
+            if (ShiftAlarmUtils.isEphemeralId(alarm.id)) continue;
             final AlarmInstance alarmInstance = alarm.canPreemptivelyDismiss(requireContext())
                     ? new AlarmInstance(data, true)
                     : null;
