@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
  * API for asynchronously mutating a single alarm.
  */
 public final class AlarmUpdateHandler {
+    public Context getContext() { return mAppContext; }
 
     private final Context mAppContext;
     private final ScrollHandler mScrollHandler;

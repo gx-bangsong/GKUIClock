@@ -118,6 +118,12 @@ public final class ClockContract {
          * <p>Type: INTEGER</p>
          */
         String ALARM_VOLUME = "alarmVolume";
+
+        /**
+         * 64-day rotation rules payload.
+         * <p>Type: TEXT</p>
+         */
+        String ROTATION_PAYLOAD = "rotation_payload";
     }
 
     /**

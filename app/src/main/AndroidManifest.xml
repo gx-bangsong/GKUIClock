@@ -42,6 +42,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DeskClock"
         tools:targetApi="s">
+        <receiver android:name="com.best.deskclock.alarms.ShiftActionReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="com.best.deskclock.action.SKIP_SHIFT" />
+            </intent-filter>
+        </receiver>
 
         <!-- ============================================================== -->
         <!-- Main app components.                                           -->
@@ -174,6 +179,7 @@
             android:directBootAware="true"
             android:exported="false" />
 
+
         <receiver
             android:name="com.best.deskclock.AlarmInitReceiver"
             android:directBootAware="true"
@@ -188,6 +194,7 @@
                 <action android:name="org.codeaurora.poweroffalarm.action.UPDATE_ALARM" />
             </intent-filter>
         </receiver>
+
 
         <receiver
             android:name="com.best.deskclock.alarms.AlarmStateManager"
@@ -216,6 +223,7 @@
             tools:ignore="DiscouragedApi, NonResizeableActivity" />
 
         <!-- Legacy broadcast receiver that honors old scheduled timers across app upgrade. -->
+
         <receiver
             android:name="com.best.deskclock.timer.TimerReceiver"
             android:exported="false">
@@ -278,6 +286,7 @@
 
         <!-- Receiver for handling the daily update of app widgets at midnight
              and more mainly the widgets that display the date -->
+
         <receiver android:name="com.best.alarmclock.DailyWidgetUpdateReceiver"
             android:directBootAware="true">
         </receiver>
@@ -292,6 +301,7 @@
             android:excludeFromRecents="true"
             android:label="@string/analog_widget"
             android:theme="@style/Theme.DeskClock" />
+
 
         <receiver
             android:name="com.best.alarmclock.standardwidgets.AnalogAppWidgetProvider"
@@ -311,6 +321,7 @@
             android:excludeFromRecents="true"
             android:label="@string/digital_widget"
             android:theme="@style/Theme.DeskClock" />
+
 
         <receiver
             android:name="com.best.alarmclock.standardwidgets.DigitalAppWidgetProvider"
@@ -341,6 +352,7 @@
             android:label="@string/vertical_digital_widget"
             android:theme="@style/Theme.DeskClock" />
 
+
         <receiver
             android:name="com.best.alarmclock.standardwidgets.VerticalDigitalAppWidgetProvider"
             android:exported="true"
@@ -363,6 +375,7 @@
             android:excludeFromRecents="true"
             android:label="@string/next_alarm_widget"
             android:theme="@style/Theme.DeskClock" />
+
 
         <receiver
             android:name="com.best.alarmclock.standardwidgets.NextAlarmAppWidgetProvider"
@@ -392,6 +405,7 @@
             android:label="@string/analog_widget_material_you"
             android:theme="@style/Theme.DeskClock" />
 
+
         <receiver
             android:name="com.best.alarmclock.materialyouwidgets.MaterialYouAnalogAppWidgetProvider"
             android:exported="true"
@@ -414,6 +428,7 @@
             android:excludeFromRecents="true"
             android:label="@string/material_you_digital_widget"
             android:theme="@style/Theme.DeskClock" />
+
 
         <receiver
             android:name="com.best.alarmclock.materialyouwidgets.MaterialYouDigitalAppWidgetProvider"
@@ -444,6 +459,7 @@
             android:label="@string/material_you_vertical_digital_widget"
             android:theme="@style/Theme.DeskClock" />
 
+
         <receiver
             android:name="com.best.alarmclock.materialyouwidgets.MaterialYouVerticalDigitalAppWidgetProvider"
             android:exported="true"
@@ -466,6 +482,7 @@
             android:excludeFromRecents="true"
             android:label="@string/material_you_next_alarm_widget"
             android:theme="@style/Theme.DeskClock" />
+
 
         <receiver
             android:name="com.best.alarmclock.materialyouwidgets.MaterialYouNextAlarmAppWidgetProvider"

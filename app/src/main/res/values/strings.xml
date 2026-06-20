@@ -1589,4 +1589,10 @@
     <string name="holiday_option_big_small_xiao">Small Week (5 days work)</string>
     <string name="holiday_option_single_day_off">Single Day Off (6 days work)</string>
     <string name="holiday_option_none">None</string>
+
+    <string name="calendar_shift_sync_title">Calendar shift alarm synchronization</string>
+    <string name="calendar_shift_sync_summary">Automatically match shift keywords in system calendar to schedule alarms</string>
+    <string name="shift_settings_title">Advanced Shift Settings</string>
+    <string name="skip_this_shift">Skip This Shift</string>
+    <string name="shift_mode_label">Enable Shift Mode (64-day cycle)</string>
 </resources>

@@ -40,11 +40,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.best.deskclock.ItemAdapter;
 import com.best.deskclock.R;
+import com.best.deskclock.alarms.RotationPanel;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.events.Events;
@@ -57,6 +60,7 @@ import com.best.deskclock.utils.RingtoneUtils;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.color.MaterialColors;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 import java.util.List;
 import java.util.Locale;
@@ -65,7 +69,6 @@ import java.util.Locale;
  * A ViewHolder containing views for an alarm item in expanded state.
  */
 public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
-    private final TextView holidayOption;
     public static final int VIEW_TYPE = R.layout.alarm_time_expanded;
 
     private final ImageView editLabelIcon;
@@ -81,6 +84,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final TextView vibrationPatternTitle;
     private final TextView vibrationPatternValue;
     private final CheckBox flash;
+    private final TextView holidayOption;
     private final CheckBox deleteOccasionalAlarmAfterUse;
     private final TextView autoSilenceDurationTitle;
     private final TextView autoSilenceDurationValue;
@@ -94,6 +98,10 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final TextView alarmVolumeValue;
     private final Chip delete;
     private final Chip duplicate;
+
+    private final MaterialSwitch shiftModeToggle;
+    private final View rotationSettingsPanel;
+    private final RotationPanel mRotationPanel;
 
     private final boolean mHasVibrator;
     private final boolean mHasFlash;
@@ -124,6 +132,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         vibrationPatternTitle = itemView.findViewById(R.id.vibration_pattern_title);
         vibrationPatternValue = itemView.findViewById(R.id.vibration_pattern_value);
         flash = itemView.findViewById(R.id.flash_onoff);
+        holidayOption = itemView.findViewById(R.id.holiday_option);
         deleteOccasionalAlarmAfterUse = itemView.findViewById(R.id.delete_occasional_alarm_after_use);
         autoSilenceDurationTitle = itemView.findViewById(R.id.auto_silence_duration_title);
         autoSilenceDurationValue = itemView.findViewById(R.id.auto_silence_duration_value);
@@ -137,7 +146,25 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         alarmVolumeValue = itemView.findViewById(R.id.alarm_volume_value);
         delete = itemView.findViewById(R.id.delete);
         duplicate = itemView.findViewById(R.id.duplicate);
-        holidayOption = itemView.findViewById(R.id.holiday_option);
+
+        shiftModeToggle = itemView.findViewById(R.id.shift_mode_toggle);
+        rotationSettingsPanel = itemView.findViewById(R.id.rotation_settings_panel);
+        FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
+        mRotationPanel = new RotationPanel(rotationSettingsPanel, (a, payload) -> {
+            getAlarmTimeClickHandler().onRotationPayloadChanged(a, payload);
+        }, fm);
+
+        shiftModeToggle.setOnCheckedChangeListener((btn, isChecked) -> {
+            rotationSettingsPanel.setVisibility(isChecked ? VISIBLE : GONE);
+            repeatDays.setVisibility(isChecked ? GONE : VISIBLE);
+            if (!isChecked) {
+                getItemHolder().item.rotationPayload = null;
+                getAlarmTimeClickHandler().onRotationPayloadChanged(getItemHolder().item, null);
+            } else if (getItemHolder().item.rotationPayload == null) {
+                // Trigger initial payload generation
+                mRotationPanel.bind(getItemHolder().item);
+            }
+        });
 
         // Collapse handler
         itemView.setOnClickListener(v -> {
@@ -216,6 +243,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
                 getAlarmTimeClickHandler().setAlarmFlashEnabled(
                         getItemHolder().item, ((CheckBox) v).isChecked()));
 
+        holidayOption.setOnClickListener(v ->
+                getAlarmTimeClickHandler().onHolidayOptionClicked(getItemHolder().item));
+
         // Delete Occasional Alarm After Use checkbox handler
         deleteOccasionalAlarmAfterUse.setOnClickListener(v ->
                 getAlarmTimeClickHandler().deleteOccasionalAlarmAfterUse(
@@ -268,9 +298,6 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         });
 
         // Duplicate alarm handler
-        holidayOption.setOnClickListener(v ->
-                getAlarmTimeClickHandler().onHolidayOptionClicked(getItemHolder().item));
-
         duplicate.setOnClickListener(v -> {
             getAlarmTimeClickHandler().onDuplicateClicked(getItemHolder());
             v.announceForAccessibility(context.getString(R.string.alarm_created));
@@ -292,6 +319,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         bindRingtone(context, alarm);
         bindVibrator(context, alarm);
         bindFlash(alarm);
+        bindHolidayOption(context, alarm);
         bindDeleteOccasionalAlarmAfterUse(alarm);
         bindEditLabelAnnotations(alarm);
         bindAutoSilenceValue(context, alarm);
@@ -300,7 +328,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         bindCrescendoValue(context, alarm);
         bindAlarmVolume(context, alarm);
         bindDeleteAndDuplicateButtons();
-        bindHolidayOption(context, alarm);
+        bindShiftMode(alarm);
 
         // If this view is bound without coming from a CollapsedAlarmViewHolder (e.g.
         // when calling expand() before this alarm was visible in it's collapsed state),
@@ -333,13 +361,15 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         alarmVolumeValue.setAlpha(1f);
         preemptiveDismissButton.setAlpha(1f);
         vibrate.setAlpha(1f);
-        holidayOption.setAlpha(1f);
         vibrationPatternTitle.setAlpha(1f);
         vibrationPatternValue.setAlpha(1f);
         flash.setAlpha(1f);
+        holidayOption.setAlpha(1f);
         deleteOccasionalAlarmAfterUse.setAlpha(1f);
         delete.setAlpha(1f);
         duplicate.setAlpha(1f);
+        shiftModeToggle.setAlpha(1f);
+        rotationSettingsPanel.setAlpha(1f);
     }
 
     private void bindEditLabel(Context context, Alarm alarm) {
@@ -629,6 +659,22 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         }
     }
 
+    private void bindHolidayOption(Context context, Alarm alarm) {
+        holidayOption.setVisibility(VISIBLE);
+        holidayOption.setTypeface(mGeneralTypeface);
+        switch (alarm.holidayOption) {
+            case com.best.deskclock.holiday.HolidayUtils.HOLIDAY_OPTION_SKIP_HOLIDAY ->
+                    holidayOption.setText(context.getString(R.string.holiday_option_skip_holiday));
+            case com.best.deskclock.holiday.HolidayUtils.HOLIDAY_OPTION_BIG_SMALL_DA ->
+                    holidayOption.setText(context.getString(R.string.holiday_option_big_small_da));
+            case com.best.deskclock.holiday.HolidayUtils.HOLIDAY_OPTION_BIG_SMALL_XIAO ->
+                    holidayOption.setText(context.getString(R.string.holiday_option_big_small_xiao));
+            case com.best.deskclock.holiday.HolidayUtils.HOLIDAY_OPTION_SINGLE_DAY_OFF ->
+                    holidayOption.setText(context.getString(R.string.holiday_option_single_day_off));
+            default -> holidayOption.setText(context.getString(R.string.holiday_option_none));
+        }
+    }
+
     private void bindDeleteOccasionalAlarmAfterUse(Alarm alarm) {
         if (alarm.daysOfWeek.isRepeating()) {
             deleteOccasionalAlarmAfterUse.setVisibility(GONE);
@@ -687,20 +733,13 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         }
     }
 
-
-    private void bindHolidayOption(Context context, Alarm alarm) {
-        holidayOption.setVisibility(VISIBLE);
-        holidayOption.setTypeface(mGeneralTypeface);
-        switch (alarm.holidayOption) {
-            case com.best.deskclock.holiday.HolidayUtils.HOLIDAY_OPTION_SKIP_HOLIDAY ->
-                    holidayOption.setText(context.getString(R.string.holiday_option_skip_holiday));
-            case com.best.deskclock.holiday.HolidayUtils.HOLIDAY_OPTION_BIG_SMALL_DA ->
-                    holidayOption.setText(context.getString(R.string.holiday_option_big_small_da));
-            case com.best.deskclock.holiday.HolidayUtils.HOLIDAY_OPTION_BIG_SMALL_XIAO ->
-                    holidayOption.setText(context.getString(R.string.holiday_option_big_small_xiao));
-            case com.best.deskclock.holiday.HolidayUtils.HOLIDAY_OPTION_SINGLE_DAY_OFF ->
-                    holidayOption.setText(context.getString(R.string.holiday_option_single_day_off));
-            default -> holidayOption.setText(context.getString(R.string.holiday_option_none));
+    private void bindShiftMode(Alarm alarm) {
+        boolean isShiftMode = alarm.rotationPayload != null && !alarm.rotationPayload.isEmpty();
+        shiftModeToggle.setChecked(isShiftMode);
+        rotationSettingsPanel.setVisibility(isShiftMode ? VISIBLE : GONE);
+        repeatDays.setVisibility(isShiftMode ? GONE : VISIBLE);
+        if (isShiftMode) {
+            mRotationPanel.bind(alarm);
         }
     }
 
@@ -974,6 +1013,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         vibrationPatternTitle.setAlpha(0f);
         vibrationPatternValue.setAlpha(0f);
         flash.setAlpha(0f);
+        holidayOption.setAlpha(0f);
         deleteOccasionalAlarmAfterUse.setAlpha(0f);
         autoSilenceDurationTitle.setAlpha(0f);
         autoSilenceDurationValue.setAlpha(0f);
@@ -987,6 +1027,8 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         alarmVolumeValue.setAlpha(0f);
         delete.setAlpha(0f);
         duplicate.setAlpha(0f);
+        shiftModeToggle.setAlpha(0f);
+        rotationSettingsPanel.setAlpha(0f);
         setChangingViewsAlpha(0f);
 
         final View newView = itemView;
@@ -1037,6 +1079,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         final Animator flashAnimation = ObjectAnimator.ofFloat(flash, View.ALPHA, 1f)
                 .setDuration(longDuration);
 
+        final Animator holidayOptionAnimation = ObjectAnimator.ofFloat(holidayOption, View.ALPHA, 1f)
+                .setDuration(longDuration);
+
         final Animator deleteOccasionalAlarmAfterUseAnimation = ObjectAnimator.ofFloat(
                 deleteOccasionalAlarmAfterUse, View.ALPHA, 1f).setDuration(longDuration);
 
@@ -1082,6 +1127,12 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         final Animator arrowAnimation = ObjectAnimator.ofFloat(arrow, View.TRANSLATION_Y, 0f)
                 .setDuration(duration);
 
+        final Animator shiftModeToggleAnimation = ObjectAnimator.ofFloat(shiftModeToggle, View.ALPHA, 1f)
+                .setDuration(longDuration);
+
+        final Animator rotationSettingsPanelAnimation = ObjectAnimator.ofFloat(rotationSettingsPanel, View.ALPHA, 1f)
+                .setDuration(longDuration);
+
         arrowAnimation.setInterpolator(AnimatorUtils.INTERPOLATOR_FAST_OUT_SLOW_IN);
 
         // Set the stagger delays; delay the first by the amount of time it takes for the collapse
@@ -1092,6 +1143,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         final boolean vibrateVisible = vibrate.getVisibility() == VISIBLE;
         final boolean vibrationPatternVisible = vibrationPatternTitle.getVisibility() == VISIBLE;
         final boolean flashVisible = flash.getVisibility() == VISIBLE;
+        final boolean holidayOptionVisible = holidayOption.getVisibility() == VISIBLE;
         final boolean deleteOccasionalAlarmAfterUseVisible = deleteOccasionalAlarmAfterUse.getVisibility() == VISIBLE;
         final boolean autoSilenceDurationTitleVisible = autoSilenceDurationTitle.getVisibility() == VISIBLE;
         final boolean snoozeDurationTitleVisible = snoozeDurationTitle.getVisibility() == VISIBLE;
@@ -1103,6 +1155,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         editLabelIconAnimation.setStartDelay(startDelay);
 
         editLabelAnimation.setStartDelay(startDelay);
+
+        shiftModeToggleAnimation.setStartDelay(startDelay);
+        rotationSettingsPanelAnimation.setStartDelay(startDelay);
 
         repeatDaysAnimation.setStartDelay(startDelay);
 
@@ -1129,6 +1184,11 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
 
         if (flashVisible) {
             flashAnimation.setStartDelay(startDelay);
+            startDelay += delayIncrement;
+        }
+
+        if (holidayOptionVisible) {
+            holidayOptionAnimation.setStartDelay(startDelay);
             startDelay += delayIncrement;
         }
 
@@ -1179,15 +1239,15 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         final AnimatorSet animatorSet = new AnimatorSet();
         animatorSet.playTogether(backgroundAnimator, boundsAnimator, repeatDaysAnimation,
                 editLabelAnimation, editLabelIconAnimation, flashAnimation, vibrateAnimation,
-                deleteOccasionalAlarmAfterUseAnimation, ringtoneAnimation, deleteAnimation,
-                duplicateAnimation, dismissAnimation, arrowAnimation, scheduleAlarmAnimation,
+                holidayOptionAnimation, deleteOccasionalAlarmAfterUseAnimation, ringtoneAnimation,
+                deleteAnimation, duplicateAnimation, dismissAnimation, arrowAnimation, scheduleAlarmAnimation,
                 selectedDateAnimation, addDateAnimation, removeDateAnimation,
                 snoozeDurationTitleAnimation, snoozeDurationValueAnimation,
                 crescendoDurationTitleAnimation, crescendoDurationValueAnimation,
                 silenceAfterDurationTitleAnimation, silenceAfterDurationValueAnimation,
                 missedAlarmRepeatLimitTitleAnimation, missedAlarmRepeatLimitValueAnimation,
                 alarmVolumeTitleAnimation, alarmVolumeValueAnimation, vibrationPatternTitleAnimation,
-                vibrationPatternValueAnimation);
+                vibrationPatternValueAnimation, shiftModeToggleAnimation, rotationSettingsPanelAnimation);
 
         animatorSet.addListener(new AnimatorListenerAdapter() {
 
@@ -1224,6 +1284,10 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         }
 
         if (flash.getVisibility() == VISIBLE) {
+            numberOfItems++;
+        }
+
+        if (holidayOption.getVisibility() == VISIBLE) {
             numberOfItems++;
         }
 

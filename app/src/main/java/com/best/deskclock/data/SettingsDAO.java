@@ -1579,5 +1579,13 @@ public final class SettingsDAO {
      */
     public static int getAlarmSecondsHandColor(SharedPreferences prefs, Context context) {
         return prefs.getInt("key_alarm_seconds_hand_color", Color.RED);
+}
+
+    /**
+     * @return {@code true} if the calendar shift synchronization is enabled.
+     * {@code false} otherwise.
+     */
+    public static boolean isCalendarShiftSyncEnabled(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_CALENDAR_SHIFT_SYNC, true);
     }
 }

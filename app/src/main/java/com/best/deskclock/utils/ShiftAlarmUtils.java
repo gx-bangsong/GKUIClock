@@ -47,7 +47,11 @@ public final class ShiftAlarmUtils {
         // Prevent instantiation
     }
 
+    public static boolean isRotationId(long id) {
+        return id <= -20000L && id >= -29999L;
+    }
+
     public static boolean isEphemeralId(long id) {
-        return id <= EPHEMERAL_ID_START && id >= EPHEMERAL_ID_END;
+        return (id <= EPHEMERAL_ID_START && id >= EPHEMERAL_ID_END) || (id <= -20000L && id >= -29999L);
     }
 }

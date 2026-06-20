@@ -365,6 +365,15 @@
             app:singleLineTitle="false"
             tools:layout="@layout/settings_preference_layout" />
 
+        <com.best.deskclock.settings.custompreference.CustomSwitchPreference
+            android:key="key_calendar_shift_sync"
+            android:title="@string/calendar_shift_sync_title"
+            android:summary="@string/calendar_shift_sync_summary"
+            android:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false"
+            tools:layout="@layout/settings_preference_layout" />
+
     </com.best.deskclock.settings.custompreference.CustomPreferenceCategory>
 
 

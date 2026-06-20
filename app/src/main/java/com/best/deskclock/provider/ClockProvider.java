@@ -85,6 +85,10 @@ public class ClockProvider extends ContentProvider {
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.HOLIDAY_OPTION);
         sAlarmsWithInstancesProjection.put(AlarmsColumns.HOLIDAY_OPTION,
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.HOLIDAY_OPTION);
+        sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD,
+                ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD);
+        sAlarmsWithInstancesProjection.put(AlarmsColumns.ROTATION_PAYLOAD,
+                ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.FLASH,
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.FLASH);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.LABEL,
@@ -128,6 +132,8 @@ public class ClockProvider extends ContentProvider {
                 INSTANCES_TABLE_NAME + "." + InstancesColumns.VIBRATION_PATTERN);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.HOLIDAY_OPTION,
                 INSTANCES_TABLE_NAME + "." + InstancesColumns.HOLIDAY_OPTION);
+        sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD,
+                ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.FLASH,
                 INSTANCES_TABLE_NAME + "." + InstancesColumns.FLASH);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.AUTO_SILENCE_DURATION,

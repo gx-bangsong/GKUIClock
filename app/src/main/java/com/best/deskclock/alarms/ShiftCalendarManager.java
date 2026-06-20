@@ -1,10 +1,13 @@
 package com.best.deskclock.alarms;
 
+import static com.best.deskclock.DeskClockApplication.getDefaultSharedPreferences;
+
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -14,6 +17,7 @@ import android.provider.CalendarContract;
 import android.provider.Settings;
 
 import com.best.deskclock.data.DataModel;
+import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.data.Weekdays;
 import com.best.deskclock.holiday.HolidayUtils;
 import com.best.deskclock.provider.Alarm;
@@ -65,11 +69,12 @@ public final class ShiftCalendarManager {
     }
 
     public synchronized void updateShiftAlarms() {
-        LogUtils.i(TAG, "Updating shift alarms from calendar...");
+        SharedPreferences prefs = getDefaultSharedPreferences(mContext);
+        boolean enabled = SettingsDAO.isCalendarShiftSyncEnabled(prefs);
 
         ContentResolver cr = mContext.getContentResolver();
 
-        // 1. Clean up old ephemeral instances
+        // Always clean up existing ephemeral instances first
         List<AlarmInstance> currentInstances = AlarmInstance.getInstances(cr, null);
         for (AlarmInstance instance : currentInstances) {
             if (ShiftAlarmUtils.isEphemeralId(instance.mId)) {
@@ -78,6 +83,15 @@ public final class ShiftCalendarManager {
                 AlarmInstance.deleteInstance(cr, instance.mId);
             }
         }
+
+        if (!enabled) {
+            RotationScheduler.scheduleRotationAlarms(mContext);
+            LogUtils.i(TAG, "Shift sync disabled, cleaned up instances.");
+            return;
+        }
+
+        LogUtils.i(TAG, "Updating shift alarms from calendar...");
+        RotationScheduler.scheduleRotationAlarms(mContext);
 
         // 2. Query Calendar Instances for the next 7 days
         long now = System.currentTimeMillis();

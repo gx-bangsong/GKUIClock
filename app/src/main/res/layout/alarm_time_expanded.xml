@@ -97,6 +97,21 @@
         app:layout_constraintBottom_toBottomOf="@id/days_of_week"
         tools:ignore="TouchTargetSizeCheck" />
 
+    <com.google.android.material.materialswitch.MaterialSwitch
+        android:id="@+id/shift_mode_toggle"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginHorizontal="12dp"
+        android:text="@string/shift_mode_label"
+        app:layout_constraintTop_toBottomOf="@id/days_of_week" />
+
+    <include
+        android:id="@+id/rotation_settings_include"
+        layout="@layout/alarm_rotation_settings"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/shift_mode_toggle" />
+
     <!-- Day buttons are added programmatically -->
     <LinearLayout
         android:id="@+id/repeat_days"
@@ -105,7 +120,7 @@
         android:layout_marginTop="10dp"
         android:gravity="center"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/days_of_week" />
+        app:layout_constraintTop_toBottomOf="@id/rotation_settings_include" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/schedule_alarm"

@@ -120,7 +120,7 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         if (newState != alarm.vibrate) {
             alarm.vibrate = newState;
             Events.sendAlarmEvent(R.string.action_toggle_vibrate, R.string.label_deskclock);
-            mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+            mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, false);
             LOGGER.d("Updating vibrate state to " + newState);
 
             if (newState) {
@@ -142,7 +142,7 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         if (newState != alarm.flash) {
             alarm.flash = newState;
             Events.sendAlarmEvent(R.string.action_toggle_flash, R.string.label_deskclock);
-            mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+            mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, false);
             LOGGER.d("Updating flash state to " + newState);
             Utils.setVibrationTime(mContext, 50);
         }
@@ -152,7 +152,7 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         if (newState != alarm.deleteAfterUse) {
             alarm.deleteAfterUse = newState;
             Events.sendAlarmEvent(R.string.action_delete_alarm_after_use, R.string.label_deskclock);
-            mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+            mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, false);
             LOGGER.d("Delete alarm after use state to " + newState);
             Utils.setVibrationTime(mContext, 50);
         }
@@ -253,6 +253,11 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
 
         final Intent intent = RingtonePickerActivity.createAlarmRingtonePickerIntent(mContext, alarm);
         mContext.startActivity(intent);
+    }
+
+    public void onRotationPayloadChanged(Alarm alarm, String payload) {
+        alarm.rotationPayload = payload;
+        mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, false);
     }
 
     public void onHolidayOptionClicked(Alarm alarm) {

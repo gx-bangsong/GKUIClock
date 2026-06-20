@@ -782,4 +782,9 @@
     <string name="analog_widget_choice_title">选择样式</string>
     <string name="contributors_dialog_title">查看资料</string>
     <string name="tab_title_visibility_never">从不</string>
-    </resources>
+    <string name="calendar_shift_sync_title">日历轮班闹钟同步</string>
+    <string name="calendar_shift_sync_summary">自动匹配系统日历中的班次关键词并安排闹钟</string>
+    <string name="shift_settings_title">高级轮班设置</string>
+    <string name="skip_this_shift">跳过本次班次</string>
+    <string name="shift_mode_label">开启轮班模式 (64天循环)</string>
+</resources>
