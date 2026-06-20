@@ -115,6 +115,10 @@ public final class AlarmUpdateHandler {
                     newInstance.mSnoozeDuration = alarm.snoozeDuration;
                     newInstance.mCrescendoDuration = alarm.crescendoDuration;
                     newInstance.mAlarmVolume = alarm.alarmVolume;
+                    newInstance.mRotationPayload = alarm.rotationPayload;
+                    newInstance.mRotationPayload = alarm.rotationPayload;
+                    newInstance.mRotationPayload = alarm.rotationPayload;
+                    newInstance.mRotationPayload = alarm.rotationPayload;
                     // Since we copied the mId of the old instance and the mId is used
                     // as the primary key in the AlarmInstance table, this will replace
                     // the existing instance.

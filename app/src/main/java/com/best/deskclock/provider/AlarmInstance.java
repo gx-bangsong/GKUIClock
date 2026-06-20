@@ -69,7 +69,11 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             MISSED_ALARM_REPEAT_LIMIT,
             CRESCENDO_DURATION,
             ALARM_VOLUME,
-            HOLIDAY_OPTION
+            HOLIDAY_OPTION,
+            ROTATION_PAYLOAD,
+            ROTATION_PAYLOAD,
+            ROTATION_PAYLOAD,
+            ROTATION_PAYLOAD
     };
 
     /**
@@ -96,8 +100,12 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     private static final int CRESCENDO_DURATION_INDEX = 17;
     private static final int ALARM_VOLUME_INDEX = 18;
     private static final int HOLIDAY_OPTION_INDEX = 19;
+    private static final int ROTATION_PAYLOAD_INDEX = 20;
+    private static final int ROTATION_PAYLOAD_INDEX = 20;
+    private static final int ROTATION_PAYLOAD_INDEX = 20;
+    private static final int ROTATION_PAYLOAD_INDEX = 20;
 
-    private static final int COLUMN_COUNT = HOLIDAY_OPTION_INDEX + 1;
+    private static final int COLUMN_COUNT = ROTATION_PAYLOAD_INDEX + 1;
     // Public fields
     public long mId;
     public int mYear;
@@ -120,6 +128,10 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     // Alarm volume level in steps; not a percentage
     public int mAlarmVolume;
     public int mHolidayOption;
+    public String mRotationPayload;
+    public String mRotationPayload;
+    public String mRotationPayload;
+    public String mRotationPayload;
 
     public AlarmInstance(Calendar calendar, Long alarmId) {
         this(calendar);
@@ -142,6 +154,10 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         mCrescendoDuration = DEFAULT_VOLUME_CRESCENDO_DURATION;
         mAlarmVolume = DEFAULT_ALARM_VOLUME;
         mHolidayOption = 0;
+        mRotationPayload = null;
+        mRotationPayload = null;
+        mRotationPayload = null;
+        mRotationPayload = null;
     }
 
     public AlarmInstance(AlarmInstance instance) {
@@ -165,6 +181,10 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         this.mCrescendoDuration = instance.mCrescendoDuration;
         this.mAlarmVolume = instance.mAlarmVolume;
         this.mHolidayOption = instance.mHolidayOption;
+        this.mRotationPayload = instance.mRotationPayload;
+        this.mRotationPayload = instance.mRotationPayload;
+        this.mRotationPayload = instance.mRotationPayload;
+        this.mRotationPayload = instance.mRotationPayload;
     }
 
     public AlarmInstance(Cursor c, boolean joinedTable) {
@@ -186,6 +206,10 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             mCrescendoDuration = c.getInt(Alarm.INSTANCE_CRESCENDO_DURATION_INDEX);
             mAlarmVolume = c.getInt(Alarm.INSTANCE_ALARM_VOLUME_INDEX);
             mHolidayOption = c.getInt(Alarm.INSTANCE_HOLIDAY_OPTION_INDEX);
+            mRotationPayload = c.getString(Alarm.INSTANCE_ROTATION_PAYLOAD_INDEX);
+            mRotationPayload = c.getString(Alarm.INSTANCE_ROTATION_PAYLOAD_INDEX);
+            mRotationPayload = c.getString(Alarm.INSTANCE_ROTATION_PAYLOAD_INDEX);
+            mRotationPayload = c.getString(Alarm.INSTANCE_ROTATION_PAYLOAD_INDEX);
         } else {
             mId = c.getLong(ID_INDEX);
             mYear = c.getInt(YEAR_INDEX);
@@ -204,6 +228,10 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             mCrescendoDuration = c.getInt(CRESCENDO_DURATION_INDEX);
             mAlarmVolume = c.getInt(ALARM_VOLUME_INDEX);
             mHolidayOption = c.getInt(HOLIDAY_OPTION_INDEX);
+            mRotationPayload = c.getString(ROTATION_PAYLOAD_INDEX);
+            mRotationPayload = c.getString(ROTATION_PAYLOAD_INDEX);
+            mRotationPayload = c.getString(ROTATION_PAYLOAD_INDEX);
+            mRotationPayload = c.getString(ROTATION_PAYLOAD_INDEX);
         }
         if (c.isNull(RINGTONE_INDEX)) {
             // Should we be saving this with the current ringtone or leave it null
@@ -250,6 +278,10 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         values.put(CRESCENDO_DURATION, mCrescendoDuration);
         values.put(ALARM_VOLUME, mAlarmVolume);
         values.put(HOLIDAY_OPTION, mHolidayOption);
+        values.put(ROTATION_PAYLOAD, mRotationPayload);
+        values.put(ROTATION_PAYLOAD, mRotationPayload);
+        values.put(ROTATION_PAYLOAD, mRotationPayload);
+        values.put(ROTATION_PAYLOAD, mRotationPayload);
 
         return values;
     }
@@ -505,6 +537,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
                 ", mMissedAlarmRepeatLimit=" + mMissedAlarmRepeatLimit +
                 ", mCrescendoDuration=" + mCrescendoDuration +
                 ", mAlarmVolume=" + mAlarmVolume +
+                ", mRotationPayload='" + mRotationPayload + '\'' +
                 '}';
     }
     public static void addInstance(android.content.ContentResolver cr, AlarmInstance instance) {

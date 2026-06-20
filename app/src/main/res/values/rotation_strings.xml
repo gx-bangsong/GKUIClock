@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_shift_setup">Advanced Shift Setup</string>
+    <string name="cycle_length">Cycle Length:</string>
+    <string name="anchor_date">Anchor Date:</string>
+    <string name="holiday_skip">Holiday Skip</string>
+    <string name="off">Off</string>
+    <string name="days_count">%d days</string>
+    <string name="shift_day_description">Shift cycle day %d alarm time</string>
+</resources>

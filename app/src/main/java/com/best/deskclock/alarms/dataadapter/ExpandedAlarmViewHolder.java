@@ -56,6 +56,17 @@ import com.best.deskclock.utils.DeviceUtils;
 import com.best.deskclock.utils.RingtoneUtils;
 
 import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.slider.Slider;
+import com.google.android.material.materialswitch.MaterialSwitch;
+import android.transition.TransitionManager;
+import android.widget.EditText;
+import android.text.TextWatcher;
+import android.text.Editable;
+import android.text.TextUtils;
+import java.util.Calendar;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import com.google.android.material.color.MaterialColors;
 
 import java.util.List;
@@ -94,6 +105,38 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final TextView alarmVolumeValue;
     private final Chip delete;
     private final Chip duplicate;
+    private final View shiftSetupActivator;
+    private final ImageView shiftSetupCaret;
+    private final View advancedShiftPanel;
+    private final Slider cycleLengthSlider;
+    private final TextView cycleLengthValue;
+    private final com.google.android.material.button.MaterialButton anchorDateButton;
+    private final MaterialSwitch holidaySkipSwitch;
+    private final ChipGroup shiftGridContainer;
+    private final View shiftSetupActivator;
+    private final ImageView shiftSetupCaret;
+    private final View advancedShiftPanel;
+    private final Slider cycleLengthSlider;
+    private final TextView cycleLengthValue;
+    private final com.google.android.material.button.MaterialButton anchorDateButton;
+    private final MaterialSwitch holidaySkipSwitch;
+    private final ChipGroup shiftGridContainer;
+    private final View shiftSetupActivator;
+    private final ImageView shiftSetupCaret;
+    private final View advancedShiftPanel;
+    private final Slider cycleLengthSlider;
+    private final TextView cycleLengthValue;
+    private final com.google.android.material.button.MaterialButton anchorDateButton;
+    private final MaterialSwitch holidaySkipSwitch;
+    private final ChipGroup shiftGridContainer;
+    private final View shiftSetupActivator;
+    private final ImageView shiftSetupCaret;
+    private final View advancedShiftPanel;
+    private final Slider cycleLengthSlider;
+    private final TextView cycleLengthValue;
+    private final com.google.android.material.button.MaterialButton anchorDateButton;
+    private final MaterialSwitch holidaySkipSwitch;
+    private final ChipGroup shiftGridContainer;
 
     private final boolean mHasVibrator;
     private final boolean mHasFlash;
@@ -138,6 +181,38 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         delete = itemView.findViewById(R.id.delete);
         duplicate = itemView.findViewById(R.id.duplicate);
         holidayOption = itemView.findViewById(R.id.holiday_option);
+        shiftSetupActivator = itemView.findViewById(R.id.shift_setup_activator);
+        shiftSetupCaret = itemView.findViewById(R.id.shift_setup_caret);
+        advancedShiftPanel = itemView.findViewById(R.id.advanced_shift_panel);
+        cycleLengthSlider = itemView.findViewById(R.id.cycle_length_slider);
+        cycleLengthValue = itemView.findViewById(R.id.cycle_length_value);
+        anchorDateButton = itemView.findViewById(R.id.anchor_date_button);
+        holidaySkipSwitch = itemView.findViewById(R.id.holiday_skip_switch);
+        shiftGridContainer = itemView.findViewById(R.id.shift_grid_container);
+        shiftSetupActivator = itemView.findViewById(R.id.shift_setup_activator);
+        shiftSetupCaret = itemView.findViewById(R.id.shift_setup_caret);
+        advancedShiftPanel = itemView.findViewById(R.id.advanced_shift_panel);
+        cycleLengthSlider = itemView.findViewById(R.id.cycle_length_slider);
+        cycleLengthValue = itemView.findViewById(R.id.cycle_length_value);
+        anchorDateButton = itemView.findViewById(R.id.anchor_date_button);
+        holidaySkipSwitch = itemView.findViewById(R.id.holiday_skip_switch);
+        shiftGridContainer = itemView.findViewById(R.id.shift_grid_container);
+        shiftSetupActivator = itemView.findViewById(R.id.shift_setup_activator);
+        shiftSetupCaret = itemView.findViewById(R.id.shift_setup_caret);
+        advancedShiftPanel = itemView.findViewById(R.id.advanced_shift_panel);
+        cycleLengthSlider = itemView.findViewById(R.id.cycle_length_slider);
+        cycleLengthValue = itemView.findViewById(R.id.cycle_length_value);
+        anchorDateButton = itemView.findViewById(R.id.anchor_date_button);
+        holidaySkipSwitch = itemView.findViewById(R.id.holiday_skip_switch);
+        shiftGridContainer = itemView.findViewById(R.id.shift_grid_container);
+        shiftSetupActivator = itemView.findViewById(R.id.shift_setup_activator);
+        shiftSetupCaret = itemView.findViewById(R.id.shift_setup_caret);
+        advancedShiftPanel = itemView.findViewById(R.id.advanced_shift_panel);
+        cycleLengthSlider = itemView.findViewById(R.id.cycle_length_slider);
+        cycleLengthValue = itemView.findViewById(R.id.cycle_length_value);
+        anchorDateButton = itemView.findViewById(R.id.anchor_date_button);
+        holidaySkipSwitch = itemView.findViewById(R.id.holiday_skip_switch);
+        shiftGridContainer = itemView.findViewById(R.id.shift_grid_container);
 
         // Collapse handler
         itemView.setOnClickListener(v -> {
@@ -197,6 +272,54 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         // Ringtone editor handler
         ringtone.setOnClickListener(v ->
                 getAlarmTimeClickHandler().onRingtoneClicked(getItemHolder().item));
+
+        shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
+        cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
+            if (fromUser) {
+                int length = (int) value;
+                cycleLengthValue.setText(context.getString(R.string.days_count, length));
+                rebuildShiftGrid(length);
+                saveRotationPayload();
+            }
+        });
+        holidaySkipSwitch.setOnCheckedChangeListener((v, isChecked) -> saveRotationPayload());
+        anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
+
+        shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
+        cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
+            if (fromUser) {
+                int length = (int) value;
+                cycleLengthValue.setText(context.getString(R.string.days_count, length));
+                rebuildShiftGrid(length);
+                saveRotationPayload();
+            }
+        });
+        holidaySkipSwitch.setOnCheckedChangeListener((v, isChecked) -> saveRotationPayload());
+        anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
+
+        shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
+        cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
+            if (fromUser) {
+                int length = (int) value;
+                cycleLengthValue.setText(context.getString(R.string.days_count, length));
+                rebuildShiftGrid(length);
+                saveRotationPayload();
+            }
+        });
+        holidaySkipSwitch.setOnCheckedChangeListener((v, isChecked) -> saveRotationPayload());
+        anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
+        shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
+        cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
+            if (fromUser) {
+                int length = (int) value;
+                cycleLengthValue.setText(context.getString(R.string.days_count, length));
+                rebuildShiftGrid(length);
+                saveRotationPayload();
+            }
+        });
+        holidaySkipSwitch.setOnCheckedChangeListener((v, isChecked) -> saveRotationPayload());
+        anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
+
 
         // Vibrator checkbox handler
         vibrate.setOnClickListener(v ->
@@ -301,6 +424,10 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         bindAlarmVolume(context, alarm);
         bindDeleteAndDuplicateButtons();
         bindHolidayOption(context, alarm);
+        bindShiftSetup(context, alarm);
+        bindShiftSetup(context, alarm);
+        bindShiftSetup(context, alarm);
+        bindShiftSetup(context, alarm);
 
         // If this view is bound without coming from a CollapsedAlarmViewHolder (e.g.
         // when calling expand() before this alarm was visible in it's collapsed state),
@@ -327,6 +454,14 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         snoozeDurationValue.setAlpha(1f);
         missedAlarmRepeatLimitTitle.setAlpha(1f);
         missedAlarmRepeatLimitValue.setAlpha(1f);
+        shiftSetupActivator.setAlpha(1f);
+        advancedShiftPanel.setAlpha(1f);
+        shiftSetupActivator.setAlpha(1f);
+        advancedShiftPanel.setAlpha(1f);
+        shiftSetupActivator.setAlpha(1f);
+        advancedShiftPanel.setAlpha(1f);
+        shiftSetupActivator.setAlpha(1f);
+        advancedShiftPanel.setAlpha(1f);
         crescendoDurationTitle.setAlpha(1f);
         crescendoDurationValue.setAlpha(1f);
         alarmVolumeTitle.setAlpha(1f);
@@ -1296,4 +1431,176 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private String formatAlarmDate(Alarm alarm) {
         return "Placeholder Date"; // Placeholder
     }
-}
+
+    private void toggleShiftPanel() {
+        boolean isVisible = advancedShiftPanel.getVisibility() == View.VISIBLE;
+        TransitionManager.beginDelayedTransition((ViewGroup) itemView.getParent());
+        advancedShiftPanel.setVisibility(isVisible ? View.GONE : View.VISIBLE);
+        shiftSetupCaret.animate().rotation(isVisible ? 0 : 180).setDuration(200).start();
+    }
+
+    private void rebuildShiftGrid(int length) {
+        shiftGridContainer.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(itemView.getContext());
+        for (int i = 0; i < length; i++) {
+            View node = inflater.inflate(R.layout.rotation_day_node, shiftGridContainer, false);
+            TextView label = node.findViewById(R.id.day_label);
+            EditText input = node.findViewById(R.id.day_time_input);
+                                    label.setText("Day " + (i + 1));
+            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
+            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
+            input.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                @Override public void afterTextChanged(Editable s) { saveRotationPayload(); }
+            });
+            shiftGridContainer.addView(node);
+        }
+    }
+
+    private void saveRotationPayload() {
+        Alarm alarm = getItemHolder().item;
+        int length = (int) cycleLengthSlider.getValue();
+        boolean holidaySkip = holidaySkipSwitch.isChecked();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < shiftGridContainer.getChildCount(); i++) {
+            View node = shiftGridContainer.getChildAt(i);
+            EditText input = node.findViewById(R.id.day_time_input);
+            sb.append(parseTimeToMinutes(input.getText().toString()));
+            if (i < shiftGridContainer.getChildCount() - 1) sb.append(",");
+        }
+        long anchorMs = 0;
+        try {
+            anchorMs = new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(anchorDateButton.getText().toString()).getTime();
+        } catch (Exception ignored) {}
+        String payload = String.format(Locale.US, "SHIFT_ROTATION_V2|%d|%d|%b|%s|{}", length, anchorMs, holidaySkip, sb.toString());
+        if (!payload.equals(alarm.rotationPayload)) {
+            alarm.rotationPayload = payload;
+            getAlarmTimeClickHandler().asyncUpdateAlarm(alarm, false);
+        }
+    }
+
+    private int parseTimeToMinutes(String text) {
+        if (TextUtils.isEmpty(text)) return -1;
+        try {
+            if (text.contains(":")) {
+                String[] p = text.split(":");
+                return Integer.parseInt(p[0]) * 60 + Integer.parseInt(p[1]);
+            }
+            return Integer.parseInt(text);
+        } catch (Exception e) { return -1; }
+    }
+
+    private String formatMinutesToTime(int mins) {
+        if (mins < 0) return "";
+        return String.format(Locale.US, "%02d:%02d", mins / 60, mins % 60);
+    }
+
+    private void bindShiftSetup(Context context, Alarm alarm) {
+        shiftSetupActivator.setVisibility(VISIBLE);
+        if (TextUtils.isEmpty(alarm.rotationPayload) || !alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+            advancedShiftPanel.setVisibility(GONE);
+            shiftSetupCaret.setRotation(0);
+            cycleLengthSlider.setValue(7);
+            cycleLengthValue.setText(context.getString(R.string.days_count, 7));
+            anchorDateButton.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date()));
+            holidaySkipSwitch.setChecked(false);
+            rebuildShiftGrid(7);
+            return;
+        }
+        String[] parts = alarm.rotationPayload.split("\\Q|\\E");
+        if (parts.length < 6) return;
+        try {
+            int length = Integer.parseInt(parts[1]);
+            long anchorMs = Long.parseLong(parts[2]);
+            boolean holidaySkip = Boolean.parseBoolean(parts[3]);
+            String[] minutes = parts[4].split(",");
+            cycleLengthSlider.setValue(length);
+            cycleLengthValue.setText(context.getString(R.string.days_count, length));
+            anchorDateButton.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date(anchorMs)));
+            holidaySkipSwitch.setChecked(holidaySkip);
+            shiftGridContainer.removeAllViews();
+            LayoutInflater inflater = LayoutInflater.from(context);
+            for (int i = 0; i < length; i++) {
+                View node = inflater.inflate(R.layout.rotation_day_node, shiftGridContainer, false);
+                TextView label = node.findViewById(R.id.day_label);
+                EditText input = node.findViewById(R.id.day_time_input);
+                                        label.setText("Day " + (i + 1));
+            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
+            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
+                if (i < minutes.length) input.setText(formatMinutesToTime(Integer.parseInt(minutes[i])));
+                input.addTextChangedListener(new TextWatcher() {
+                    @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                    @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                    @Override public void afterTextChanged(Editable s) { saveRotationPayload(); }
+                });
+                shiftGridContainer.addView(node);
+            }
+        } catch (Exception ignored) {}
+    }
+
+
+    private void toggleShiftPanel() {
+        boolean isVisible = advancedShiftPanel.getVisibility() == View.VISIBLE;
+        TransitionManager.beginDelayedTransition((ViewGroup) itemView.getParent());
+        advancedShiftPanel.setVisibility(isVisible ? View.GONE : View.VISIBLE);
+        shiftSetupCaret.animate().rotation(isVisible ? 0 : 180).setDuration(200).start();
+    }
+
+    private void rebuildShiftGrid(int length) {
+        shiftGridContainer.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(itemView.getContext());
+        for (int i = 0; i < length; i++) {
+            View node = inflater.inflate(R.layout.rotation_day_node, shiftGridContainer, false);
+            TextView label = node.findViewById(R.id.day_label);
+            EditText input = node.findViewById(R.id.day_time_input);
+                                    label.setText("Day " + (i + 1));
+            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
+            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
+            input.addTextChangedListener(new TextWatcher() {
+                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+                @Override public void afterTextChanged(Editable s) { saveRotationPayload(); }
+            });
+            shiftGridContainer.addView(node);
+        }
+    }
+
+    private void saveRotationPayload() {
+        Alarm alarm = getItemHolder().item;
+        int length = (int) cycleLengthSlider.getValue();
+        boolean holidaySkip = holidaySkipSwitch.isChecked();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < shiftGridContainer.getChildCount(); i++) {
+            View node = shiftGridContainer.getChildAt(i);
+            EditText input = node.findViewById(R.id.day_time_input);
+            sb.append(parseTimeToMinutes(input.getText().toString()));
+            if (i < shiftGridContainer.getChildCount() - 1) sb.append(",");
+        }
+        long anchorMs = 0;
+        try {
+            anchorMs = new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(anchorDateButton.getText().toString()).getTime();
+        } catch (Exception ignored) {}
+        String payload = String.format(Locale.US, "SHIFT_ROTATION_V2|%d|%d|%b|%s|{}", length, anchorMs, holidaySkip, sb.toString());
+        if (!payload.equals(alarm.rotationPayload)) {
+            alarm.rotationPayload = payload;
+            getAlarmTimeClickHandler().asyncUpdateAlarm(alarm, false);
+        }
+    }
+
+    private int parseTimeToMinutes(String text) {
+        if (TextUtils.isEmpty(text)) return -1;
+        try {
+            if (text.contains(":")) {
+                String[] p = text.split(":");
+                return Integer.parseInt(p[0]) * 60 + Integer.parseInt(p[1]);
+            }
+            return Integer.parseInt(text);
+        } catch (Exception e) { return -1; }
+    }
+
+    private String formatMinutesToTime(int mins) {
+        if (mins < 0) return "";
+        return String.format(Locale.US, "%02d:%02d", mins / 60, mins % 60);
+    }
+

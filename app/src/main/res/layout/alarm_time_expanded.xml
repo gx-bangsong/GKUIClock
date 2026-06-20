@@ -106,6 +106,146 @@
         android:gravity="center"
         android:orientation="horizontal"
         app:layout_constraintTop_toBottomOf="@id/days_of_week" />
+    <!-- Advanced Shift Setup Disclosure -->
+    <LinearLayout
+        android:id="@+id/shift_setup_activator"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/advanced_shift_setup" android:textColor="?attr/colorPrimary" android:textStyle="bold" />
+        <ImageView android:id="@+id/shift_setup_caret" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_caret_down_static" app:tint="?attr/colorPrimary" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/advanced_shift_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintTop_toBottomOf="@id/shift_setup_activator">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/cycle_length" android:paddingEnd="8dp" />
+            <com.google.android.material.slider.Slider android:id="@+id/cycle_length_slider" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:valueFrom="2" android:valueTo="64" android:stepSize="1" />
+            <TextView android:id="@+id/cycle_length_value" android:layout_width="60dp" android:layout_height="wrap_content" android:gravity="end" tools:text="7 days" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/anchor_date" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/anchor_date_button" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="2023-10-27" />
+        </LinearLayout>
+        <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/holiday_skip_switch" android:layout_width="match_parent" android:layout_height="48dp" android:text="@string/holiday_skip" />
+        <com.best.deskclock.widget.MaxHeightNestedScrollView android:id="@+id/shift_grid_scroll" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
+            <com.google.android.material.chip.ChipGroup android:id="@+id/shift_grid_container" android:layout_width="match_parent" android:layout_height="wrap_content" app:chipSpacingVertical="4dp" app:chipSpacingHorizontal="4dp" />
+        </com.best.deskclock.widget.MaxHeightNestedScrollView>
+    </LinearLayout>
+    <!-- Advanced Shift Setup Disclosure -->
+    <LinearLayout
+        android:id="@+id/shift_setup_activator"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/advanced_shift_setup" android:textColor="?attr/colorPrimary" android:textStyle="bold" />
+        <ImageView android:id="@+id/shift_setup_caret" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_caret_down_static" app:tint="?attr/colorPrimary" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/advanced_shift_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintTop_toBottomOf="@id/shift_setup_activator">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/cycle_length" android:paddingEnd="8dp" />
+            <com.google.android.material.slider.Slider android:id="@+id/cycle_length_slider" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:valueFrom="2" android:valueTo="64" android:stepSize="1" />
+            <TextView android:id="@+id/cycle_length_value" android:layout_width="60dp" android:layout_height="wrap_content" android:gravity="end" tools:text="7 days" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/anchor_date" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/anchor_date_button" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="2023-10-27" />
+        </LinearLayout>
+        <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/holiday_skip_switch" android:layout_width="match_parent" android:layout_height="48dp" android:text="@string/holiday_skip" />
+        <com.best.deskclock.widget.MaxHeightNestedScrollView android:id="@+id/shift_grid_scroll" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
+            <com.google.android.material.chip.ChipGroup android:id="@+id/shift_grid_container" android:layout_width="match_parent" android:layout_height="wrap_content" app:chipSpacingVertical="4dp" app:chipSpacingHorizontal="4dp" />
+        </com.best.deskclock.widget.MaxHeightNestedScrollView>
+    </LinearLayout>
+    <!-- Advanced Shift Setup Disclosure -->
+    <LinearLayout
+        android:id="@+id/shift_setup_activator"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/advanced_shift_setup" android:textColor="?attr/colorPrimary" android:textStyle="bold" />
+        <ImageView android:id="@+id/shift_setup_caret" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_caret_down_static" app:tint="?attr/colorPrimary" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/advanced_shift_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintTop_toBottomOf="@id/shift_setup_activator">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/cycle_length" android:paddingEnd="8dp" />
+            <com.google.android.material.slider.Slider android:id="@+id/cycle_length_slider" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:valueFrom="2" android:valueTo="64" android:stepSize="1" />
+            <TextView android:id="@+id/cycle_length_value" android:layout_width="60dp" android:layout_height="wrap_content" android:gravity="end" tools:text="7 days" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/anchor_date" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/anchor_date_button" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="2023-10-27" />
+        </LinearLayout>
+        <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/holiday_skip_switch" android:layout_width="match_parent" android:layout_height="48dp" android:text="@string/holiday_skip" />
+        <com.best.deskclock.widget.MaxHeightNestedScrollView android:id="@+id/shift_grid_scroll" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
+            <com.google.android.material.chip.ChipGroup android:id="@+id/shift_grid_container" android:layout_width="match_parent" android:layout_height="wrap_content" app:chipSpacingVertical="4dp" app:chipSpacingHorizontal="4dp" />
+        </com.best.deskclock.widget.MaxHeightNestedScrollView>
+    </LinearLayout>
+    <!-- Advanced Shift Setup Disclosure -->
+    <LinearLayout
+        android:id="@+id/shift_setup_activator"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="12dp"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/advanced_shift_setup" android:textColor="?attr/colorPrimary" android:textStyle="bold" />
+        <ImageView android:id="@+id/shift_setup_caret" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_caret_down_static" app:tint="?attr/colorPrimary" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/advanced_shift_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintTop_toBottomOf="@id/shift_setup_activator">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/cycle_length" android:paddingEnd="8dp" />
+            <com.google.android.material.slider.Slider android:id="@+id/cycle_length_slider" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:valueFrom="2" android:valueTo="64" android:stepSize="1" />
+            <TextView android:id="@+id/cycle_length_value" android:layout_width="60dp" android:layout_height="wrap_content" android:gravity="end" tools:text="7 days" />
+        </LinearLayout>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="48dp" android:orientation="horizontal" android:gravity="center_vertical">
+            <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/anchor_date" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/anchor_date_button" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="2023-10-27" />
+        </LinearLayout>
+        <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/holiday_skip_switch" android:layout_width="match_parent" android:layout_height="48dp" android:text="@string/holiday_skip" />
+        <com.best.deskclock.widget.MaxHeightNestedScrollView android:id="@+id/shift_grid_scroll" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
+            <com.google.android.material.chip.ChipGroup android:id="@+id/shift_grid_container" android:layout_width="match_parent" android:layout_height="wrap_content" app:chipSpacingVertical="4dp" app:chipSpacingHorizontal="4dp" />
+        </com.best.deskclock.widget.MaxHeightNestedScrollView>
+    </LinearLayout>
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/schedule_alarm"
@@ -120,7 +260,7 @@
         android:gravity="center_vertical"
         app:drawableTint="?attr/colorOnSurfaceVariant"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/repeat_days" />
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/selected_date"
@@ -131,7 +271,7 @@
         android:focusable="true"
         android:gravity="center_vertical"
         app:layout_constraintEnd_toStartOf="@+id/remove_date"
-        app:layout_constraintTop_toBottomOf="@id/repeat_days"
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel"
         tools:text="01/01/2024" />
 
     <ImageButton
@@ -144,7 +284,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@null"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/repeat_days"
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel"
         app:layout_constraintBottom_toBottomOf="@+id/schedule_alarm"
         tools:visibility="gone" />
 
@@ -158,7 +298,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@null"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/repeat_days"
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel"
         app:layout_constraintBottom_toBottomOf="@+id/schedule_alarm"
         tools:visibility="visible"
         tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck"/>

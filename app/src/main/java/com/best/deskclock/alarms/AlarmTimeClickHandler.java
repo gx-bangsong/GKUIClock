@@ -75,6 +75,10 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
     private final SharedPreferences mPrefs;
     private final AlarmUpdateHandler mAlarmUpdateHandler;
     private Alarm mSelectedAlarm;
+    private boolean mIsAnchorDateMode = false;
+    private boolean mIsAnchorDateMode = false;
+    private boolean mIsAnchorDateMode = false;
+    private boolean mIsAnchorDateMode = false;
     private Bundle mPreviousDaysOfWeekMap;
     private AlertDialog mCurrentSpinnerDatePickerDialog = null;
 
@@ -309,7 +313,68 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         MaterialTimePickerDialog.show(mContext, fragmentManager, TAG, hours, minutes, mPrefs, this);
     }
 
+
+    public void onAnchorDateClicked(Alarm alarm) {
+        mSelectedAlarm = alarm;
+        mIsAnchorDateMode = true;
+        if (SettingsDAO.getMaterialDatePickerStyle(mPrefs).equals(SPINNER_DATE_PICKER_STYLE)) {
+            showSpinnerDatePicker(alarm);
+        } else {
+            showMaterialDatePicker(alarm);
+        }
+    }
+
+    public void asyncUpdateAlarm(Alarm alarm, boolean popUpToast) {
+        mAlarmUpdateHandler.asyncUpdateAlarm(alarm, popUpToast, false);
+    }
+
+
+    public void onAnchorDateClicked(Alarm alarm) {
+        mSelectedAlarm = alarm;
+        mIsAnchorDateMode = true;
+        if (SettingsDAO.getMaterialDatePickerStyle(mPrefs).equals(SPINNER_DATE_PICKER_STYLE)) {
+            showSpinnerDatePicker(alarm);
+        } else {
+            showMaterialDatePicker(alarm);
+        }
+    }
+
+    public void asyncUpdateAlarm(Alarm alarm, boolean popUpToast) {
+        mAlarmUpdateHandler.asyncUpdateAlarm(alarm, popUpToast, false);
+    }
+
+    public void onAnchorDateClicked(Alarm alarm) {
+        mSelectedAlarm = alarm;
+        mIsAnchorDateMode = true;
+        if (SettingsDAO.getMaterialDatePickerStyle(mPrefs).equals(SPINNER_DATE_PICKER_STYLE)) {
+            showSpinnerDatePicker(alarm);
+        } else {
+            showMaterialDatePicker(alarm);
+        }
+    }
+
+    public void asyncUpdateAlarm(Alarm alarm, boolean popUpToast) {
+        mAlarmUpdateHandler.asyncUpdateAlarm(alarm, popUpToast, false);
+    }
+
+    public void onAnchorDateClicked(Alarm alarm) {
+        mSelectedAlarm = alarm;
+        mIsAnchorDateMode = true;
+        if (SettingsDAO.getMaterialDatePickerStyle(mPrefs).equals(SPINNER_DATE_PICKER_STYLE)) {
+            showSpinnerDatePicker(alarm);
+        } else {
+            showMaterialDatePicker(alarm);
+        }
+    }
+
+    public void asyncUpdateAlarm(Alarm alarm, boolean popUpToast) {
+        mAlarmUpdateHandler.asyncUpdateAlarm(alarm, popUpToast, false);
+    }
     public void onDateClicked(Alarm alarm) {
+        mIsAnchorDateMode = false;
+        mIsAnchorDateMode = false;
+        mIsAnchorDateMode = false;
+        mIsAnchorDateMode = false;
         mSelectedAlarm = alarm;
 
         if (SettingsDAO.getMaterialDatePickerStyle(mPrefs).equals(SPINNER_DATE_PICKER_STYLE)) {
@@ -525,7 +590,64 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         });
     }
 
-    public void onDateSet(int year, int month, int day, int hourOfDay, int minute) {
+public void onDateSet(int year, int month, int day, int hourOfDay, int minute) {
+        if (mSelectedAlarm != null && mIsAnchorDateMode) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(year, month, day);
+            if (mSelectedAlarm.rotationPayload != null) {
+                String[] parts = mSelectedAlarm.rotationPayload.split("\\|");
+                if (parts.length >= 6) {
+                    parts[2] = String.valueOf(calendar.getTimeInMillis());
+                    mSelectedAlarm.rotationPayload = String.join("|", parts);
+                    mAlarmUpdateHandler.asyncUpdateAlarm(mSelectedAlarm, false, false);
+                }
+            }
+            mIsAnchorDateMode = false;
+            mSelectedAlarm = null;
+            return;
+        }        if (mSelectedAlarm != null && mIsAnchorDateMode) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(year, month, day);
+            if (mSelectedAlarm.rotationPayload != null) {
+                String[] parts = mSelectedAlarm.rotationPayload.split("\\|");
+                if (parts.length >= 6) {
+                    parts[2] = String.valueOf(calendar.getTimeInMillis());
+                    mSelectedAlarm.rotationPayload = String.join("|", parts);
+                    mAlarmUpdateHandler.asyncUpdateAlarm(mSelectedAlarm, false, false);
+                }
+            }
+            mIsAnchorDateMode = false;
+            mSelectedAlarm = null;
+            return;
+        }        if (mSelectedAlarm != null && mIsAnchorDateMode) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(year, month, day);
+            if (mSelectedAlarm.rotationPayload != null) {
+                String[] parts = mSelectedAlarm.rotationPayload.split("\\|");
+                if (parts.length >= 6) {
+                    parts[2] = String.valueOf(calendar.getTimeInMillis());
+                    mSelectedAlarm.rotationPayload = String.join("|", parts);
+                    mAlarmUpdateHandler.asyncUpdateAlarm(mSelectedAlarm, false, false);
+                }
+            }
+            mIsAnchorDateMode = false;
+            mSelectedAlarm = null;
+            return;
+        }        if (mSelectedAlarm != null && mIsAnchorDateMode) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(year, month, day);
+            if (mSelectedAlarm.rotationPayload != null) {
+                String[] parts = mSelectedAlarm.rotationPayload.split("\\Q|\\E");
+                if (parts.length >= 6) {
+                    parts[2] = String.valueOf(calendar.getTimeInMillis());
+                    mSelectedAlarm.rotationPayload = String.join("|", parts);
+                    mAlarmUpdateHandler.asyncUpdateAlarm(mSelectedAlarm, false, false);
+                }
+            }
+            mIsAnchorDateMode = false;
+            mSelectedAlarm = null;
+            return;
+        }
         if (mSelectedAlarm != null) {
             // Disable days of the week if one or more are selected
             if (mSelectedAlarm.daysOfWeek.isRepeating()) {
