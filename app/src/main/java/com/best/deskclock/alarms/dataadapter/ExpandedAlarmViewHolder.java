@@ -425,9 +425,6 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         bindDeleteAndDuplicateButtons();
         bindHolidayOption(context, alarm);
         bindShiftSetup(context, alarm);
-        bindShiftSetup(context, alarm);
-        bindShiftSetup(context, alarm);
-        bindShiftSetup(context, alarm);
 
         // If this view is bound without coming from a CollapsedAlarmViewHolder (e.g.
         // when calling expand() before this alarm was visible in it's collapsed state),
@@ -1431,7 +1428,6 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private String formatAlarmDate(Alarm alarm) {
         return "Placeholder Date"; // Placeholder
     }
-
     private void toggleShiftPanel() {
         boolean isVisible = advancedShiftPanel.getVisibility() == View.VISIBLE;
         TransitionManager.beginDelayedTransition((ViewGroup) itemView.getParent());
@@ -1446,9 +1442,8 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             View node = inflater.inflate(R.layout.rotation_day_node, shiftGridContainer, false);
             TextView label = node.findViewById(R.id.day_label);
             EditText input = node.findViewById(R.id.day_time_input);
-                                    label.setText("Day " + (i + 1));
-            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
-            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
+            label.setText("Day " + (i + 1));
+            input.setContentDescription(itemView.getContext().getString(R.string.shift_day_description, i + 1));
             input.addTextChangedListener(new TextWatcher() {
                 @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
                 @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
@@ -1508,7 +1503,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             rebuildShiftGrid(7);
             return;
         }
-        String[] parts = alarm.rotationPayload.split("\\Q|\\E");
+        String[] parts = alarm.rotationPayload.split("\\|");
         if (parts.length < 6) return;
         try {
             int length = Integer.parseInt(parts[1]);
@@ -1525,9 +1520,8 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
                 View node = inflater.inflate(R.layout.rotation_day_node, shiftGridContainer, false);
                 TextView label = node.findViewById(R.id.day_label);
                 EditText input = node.findViewById(R.id.day_time_input);
-                                        label.setText("Day " + (i + 1));
-            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
-            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
+                label.setText("Day " + (i + 1));
+                input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
                 if (i < minutes.length) input.setText(formatMinutesToTime(Integer.parseInt(minutes[i])));
                 input.addTextChangedListener(new TextWatcher() {
                     @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -1538,69 +1532,4 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             }
         } catch (Exception ignored) {}
     }
-
-
-    private void toggleShiftPanel() {
-        boolean isVisible = advancedShiftPanel.getVisibility() == View.VISIBLE;
-        TransitionManager.beginDelayedTransition((ViewGroup) itemView.getParent());
-        advancedShiftPanel.setVisibility(isVisible ? View.GONE : View.VISIBLE);
-        shiftSetupCaret.animate().rotation(isVisible ? 0 : 180).setDuration(200).start();
-    }
-
-    private void rebuildShiftGrid(int length) {
-        shiftGridContainer.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(itemView.getContext());
-        for (int i = 0; i < length; i++) {
-            View node = inflater.inflate(R.layout.rotation_day_node, shiftGridContainer, false);
-            TextView label = node.findViewById(R.id.day_label);
-            EditText input = node.findViewById(R.id.day_time_input);
-                                    label.setText("Day " + (i + 1));
-            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
-            input.setContentDescription(context.getString(R.string.shift_day_description, i + 1));
-            input.addTextChangedListener(new TextWatcher() {
-                @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-                @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-                @Override public void afterTextChanged(Editable s) { saveRotationPayload(); }
-            });
-            shiftGridContainer.addView(node);
-        }
-    }
-
-    private void saveRotationPayload() {
-        Alarm alarm = getItemHolder().item;
-        int length = (int) cycleLengthSlider.getValue();
-        boolean holidaySkip = holidaySkipSwitch.isChecked();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < shiftGridContainer.getChildCount(); i++) {
-            View node = shiftGridContainer.getChildAt(i);
-            EditText input = node.findViewById(R.id.day_time_input);
-            sb.append(parseTimeToMinutes(input.getText().toString()));
-            if (i < shiftGridContainer.getChildCount() - 1) sb.append(",");
-        }
-        long anchorMs = 0;
-        try {
-            anchorMs = new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(anchorDateButton.getText().toString()).getTime();
-        } catch (Exception ignored) {}
-        String payload = String.format(Locale.US, "SHIFT_ROTATION_V2|%d|%d|%b|%s|{}", length, anchorMs, holidaySkip, sb.toString());
-        if (!payload.equals(alarm.rotationPayload)) {
-            alarm.rotationPayload = payload;
-            getAlarmTimeClickHandler().asyncUpdateAlarm(alarm, false);
-        }
-    }
-
-    private int parseTimeToMinutes(String text) {
-        if (TextUtils.isEmpty(text)) return -1;
-        try {
-            if (text.contains(":")) {
-                String[] p = text.split(":");
-                return Integer.parseInt(p[0]) * 60 + Integer.parseInt(p[1]);
-            }
-            return Integer.parseInt(text);
-        } catch (Exception e) { return -1; }
-    }
-
-    private String formatMinutesToTime(int mins) {
-        if (mins < 0) return "";
-        return String.format(Locale.US, "%02d:%02d", mins / 60, mins % 60);
-    }
-
+}

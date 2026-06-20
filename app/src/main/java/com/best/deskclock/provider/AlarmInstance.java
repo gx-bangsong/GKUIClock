@@ -70,9 +70,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             CRESCENDO_DURATION,
             ALARM_VOLUME,
             HOLIDAY_OPTION,
-            ROTATION_PAYLOAD,
-            ROTATION_PAYLOAD,
-            ROTATION_PAYLOAD,
             ROTATION_PAYLOAD
     };
 
@@ -101,11 +98,8 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     private static final int ALARM_VOLUME_INDEX = 18;
     private static final int HOLIDAY_OPTION_INDEX = 19;
     private static final int ROTATION_PAYLOAD_INDEX = 20;
-    private static final int ROTATION_PAYLOAD_INDEX = 20;
-    private static final int ROTATION_PAYLOAD_INDEX = 20;
-    private static final int ROTATION_PAYLOAD_INDEX = 20;
 
-    private static final int COLUMN_COUNT = ROTATION_PAYLOAD_INDEX + 1;
+    private static final int COLUMN_COUNT = 21;
     // Public fields
     public long mId;
     public int mYear;
@@ -207,9 +201,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             mAlarmVolume = c.getInt(Alarm.INSTANCE_ALARM_VOLUME_INDEX);
             mHolidayOption = c.getInt(Alarm.INSTANCE_HOLIDAY_OPTION_INDEX);
             mRotationPayload = c.getString(Alarm.INSTANCE_ROTATION_PAYLOAD_INDEX);
-            mRotationPayload = c.getString(Alarm.INSTANCE_ROTATION_PAYLOAD_INDEX);
-            mRotationPayload = c.getString(Alarm.INSTANCE_ROTATION_PAYLOAD_INDEX);
-            mRotationPayload = c.getString(Alarm.INSTANCE_ROTATION_PAYLOAD_INDEX);
         } else {
             mId = c.getLong(ID_INDEX);
             mYear = c.getInt(YEAR_INDEX);
@@ -228,9 +219,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             mCrescendoDuration = c.getInt(CRESCENDO_DURATION_INDEX);
             mAlarmVolume = c.getInt(ALARM_VOLUME_INDEX);
             mHolidayOption = c.getInt(HOLIDAY_OPTION_INDEX);
-            mRotationPayload = c.getString(ROTATION_PAYLOAD_INDEX);
-            mRotationPayload = c.getString(ROTATION_PAYLOAD_INDEX);
-            mRotationPayload = c.getString(ROTATION_PAYLOAD_INDEX);
             mRotationPayload = c.getString(ROTATION_PAYLOAD_INDEX);
         }
         if (c.isNull(RINGTONE_INDEX)) {
@@ -278,9 +266,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         values.put(CRESCENDO_DURATION, mCrescendoDuration);
         values.put(ALARM_VOLUME, mAlarmVolume);
         values.put(HOLIDAY_OPTION, mHolidayOption);
-        values.put(ROTATION_PAYLOAD, mRotationPayload);
-        values.put(ROTATION_PAYLOAD, mRotationPayload);
-        values.put(ROTATION_PAYLOAD, mRotationPayload);
         values.put(ROTATION_PAYLOAD, mRotationPayload);
 
         return values;
