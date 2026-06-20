@@ -148,7 +148,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         duplicate = itemView.findViewById(R.id.duplicate);
 
         shiftModeToggle = itemView.findViewById(R.id.shift_mode_toggle);
-        rotationSettingsPanel = itemView.findViewById(R.id.rotation_settings_panel);
+        rotationSettingsPanel = itemView.findViewById(R.id.rotation_settings_include);
         FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
         mRotationPanel = new RotationPanel(rotationSettingsPanel, (a, payload) -> {
             getAlarmTimeClickHandler().onRotationPayloadChanged(a, payload);

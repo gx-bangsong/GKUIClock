@@ -39,6 +39,7 @@ public class RotationScheduler {
     }
 
     private static void generateInstancesForAlarm(Context context, Alarm alarm) {
+        if (alarm.rotationPayload == null) return;
         String[] parts = alarm.rotationPayload.split(",");
         if (parts.length < 2) return;
 

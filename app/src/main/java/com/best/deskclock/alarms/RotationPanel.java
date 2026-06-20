@@ -41,6 +41,7 @@ public class RotationPanel {
     }
 
     public RotationPanel(View rootView, OnRotationChangedListener listener, androidx.fragment.app.FragmentManager fm) {
+        if (rootView == null) throw new IllegalArgumentException("rootView cannot be null");
         mRootView = rootView;
         mContext = rootView.getContext();
         mListener = listener;

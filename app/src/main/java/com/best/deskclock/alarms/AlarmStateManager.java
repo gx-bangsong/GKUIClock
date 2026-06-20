@@ -488,6 +488,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // Check parent if it needs to reschedule, disable or delete itself
         if (instance.mAlarmId != null) {
             updateParentAlarm(context, instance);
+        com.best.deskclock.alarms.ShiftCalendarManager.getInstance(context).updateShiftAlarms();
         }
 
         // Update alarm state
@@ -532,6 +533,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // Check parent if it needs to reschedule, disable or delete itself
         if (instance.mAlarmId != null) {
             updateParentAlarm(context, instance);
+        com.best.deskclock.alarms.ShiftCalendarManager.getInstance(context).updateShiftAlarms();
         }
 
         cancelPowerOffAlarm(context, instance);
@@ -575,6 +577,7 @@ public final class AlarmStateManager extends BroadcastReceiver {
         // Check parent if it needs to reschedule, disable or delete itself
         if (instance.mAlarmId != null) {
             updateParentAlarm(context, instance);
+        com.best.deskclock.alarms.ShiftCalendarManager.getInstance(context).updateShiftAlarms();
         }
 
         // Delete instance as it is not needed anymore
