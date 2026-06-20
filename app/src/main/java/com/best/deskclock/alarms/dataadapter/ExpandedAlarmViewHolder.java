@@ -225,7 +225,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         ringtone.setOnClickListener(v ->
                 getAlarmTimeClickHandler().onRingtoneClicked(getItemHolder().item));
 
-                shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
+        shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
         cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
             if (fromUser) {
                 int length = (int) value;
@@ -237,7 +237,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         holidaySkipSwitch.setOnCheckedChangeListener((v, isChecked) -> saveRotationPayload());
         anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
 
-// Vibrator checkbox handler
+        // Vibrator checkbox handler
         vibrate.setOnClickListener(v ->
                 getAlarmTimeClickHandler().setAlarmVibrationEnabled(
                         getItemHolder().item, ((CheckBox) v).isChecked()));
@@ -1414,7 +1414,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             rebuildShiftGrid(7);
             return;
         }
-        String[] parts = alarm.rotationPayload.split("\\|");
+        String[] parts = alarm.rotationPayload.split("\\\\|");
         if (parts.length < 6) return;
         try {
             int length = Integer.parseInt(parts[1]);
@@ -1443,4 +1443,5 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             }
         } catch (Exception ignored) {}
     }
+
 }

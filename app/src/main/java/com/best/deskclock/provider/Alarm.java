@@ -121,7 +121,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + ENABLED + " DESC, " +
                     ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + _ID + " ASC";
 
-    public static final String[] QUERY_COLUMNS = {
+    private static final String[] QUERY_COLUMNS = {
             _ID,
             YEAR,
             MONTH,
@@ -141,10 +141,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             MISSED_ALARM_REPEAT_LIMIT,
             CRESCENDO_DURATION,
             ALARM_VOLUME,
-            HOLIDAY_OPTION,
-            ROTATION_PAYLOAD
+            HOLIDAY_OPTION
     };
-
     private static final String[] QUERY_ALARMS_WITH_INSTANCES_COLUMNS = {
             ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + _ID,
             ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + YEAR,
@@ -231,9 +229,9 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     public static final int INSTANCE_ALARM_VOLUME_INDEX = 37;
     public static final int INSTANCE_ROTATION_PAYLOAD_INDEX = 38;
     public static final int INSTANCE_HOLIDAY_OPTION_INDEX = HOLIDAY_OPTION_INDEX;
+    private static final int COLUMN_COUNT = ROTATION_PAYLOAD_INDEX + 1;
+    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = INSTANCE_ROTATION_PAYLOAD_INDEX + 1;
 
-    private static final int COLUMN_COUNT = 21;
-    private static final int ALARM_JOIN_INSTANCE_COLUMN_COUNT = 39;
     // Public fields
     public long id;
     public boolean enabled;
@@ -375,9 +373,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         alarmVolume = p.readInt();
         holidayOption = p.readInt();
         rotationPayload = p.readString();
-        rotationPayload = p.readString();
-        rotationPayload = p.readString();
-        rotationPayload = p.readString();
     }
 
     public ContentValues createContentValues() {
@@ -436,9 +431,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         p.writeInt(crescendoDuration);
         p.writeInt(alarmVolume);
         p.writeInt(holidayOption);
-        p.writeString(rotationPayload);
-        p.writeString(rotationPayload);
-        p.writeString(rotationPayload);
         p.writeString(rotationPayload);
     }
 
@@ -701,10 +693,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
         result.mCrescendoDuration = crescendoDuration;
         result.mAlarmVolume = alarmVolume;
         result.mHolidayOption = holidayOption;
-        result.mRotationPayload = rotationPayload;
-        result.mRotationPayload = rotationPayload;
-        result.mRotationPayload = rotationPayload;
-        result.mRotationPayload = rotationPayload;
         return result;
     }
 
@@ -744,9 +732,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
      *         <p>- For one-time alarms: the configured date and time, or the following day if the
      *           specified time has already passed relative to {@code currentTime}.</p>
      */
-
-
-
 
     public Calendar getNextAlarmTime(Calendar currentTime) {
         if (!TextUtils.isEmpty(rotationPayload) && rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
@@ -816,6 +801,7 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
                     long targetLocal = targetDay.getTimeInMillis() + targetDay.getTimeZone().getOffset(targetDay.getTimeInMillis());
                     long anchorLocal = anchor.getTimeInMillis() + anchor.getTimeZone().getOffset(anchor.getTimeInMillis());
                     int diffDays = (int) (targetLocal / dayMs) - (int) (anchorLocal / dayMs);
+
                     int cycleIndex = diffDays % cycleLength;
                     if (cycleIndex < 0) cycleIndex += cycleLength;
 
@@ -839,17 +825,45 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     }
 
     private Calendar getLegacyNextAlarmTime(Calendar currentTime) {
-        if (!TextUtils.isEmpty(rotationPayload) && rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
-            return getNextRotationAlarmTime(currentTime);
+        final Calendar nextInstanceTime = Calendar.getInstance(currentTime.getTimeZone());
+        nextInstanceTime.set(Calendar.SECOND, 0);
+        nextInstanceTime.set(Calendar.MILLISECOND, 0);
+
+        if (daysOfWeek.isRepeating()) {
+            nextInstanceTime.setTimeInMillis(currentTime.getTimeInMillis());
+            nextInstanceTime.set(Calendar.HOUR_OF_DAY, hour);
+            nextInstanceTime.set(Calendar.MINUTE, minutes);
+
+            // If we are still behind the passed in currentTime, then add a day
+            if (nextInstanceTime.getTimeInMillis() <= currentTime.getTimeInMillis()) {
+                nextInstanceTime.add(Calendar.DAY_OF_YEAR, 1);
+            }
+
+            // The day of the week might be invalid, so find next valid one
+            final int addDays = daysOfWeek.getDistanceToNextDay(nextInstanceTime);
+            if (addDays > 0) {
+                nextInstanceTime.add(Calendar.DAY_OF_WEEK, addDays);
+            }
+
+            // Daylight Savings Time can alter the hours and minutes when adjusting the day above.
+            // Reset the desired hour and minute now that the correct day has been chosen.
+            nextInstanceTime.set(Calendar.HOUR_OF_DAY, hour);
+            nextInstanceTime.set(Calendar.MINUTE, minutes);
+        } else {
+            nextInstanceTime.set(Calendar.YEAR, year);
+            nextInstanceTime.set(Calendar.MONTH, month);
+            nextInstanceTime.set(Calendar.DAY_OF_MONTH, day);
+            nextInstanceTime.set(Calendar.HOUR_OF_DAY, hour);
+            nextInstanceTime.set(Calendar.MINUTE, minutes);
+
+            // If we are still behind the passed in currentTime, then add a day
+            if (nextInstanceTime.getTimeInMillis() <= currentTime.getTimeInMillis()) {
+                nextInstanceTime.add(Calendar.DAY_OF_YEAR, 1);
+            }
         }
-        return getLegacyNextAlarmTime(currentTime);
+
+        return nextInstanceTime;
     }
-
-
-
-
-
-
 
     /**
      * Returns the day of the week (as Calendar.DAY_OF_WEEK) when the alarm will next trigger.
@@ -967,7 +981,6 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
                 ", missedAlarmRepeatLimit=" + missedAlarmRepeatLimit +
                 ", crescendoDuration=" + crescendoDuration +
                 ", alarmVolume=" + alarmVolume +
-                ", rotationPayload='" + rotationPayload + '\'' +
                 '}';
     }
 

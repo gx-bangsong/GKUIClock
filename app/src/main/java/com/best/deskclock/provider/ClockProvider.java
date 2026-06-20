@@ -105,14 +105,6 @@ public class ClockProvider extends ContentProvider {
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.CRESCENDO_DURATION);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD,
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD);
-        sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD,
-                ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD);
-        sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD,
-                ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD);
-        sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD,
-                ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD);
-        sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD,
-                ALARMS_TABLE_NAME + "." + AlarmsColumns.ROTATION_PAYLOAD);
         sAlarmsWithInstancesProjection.put(ALARMS_TABLE_NAME + "." + AlarmsColumns.ALARM_VOLUME,
                 ALARMS_TABLE_NAME + "." + AlarmsColumns.ALARM_VOLUME);
 
@@ -150,14 +142,6 @@ public class ClockProvider extends ContentProvider {
                 INSTANCES_TABLE_NAME + "." + InstancesColumns.MISSED_ALARM_REPEAT_COUNT);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.CRESCENDO_DURATION,
                 INSTANCES_TABLE_NAME + "." + InstancesColumns.CRESCENDO_DURATION);
-        sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.ROTATION_PAYLOAD,
-                INSTANCES_TABLE_NAME + "." + InstancesColumns.ROTATION_PAYLOAD);
-        sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.ROTATION_PAYLOAD,
-                INSTANCES_TABLE_NAME + "." + InstancesColumns.ROTATION_PAYLOAD);
-        sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.ROTATION_PAYLOAD,
-                INSTANCES_TABLE_NAME + "." + InstancesColumns.ROTATION_PAYLOAD);
-        sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.ROTATION_PAYLOAD,
-                INSTANCES_TABLE_NAME + "." + InstancesColumns.ROTATION_PAYLOAD);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.ROTATION_PAYLOAD,
                 INSTANCES_TABLE_NAME + "." + InstancesColumns.ROTATION_PAYLOAD);
         sAlarmsWithInstancesProjection.put(INSTANCES_TABLE_NAME + "." + InstancesColumns.ALARM_VOLUME,

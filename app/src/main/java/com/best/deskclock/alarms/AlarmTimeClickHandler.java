@@ -324,13 +324,6 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
     public void asyncUpdateAlarm(Alarm alarm, boolean popUpToast) {
         mAlarmUpdateHandler.asyncUpdateAlarm(alarm, popUpToast, false);
     }
-
-
-
-
-
-
-
     public void onDateClicked(Alarm alarm) {
         mIsAnchorDateMode = false;
         mSelectedAlarm = alarm;
@@ -563,8 +556,7 @@ public void onDateSet(int year, int month, int day, int hourOfDay, int minute) {
             mIsAnchorDateMode = false;
             mSelectedAlarm = null;
             return;
-        }
-        if (mSelectedAlarm != null) {
+        }        if (mSelectedAlarm != null) {
             // Disable days of the week if one or more are selected
             if (mSelectedAlarm.daysOfWeek.isRepeating()) {
                 mSelectedAlarm.daysOfWeek = Weekdays.NONE;

@@ -99,7 +99,7 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     private static final int HOLIDAY_OPTION_INDEX = 19;
     private static final int ROTATION_PAYLOAD_INDEX = 20;
 
-    private static final int COLUMN_COUNT = 21;
+    private static final int COLUMN_COUNT = ROTATION_PAYLOAD_INDEX + 1;
     // Public fields
     public long mId;
     public int mYear;
@@ -513,7 +513,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
                 ", mMissedAlarmRepeatLimit=" + mMissedAlarmRepeatLimit +
                 ", mCrescendoDuration=" + mCrescendoDuration +
                 ", mAlarmVolume=" + mAlarmVolume +
-                ", mRotationPayload='" + mRotationPayload + '\'' +
                 '}';
     }
     public static void addInstance(android.content.ContentResolver cr, AlarmInstance instance) {
