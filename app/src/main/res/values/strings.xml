@@ -1595,4 +1595,10 @@
     <string name="shift_settings_title">Advanced Shift Settings</string>
     <string name="skip_this_shift">Skip This Shift</string>
     <string name="shift_mode_label">Enable Shift Mode (64-day cycle)</string>
+    <string name="shift_type_off">Off</string>
+    <string name="shift_type_morning">Morning</string>
+    <string name="shift_type_afternoon">Afternoon</string>
+    <string name="shift_type_night">Night</string>
+    <string name="edit_rotation_rules">Edit Rotation Rules</string>
+    <string name="shift_summary_format">Day %1$d of 64: %2$s</string>
 </resources>

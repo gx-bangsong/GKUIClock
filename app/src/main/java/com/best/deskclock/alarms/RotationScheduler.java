@@ -53,13 +53,14 @@ public class RotationScheduler {
             anchor.set(Calendar.MILLISECOND, 0);
 
             Calendar now = Calendar.getInstance();
+            now.set(Calendar.HOUR_OF_DAY, 0);
+            now.set(Calendar.MINUTE, 0);
+            now.set(Calendar.SECOND, 0);
+            now.set(Calendar.MILLISECOND, 0);
+
             for (int i = 0; i < 7; i++) {
                 Calendar targetDay = (Calendar) now.clone();
                 targetDay.add(Calendar.DAY_OF_YEAR, i);
-                targetDay.set(Calendar.HOUR_OF_DAY, 0);
-                targetDay.set(Calendar.MINUTE, 0);
-                targetDay.set(Calendar.SECOND, 0);
-                targetDay.set(Calendar.MILLISECOND, 0);
 
                 long diffMillis = targetDay.getTimeInMillis() - anchor.getTimeInMillis();
                 int daysDiff = (int) (diffMillis / (24 * 60 * 60 * 1000L));
@@ -82,10 +83,17 @@ public class RotationScheduler {
         Calendar alarmTime = (Calendar) targetDay.clone();
         alarmTime.set(Calendar.HOUR_OF_DAY, alarm.hour);
         alarmTime.set(Calendar.MINUTE, alarm.minutes);
+        alarmTime.set(Calendar.SECOND, 0);
+        alarmTime.set(Calendar.MILLISECOND, 0);
 
-        if (rule == 2) {
-            alarmTime.add(Calendar.MINUTE, -30);
-        }
+        // Custom offsets for different shift types if needed
+        // For now, rule 1, 2, 3 all ring at alarm time but could be modified
+        String shiftLabel = switch (rule) {
+            case 1 -> " (早班)";
+            case 2 -> " (中班)";
+            case 3 -> " (夜班)";
+            default -> " (轮班)";
+        };
 
         if (alarmTime.getTimeInMillis() <= System.currentTimeMillis()) return;
 
@@ -93,7 +101,7 @@ public class RotationScheduler {
 
         AlarmInstance instance = new AlarmInstance(alarmTime);
         instance.mId = ephemeralId;
-        instance.mLabel = alarm.label + " (轮班)";
+        instance.mLabel = alarm.label + shiftLabel;
         instance.mAlarmId = alarm.id;
         instance.mRingtone = alarm.alert;
         instance.mVibrate = alarm.vibrate;

@@ -787,4 +787,10 @@
     <string name="shift_settings_title">高级轮班设置</string>
     <string name="skip_this_shift">跳过本次班次</string>
     <string name="shift_mode_label">开启轮班模式 (64天循环)</string>
+    <string name="shift_type_off">休息</string>
+    <string name="shift_type_morning">早班</string>
+    <string name="shift_type_afternoon">中班</string>
+    <string name="shift_type_night">夜班</string>
+    <string name="edit_rotation_rules">编辑轮班规则</string>
+    <string name="shift_summary_format">周期第 %1$d/64 天: %2$s</string>
 </resources>

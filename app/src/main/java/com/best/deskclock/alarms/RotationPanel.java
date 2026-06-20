@@ -1,5 +1,6 @@
 package com.best.deskclock.alarms;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -9,31 +10,31 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.best.deskclock.R;
 import com.best.deskclock.provider.Alarm;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.button.MaterialButton;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
-import java.util.TimeZone;
 
 public class RotationPanel {
 
     private final View mRootView;
     private final Button mAnchorDateButton;
-    private final RecyclerView mGrid;
+    private final Button mOpenGridButton;
+    private final TextView mSummaryText;
     private final Context mContext;
     private final androidx.fragment.app.FragmentManager mFragmentManager;
     private final SimpleDateFormat mDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
 
     private Alarm mAlarm;
     private OnRotationChangedListener mListener;
-    private int[] mRotationRules = new int[64];
+    private int[] mRotationRules = new int[64]; // 0: Off, 1: Morning, 2: Afternoon, 3: Night
     private long mAnchorTimestamp;
 
     public interface OnRotationChangedListener {
@@ -47,12 +48,11 @@ public class RotationPanel {
         mListener = listener;
         mFragmentManager = fm;
         mAnchorDateButton = rootView.findViewById(R.id.rotation_anchor_date);
-        mGrid = rootView.findViewById(R.id.rotation_grid);
-
-        mGrid.setLayoutManager(new GridLayoutManager(mContext, 8));
-        mGrid.setAdapter(new RotationAdapter());
+        mOpenGridButton = rootView.findViewById(R.id.btn_open_grid);
+        mSummaryText = rootView.findViewById(R.id.rotation_summary);
 
         mAnchorDateButton.setOnClickListener(v -> showDatePicker());
+        mOpenGridButton.setOnClickListener(v -> showGridDialog());
     }
 
     public void bind(Alarm alarm) {
@@ -63,9 +63,43 @@ public class RotationPanel {
 
     private void updateUI() {
         mAnchorDateButton.setText(mDateFormat.format(mAnchorTimestamp));
-        if (mGrid.getAdapter() != null) {
-            mGrid.getAdapter().notifyDataSetChanged();
+        updateSummary();
+    }
+
+    private void updateSummary() {
+        Calendar now = Calendar.getInstance();
+        now.set(Calendar.HOUR_OF_DAY, 0);
+        now.set(Calendar.MINUTE, 0);
+        now.set(Calendar.SECOND, 0);
+        now.set(Calendar.MILLISECOND, 0);
+
+        Calendar anchor = Calendar.getInstance();
+        anchor.setTimeInMillis(mAnchorTimestamp);
+        anchor.set(Calendar.HOUR_OF_DAY, 0);
+        anchor.set(Calendar.MINUTE, 0);
+        anchor.set(Calendar.SECOND, 0);
+        anchor.set(Calendar.MILLISECOND, 0);
+
+        long diff = now.getTimeInMillis() - anchor.getTimeInMillis();
+        int daysDiff = (int) (diff / (24 * 60 * 60 * 1000L));
+        if (daysDiff < 0) {
+            mSummaryText.setText("尚未开始轮班");
+            return;
         }
+
+        int cycleIndex = daysDiff % 64;
+        int rule = mRotationRules[cycleIndex];
+        String shiftType = getShiftTypeName(rule);
+        mSummaryText.setText(mContext.getString(R.string.shift_summary_format, cycleIndex + 1, shiftType));
+    }
+
+    private String getShiftTypeName(int rule) {
+        return switch (rule) {
+            case 1 -> mContext.getString(R.string.shift_type_morning);
+            case 2 -> mContext.getString(R.string.shift_type_afternoon);
+            case 3 -> mContext.getString(R.string.shift_type_night);
+            default -> mContext.getString(R.string.shift_type_off);
+        };
     }
 
     private void showDatePicker() {
@@ -78,6 +112,30 @@ public class RotationPanel {
             updateUI();
         });
         picker.show(mFragmentManager, "rotation_anchor_date");
+    }
+
+    private void showGridDialog() {
+        View dialogView = LayoutInflater.from(mContext).inflate(R.layout.dialog_rotation_grid, null);
+        RecyclerView recyclerView = dialogView.findViewById(R.id.rotation_grid_full);
+        recyclerView.setLayoutManager(new GridLayoutManager(mContext, 7)); // Calendar style (7 days per week)
+
+        int[] tempRules = mRotationRules.clone();
+        RotationAdapter adapter = new RotationAdapter(tempRules);
+        recyclerView.setAdapter(adapter);
+
+        AlertDialog dialog = new AlertDialog.Builder(mContext)
+                .setView(dialogView)
+                .create();
+
+        dialogView.findViewById(R.id.btn_cancel).setOnClickListener(v -> dialog.dismiss());
+        dialogView.findViewById(R.id.btn_save).setOnClickListener(v -> {
+            System.arraycopy(tempRules, 0, mRotationRules, 0, 64);
+            save();
+            updateUI();
+            dialog.dismiss();
+        });
+
+        dialog.show();
     }
 
     private void parsePayload(String payload) {
@@ -112,37 +170,53 @@ public class RotationPanel {
     }
 
     private class RotationAdapter extends RecyclerView.Adapter<RotationAdapter.ViewHolder> {
+        private final int[] rules;
+        public RotationAdapter(int[] rules) { this.rules = rules; }
+
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             TextView tv = new TextView(mContext);
             tv.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, 100));
+                    ViewGroup.LayoutParams.MATCH_PARENT, 120));
             tv.setGravity(android.view.Gravity.CENTER);
             tv.setBackgroundResource(android.R.drawable.btn_default);
-            tv.setTextSize(12);
+            tv.setTextSize(10);
             return new ViewHolder(tv);
         }
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             TextView tv = (TextView) holder.itemView;
-            tv.setText(String.valueOf(position + 1));
-            int state = mRotationRules[position];
-            if (state == 0) {
-                tv.setBackgroundColor(Color.LTGRAY);
-                tv.setTextColor(Color.DKGRAY);
-            } else if (state == 1) {
-                tv.setBackgroundColor(Color.parseColor("#4CAF50")); // Green
-                tv.setTextColor(Color.WHITE);
-            } else {
-                tv.setBackgroundColor(Color.parseColor("#FF9800")); // Orange
-                tv.setTextColor(Color.WHITE);
+            int rule = rules[position];
+
+            // Format text: Day number + Shift Name
+            String dayNum = String.valueOf(position + 1);
+            String typeName = getShiftTypeName(rule);
+            tv.setText(dayNum + "\n" + typeName);
+
+            // Color Coding
+            switch (rule) {
+                case 1 -> { // Morning - Blue
+                    tv.setBackgroundColor(Color.parseColor("#E3F2FD"));
+                    tv.setTextColor(Color.parseColor("#1976D2"));
+                }
+                case 2 -> { // Afternoon - Orange
+                    tv.setBackgroundColor(Color.parseColor("#FFF3E0"));
+                    tv.setTextColor(Color.parseColor("#F57C00"));
+                }
+                case 3 -> { // Night - Purple
+                    tv.setBackgroundColor(Color.parseColor("#F3E5F5"));
+                    tv.setTextColor(Color.parseColor("#7B1FA2"));
+                }
+                default -> { // Off - Gray
+                    tv.setBackgroundColor(Color.parseColor("#F5F5F5"));
+                    tv.setTextColor(Color.LTGRAY);
+                }
             }
 
             tv.setOnClickListener(v -> {
-                mRotationRules[position] = (mRotationRules[position] + 1) % 3;
-                save();
+                rules[position] = (rules[position] + 1) % 4; // Cycle 0-3
                 notifyItemChanged(position);
             });
         }
