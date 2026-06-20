@@ -123,9 +123,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     public int mAlarmVolume;
     public int mHolidayOption;
     public String mRotationPayload;
-    public String mRotationPayload;
-    public String mRotationPayload;
-    public String mRotationPayload;
 
     public AlarmInstance(Calendar calendar, Long alarmId) {
         this(calendar);
@@ -148,9 +145,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         mCrescendoDuration = DEFAULT_VOLUME_CRESCENDO_DURATION;
         mAlarmVolume = DEFAULT_ALARM_VOLUME;
         mHolidayOption = 0;
-        mRotationPayload = null;
-        mRotationPayload = null;
-        mRotationPayload = null;
         mRotationPayload = null;
     }
 
@@ -175,9 +169,6 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         this.mCrescendoDuration = instance.mCrescendoDuration;
         this.mAlarmVolume = instance.mAlarmVolume;
         this.mHolidayOption = instance.mHolidayOption;
-        this.mRotationPayload = instance.mRotationPayload;
-        this.mRotationPayload = instance.mRotationPayload;
-        this.mRotationPayload = instance.mRotationPayload;
         this.mRotationPayload = instance.mRotationPayload;
     }
 

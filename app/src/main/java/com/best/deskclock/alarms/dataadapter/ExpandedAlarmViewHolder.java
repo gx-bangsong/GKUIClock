@@ -113,30 +113,6 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final com.google.android.material.button.MaterialButton anchorDateButton;
     private final MaterialSwitch holidaySkipSwitch;
     private final ChipGroup shiftGridContainer;
-    private final View shiftSetupActivator;
-    private final ImageView shiftSetupCaret;
-    private final View advancedShiftPanel;
-    private final Slider cycleLengthSlider;
-    private final TextView cycleLengthValue;
-    private final com.google.android.material.button.MaterialButton anchorDateButton;
-    private final MaterialSwitch holidaySkipSwitch;
-    private final ChipGroup shiftGridContainer;
-    private final View shiftSetupActivator;
-    private final ImageView shiftSetupCaret;
-    private final View advancedShiftPanel;
-    private final Slider cycleLengthSlider;
-    private final TextView cycleLengthValue;
-    private final com.google.android.material.button.MaterialButton anchorDateButton;
-    private final MaterialSwitch holidaySkipSwitch;
-    private final ChipGroup shiftGridContainer;
-    private final View shiftSetupActivator;
-    private final ImageView shiftSetupCaret;
-    private final View advancedShiftPanel;
-    private final Slider cycleLengthSlider;
-    private final TextView cycleLengthValue;
-    private final com.google.android.material.button.MaterialButton anchorDateButton;
-    private final MaterialSwitch holidaySkipSwitch;
-    private final ChipGroup shiftGridContainer;
 
     private final boolean mHasVibrator;
     private final boolean mHasFlash;
@@ -181,30 +157,6 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         delete = itemView.findViewById(R.id.delete);
         duplicate = itemView.findViewById(R.id.duplicate);
         holidayOption = itemView.findViewById(R.id.holiday_option);
-        shiftSetupActivator = itemView.findViewById(R.id.shift_setup_activator);
-        shiftSetupCaret = itemView.findViewById(R.id.shift_setup_caret);
-        advancedShiftPanel = itemView.findViewById(R.id.advanced_shift_panel);
-        cycleLengthSlider = itemView.findViewById(R.id.cycle_length_slider);
-        cycleLengthValue = itemView.findViewById(R.id.cycle_length_value);
-        anchorDateButton = itemView.findViewById(R.id.anchor_date_button);
-        holidaySkipSwitch = itemView.findViewById(R.id.holiday_skip_switch);
-        shiftGridContainer = itemView.findViewById(R.id.shift_grid_container);
-        shiftSetupActivator = itemView.findViewById(R.id.shift_setup_activator);
-        shiftSetupCaret = itemView.findViewById(R.id.shift_setup_caret);
-        advancedShiftPanel = itemView.findViewById(R.id.advanced_shift_panel);
-        cycleLengthSlider = itemView.findViewById(R.id.cycle_length_slider);
-        cycleLengthValue = itemView.findViewById(R.id.cycle_length_value);
-        anchorDateButton = itemView.findViewById(R.id.anchor_date_button);
-        holidaySkipSwitch = itemView.findViewById(R.id.holiday_skip_switch);
-        shiftGridContainer = itemView.findViewById(R.id.shift_grid_container);
-        shiftSetupActivator = itemView.findViewById(R.id.shift_setup_activator);
-        shiftSetupCaret = itemView.findViewById(R.id.shift_setup_caret);
-        advancedShiftPanel = itemView.findViewById(R.id.advanced_shift_panel);
-        cycleLengthSlider = itemView.findViewById(R.id.cycle_length_slider);
-        cycleLengthValue = itemView.findViewById(R.id.cycle_length_value);
-        anchorDateButton = itemView.findViewById(R.id.anchor_date_button);
-        holidaySkipSwitch = itemView.findViewById(R.id.holiday_skip_switch);
-        shiftGridContainer = itemView.findViewById(R.id.shift_grid_container);
         shiftSetupActivator = itemView.findViewById(R.id.shift_setup_activator);
         shiftSetupCaret = itemView.findViewById(R.id.shift_setup_caret);
         advancedShiftPanel = itemView.findViewById(R.id.advanced_shift_panel);
@@ -273,11 +225,11 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         ringtone.setOnClickListener(v ->
                 getAlarmTimeClickHandler().onRingtoneClicked(getItemHolder().item));
 
-        shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
+                shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
         cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
             if (fromUser) {
                 int length = (int) value;
-                cycleLengthValue.setText(context.getString(R.string.days_count, length));
+                cycleLengthValue.setText(itemView.getContext().getString(R.string.days_count, length));
                 rebuildShiftGrid(length);
                 saveRotationPayload();
             }
@@ -285,43 +237,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         holidaySkipSwitch.setOnCheckedChangeListener((v, isChecked) -> saveRotationPayload());
         anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
 
-        shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
-        cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
-            if (fromUser) {
-                int length = (int) value;
-                cycleLengthValue.setText(context.getString(R.string.days_count, length));
-                rebuildShiftGrid(length);
-                saveRotationPayload();
-            }
-        });
-        holidaySkipSwitch.setOnCheckedChangeListener((v, isChecked) -> saveRotationPayload());
-        anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
-
-        shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
-        cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
-            if (fromUser) {
-                int length = (int) value;
-                cycleLengthValue.setText(context.getString(R.string.days_count, length));
-                rebuildShiftGrid(length);
-                saveRotationPayload();
-            }
-        });
-        holidaySkipSwitch.setOnCheckedChangeListener((v, isChecked) -> saveRotationPayload());
-        anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
-        shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
-        cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
-            if (fromUser) {
-                int length = (int) value;
-                cycleLengthValue.setText(context.getString(R.string.days_count, length));
-                rebuildShiftGrid(length);
-                saveRotationPayload();
-            }
-        });
-        holidaySkipSwitch.setOnCheckedChangeListener((v, isChecked) -> saveRotationPayload());
-        anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
-
-
-        // Vibrator checkbox handler
+// Vibrator checkbox handler
         vibrate.setOnClickListener(v ->
                 getAlarmTimeClickHandler().setAlarmVibrationEnabled(
                         getItemHolder().item, ((CheckBox) v).isChecked()));
@@ -451,12 +367,6 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         snoozeDurationValue.setAlpha(1f);
         missedAlarmRepeatLimitTitle.setAlpha(1f);
         missedAlarmRepeatLimitValue.setAlpha(1f);
-        shiftSetupActivator.setAlpha(1f);
-        advancedShiftPanel.setAlpha(1f);
-        shiftSetupActivator.setAlpha(1f);
-        advancedShiftPanel.setAlpha(1f);
-        shiftSetupActivator.setAlpha(1f);
-        advancedShiftPanel.setAlpha(1f);
         shiftSetupActivator.setAlpha(1f);
         advancedShiftPanel.setAlpha(1f);
         crescendoDurationTitle.setAlpha(1f);
@@ -1428,6 +1338,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private String formatAlarmDate(Alarm alarm) {
         return "Placeholder Date"; // Placeholder
     }
+
     private void toggleShiftPanel() {
         boolean isVisible = advancedShiftPanel.getVisibility() == View.VISIBLE;
         TransitionManager.beginDelayedTransition((ViewGroup) itemView.getParent());

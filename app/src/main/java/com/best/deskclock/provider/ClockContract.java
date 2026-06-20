@@ -119,10 +119,6 @@ public final class ClockContract {
          */
         String ALARM_VOLUME = "alarmVolume";
         String ROTATION_PAYLOAD = "rotation_payload";
-        String ROTATION_PAYLOAD = "rotation_payload";
-        String ROTATION_PAYLOAD = "rotation_payload";
-        String ROTATION_PAYLOAD = "rotation_payload";
-        String ROTATION_PAYLOAD = "rotation_payload";
     }
 
     /**
