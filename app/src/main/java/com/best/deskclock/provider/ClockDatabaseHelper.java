@@ -27,7 +27,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     static final String ALARMS_TABLE_NAME = "alarm_templates";
     static final String INSTANCES_TABLE_NAME = "alarm_instances";
 
-    private static final int DATABASE_VERSION = 24;
+    private static final int DATABASE_VERSION = 25;
     private static final int MINIMUM_SUPPORTED_VERSION = 15;
 
     private final Context mContext;
@@ -224,6 +224,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
 
             LogUtils.i("Added missed_alarm_repeat_limit and missed_alarm_repeat_count columns for version 23 upgrade.");
 
+        }
         if (oldVersion < 24) {
             db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " +
                     ClockContract.AlarmsColumns.ROTATION_PAYLOAD + " TEXT;");
@@ -231,6 +232,13 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                     ClockContract.InstancesColumns.ROTATION_PAYLOAD + " TEXT;");
             LogUtils.i("Added rotation_payload column for version 24 upgrade.");
         }
+
+        if (oldVersion < 25) {
+            db.execSQL("ALTER TABLE " + ALARMS_TABLE_NAME + " ADD COLUMN " +
+                    ClockContract.AlarmsColumns.ROTATION_PAYLOAD + " TEXT;");
+            db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " +
+                    ClockContract.InstancesColumns.ROTATION_PAYLOAD + " TEXT;");
+            LogUtils.i("Added rotation_payload column for version 25 upgrade.");
         }
 
     }

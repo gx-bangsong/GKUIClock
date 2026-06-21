@@ -141,7 +141,8 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
             MISSED_ALARM_REPEAT_LIMIT,
             CRESCENDO_DURATION,
             ALARM_VOLUME,
-            HOLIDAY_OPTION
+            HOLIDAY_OPTION,
+            ROTATION_PAYLOAD
     };
     private static final String[] QUERY_ALARMS_WITH_INSTANCES_COLUMNS = {
             ClockDatabaseHelper.ALARMS_TABLE_NAME + "." + _ID,
