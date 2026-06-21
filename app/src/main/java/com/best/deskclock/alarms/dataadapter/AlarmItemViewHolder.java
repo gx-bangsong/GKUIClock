@@ -125,12 +125,29 @@ public abstract class AlarmItemViewHolder extends ItemAdapter.ItemViewHolder<Ala
     }
 
     protected void bindClock(Alarm alarm) {
-        clock.setTime(alarm.hour, alarm.minutes);
+        if (!android.text.TextUtils.isEmpty(alarm.rotationPayload) && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+            Calendar next = alarm.getNextAlarmTime(Calendar.getInstance());
+            clock.setTime(next.get(Calendar.HOUR_OF_DAY), next.get(Calendar.MINUTE));
+        } else {
+            clock.setTime(alarm.hour, alarm.minutes);
+        }
         clock.setTypeface(alarm.enabled ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
     }
 
     protected void bindRepeatText(Context context, Alarm alarm) {
-        if (alarm.daysOfWeek.isRepeating()) {
+        if (!android.text.TextUtils.isEmpty(alarm.rotationPayload) && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+            try {
+                String[] parts = alarm.rotationPayload.split("\\|");
+                int cycleLength = Integer.parseInt(parts[1]);
+                long anchorMs = Long.parseLong(parts[2]);
+                Calendar next = alarm.getNextAlarmTime(Calendar.getInstance());
+                long nextAlertTimeMs = next.getTimeInMillis();
+                int upcomingDayIndex = (int) ((nextAlertTimeMs - anchorMs) / (1000 * 60 * 60 * 24)) % cycleLength + 1;
+                daysOfWeek.setText(context.getString(R.string.shift_cycle_day_n, upcomingDayIndex));
+            } catch (Exception e) {
+                daysOfWeek.setText("Shift Rotation");
+            }
+        } else if (alarm.daysOfWeek.isRepeating()) {
             final Weekdays.Order weekdayOrder = SettingsDAO.getWeekdayOrder(getDefaultSharedPreferences(context));
             final String daysOfWeekText = alarm.daysOfWeek.toString(context, weekdayOrder);
             daysOfWeek.setText(daysOfWeekText);
