@@ -115,7 +115,7 @@
         android:gravity="center_vertical"
         android:paddingHorizontal="12dp"
         android:background="?attr/selectableItemBackground"
-        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel">
+        app:layout_constraintTop_toBottomOf="@id/repeat_days">
         <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/advanced_shift_setup" android:textColor="?attr/colorPrimary" android:textStyle="bold" />
         <ImageView android:id="@+id/shift_setup_caret" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/ic_caret_down_static" app:tint="?attr/colorPrimary" />
     </LinearLayout>
@@ -155,7 +155,7 @@
         android:gravity="center_vertical"
         app:drawableTint="?attr/colorOnSurfaceVariant"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/repeat_days" />
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/selected_date"
@@ -166,7 +166,7 @@
         android:focusable="true"
         android:gravity="center_vertical"
         app:layout_constraintEnd_toStartOf="@+id/remove_date"
-        app:layout_constraintTop_toBottomOf="@id/repeat_days"
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel"
         tools:text="01/01/2024" />
 
     <ImageButton
@@ -179,7 +179,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@null"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/repeat_days"
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel"
         app:layout_constraintBottom_toBottomOf="@+id/schedule_alarm"
         tools:visibility="gone" />
 
@@ -193,7 +193,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@null"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/repeat_days"
+        app:layout_constraintTop_toBottomOf="@id/advanced_shift_panel"
         app:layout_constraintBottom_toBottomOf="@+id/schedule_alarm"
         tools:visibility="visible"
         tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck"/>
