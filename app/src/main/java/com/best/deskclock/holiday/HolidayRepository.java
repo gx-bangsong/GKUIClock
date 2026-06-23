@@ -28,6 +28,8 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import com.best.deskclock.utils.LogUtils;
@@ -37,6 +39,8 @@ public class HolidayRepository {
     private static volatile HolidayRepository sInstance;
     private final HolidayDao mHolidayDao;
     private final ExecutorService mExecutorService;
+    private final Map<String, Holiday> mHolidayCache = new ConcurrentHashMap<>();
+    private final Map<String, Holiday> mCompDayCache = new ConcurrentHashMap<>();
 
     private HolidayRepository(Context context) {
         HolidayDatabase db = HolidayDatabase.getDatabase(context);
@@ -64,6 +68,8 @@ public class HolidayRepository {
                 List<Holiday> holidays = new Gson().fromJson(in, listType);
                 mHolidayDao.insertAll(holidays);
                 in.close();
+                mHolidayCache.clear();
+                mCompDayCache.clear();
             } catch (Exception e) {
                 LogUtils.e("Error updating holiday data", e);
             }
@@ -71,11 +77,21 @@ public class HolidayRepository {
     }
 
     public Holiday getHolidayByDate(String date) {
-        return mHolidayDao.getHolidayByDate(date);
+        if (mHolidayCache.containsKey(date)) {
+            return mHolidayCache.get(date);
+        }
+        Holiday h = mHolidayDao.getHolidayByDate(date);
+        if (h != null) mHolidayCache.put(date, h);
+        return h;
     }
 
     public Holiday getCompDayByDate(String date) {
-        return mHolidayDao.getCompDayByDate(date);
+        if (mCompDayCache.containsKey(date)) {
+            return mCompDayCache.get(date);
+        }
+        Holiday h = mHolidayDao.getCompDayByDate(date);
+        if (h != null) mCompDayCache.put(date, h);
+        return h;
     }
 
     public List<Holiday> getAllHolidays() {
