@@ -236,7 +236,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
                 saveRotationPayload();
             }
         });
-        holidaySkipSwitch.setOnCheckedChangeListener((v, isChecked) -> saveRotationPayload());
+        holidaySkipSwitch.setOnClickListener(v -> saveRotationPayload());
         anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
 
         // Vibrator checkbox handler
@@ -1412,7 +1412,16 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         try {
             anchorMs = new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(anchorDateButton.getText().toString()).getTime();
         } catch (Exception ignored) {}
-        String payload = String.format(Locale.US, "SHIFT_ROTATION_V2|%d|%d|%b|%s|{}", length, anchorMs, holidaySkip, sb.toString());
+
+        String overrides = "{}";
+        if (!android.text.TextUtils.isEmpty(alarm.rotationPayload) && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+            String[] existingParts = alarm.rotationPayload.split("\\|");
+            if (existingParts.length >= 6) {
+                overrides = existingParts[5];
+            }
+        }
+
+        String payload = String.format(Locale.US, "SHIFT_ROTATION_V2|%d|%d|%b|%s|%s", length, anchorMs, holidaySkip, sb.toString(), overrides);
         if (!payload.equals(alarm.rotationPayload)) {
             alarm.rotationPayload = payload;
             getAlarmTimeClickHandler().asyncUpdateAlarm(alarm, false);
@@ -1468,10 +1477,14 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             long anchorMs = Long.parseLong(parts[2]);
             boolean holidaySkip = Boolean.parseBoolean(parts[3]);
             String[] minutes = parts[4].split(",");
-            cycleLengthSlider.setValue(length);
+            if (cycleLengthSlider.getValue() != length) {
+                cycleLengthSlider.setValue(length);
+            }
             cycleLengthValue.setText(context.getString(R.string.days_count, length));
             anchorDateButton.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date(anchorMs)));
-            holidaySkipSwitch.setChecked(holidaySkip);
+            if (holidaySkipSwitch.isChecked() != holidaySkip) {
+                holidaySkipSwitch.setChecked(holidaySkip);
+            }
             shiftGridContainer.removeAllViews();
             LayoutInflater inflater = LayoutInflater.from(context);
             for (int i = 0; i < length; i++) {

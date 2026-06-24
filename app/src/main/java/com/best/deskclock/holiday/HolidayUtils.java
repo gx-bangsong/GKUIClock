@@ -34,7 +34,8 @@ public class HolidayUtils {
     public static final int HOLIDAY_OPTION_BIG_SMALL_XIAO = 3;
     public static final int HOLIDAY_OPTION_SINGLE_DAY_OFF = 4;
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+    private static final ThreadLocal<SimpleDateFormat> DATE_FORMAT_THREAD_LOCAL =
+            ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd", Locale.US));
 
     /**
      * Determines if the alarm should ring on the given date based on the selected holiday option.
@@ -50,7 +51,7 @@ public class HolidayUtils {
             return true;
         }
 
-        String dateStr = DATE_FORMAT.format(calendar.getTime());
+        String dateStr = DATE_FORMAT_THREAD_LOCAL.get().format(calendar.getTime());
         HolidayRepository repo = HolidayRepository.getInstance(context);
 
         // Check if it's a legal holiday or compensation workday
@@ -74,13 +75,9 @@ public class HolidayUtils {
 
             case HOLIDAY_OPTION_BIG_SMALL_DA:
                 // Big Week: Sat don't work this week, next week Sat work.
-                // Usually means alternating Saturdays.
                 if (isCompWorkday) return true;
                 if (isLegalHoliday) return false;
                 if (dayOfWeek == Calendar.SATURDAY) {
-                    // Check if current week is Big or Small week.
-                    // For example, even weeks are Big weeks (Sat off), odd weeks are Small weeks (Sat work).
-                    // This is a simplified logic.
                     return (calendar.get(Calendar.WEEK_OF_YEAR) % 2 == 0);
                 }
                 return (dayOfWeek != Calendar.SUNDAY);
