@@ -8,17 +8,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.best.deskclock.R;
 import com.best.deskclock.provider.Alarm;
 import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.button.MaterialButtonToggleGroup;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -36,7 +40,7 @@ public class RotationPanel {
 
     private Alarm mAlarm;
     private OnRotationChangedListener mListener;
-    private int[] mRotationRules = new int[64];
+    private int[] mRotationRules = new int[64]; // 0: Off, 1: Morning, 2: Afternoon, 3: Night
     private long mAnchorTimestamp;
 
     public interface OnRotationChangedListener {
@@ -54,7 +58,7 @@ public class RotationPanel {
         mSummaryText = rootView.findViewById(R.id.rotation_summary);
 
         mAnchorDateButton.setOnClickListener(v -> showDatePicker());
-        mOpenGridButton.setOnClickListener(v -> showGridDialog());
+        mOpenGridButton.setOnClickListener(v -> showWizardDialog());
     }
 
     public void bind(Alarm alarm) {
@@ -116,54 +120,88 @@ public class RotationPanel {
         picker.show(mFragmentManager, "rotation_anchor_date");
     }
 
-    private void showGridDialog() {
+    private void showWizardDialog() {
         View dialogView = LayoutInflater.from(mContext).inflate(R.layout.dialog_rotation_grid, null);
-        RecyclerView recyclerView = dialogView.findViewById(R.id.rotation_grid_full);
-        recyclerView.setLayoutManager(new GridLayoutManager(mContext, 7));
+        ViewFlipper flipper = dialogView.findViewById(R.id.wizard_flipper);
+        TextView titleView = dialogView.findViewById(R.id.wizard_title);
+        Button btnBack = dialogView.findViewById(R.id.btn_back);
+        Button btnNext = dialogView.findViewById(R.id.btn_next);
+        Button btnReset = dialogView.findViewById(R.id.btn_reset);
 
+        // Step 1: Pattern
+        NumberPicker pickerWork = dialogView.findViewById(R.id.picker_work);
+        NumberPicker pickerRest = dialogView.findViewById(R.id.picker_rest);
+        pickerWork.setMinValue(1); pickerWork.setMaxValue(31); pickerWork.setValue(5);
+        pickerRest.setMinValue(0); pickerRest.setMaxValue(31); pickerRest.setValue(2);
+
+        // Step 2: Assign
+        RecyclerView workDayList = dialogView.findViewById(R.id.work_day_list);
+        workDayList.setLayoutManager(new LinearLayoutManager(mContext));
+        int[] workDayShifts = new int[31];
+        for (int i = 0; i < 31; i++) workDayShifts[i] = 1; // Default all morning
+
+        // Step 3: Preview
+        RecyclerView previewGrid = dialogView.findViewById(R.id.rotation_preview_grid);
+        previewGrid.setLayoutManager(new GridLayoutManager(mContext, 7));
         int[] tempRules = mRotationRules.clone();
-        RotationAdapter adapter = new RotationAdapter(tempRules);
-        recyclerView.setAdapter(adapter);
 
-        EditText workDaysIn = dialogView.findViewById(R.id.wizard_work_days);
-        EditText offDaysIn = dialogView.findViewById(R.id.wizard_off_days);
-        Button btnApply = dialogView.findViewById(R.id.btn_wizard_apply);
-
-        btnApply.setOnClickListener(v -> {
-            try {
-                int work = Integer.parseInt(workDaysIn.getText().toString());
-                int off = Integer.parseInt(offDaysIn.getText().toString());
-                applyRule(tempRules, work, off, adapter);
-            } catch (Exception ignored) {}
+        btnNext.setOnClickListener(v -> {
+            int step = flipper.getDisplayedChild();
+            if (step == 0) {
+                // To Step 2
+                WorkDayAdapter adapter = new WorkDayAdapter(pickerWork.getValue(), workDayShifts);
+                workDayList.setAdapter(adapter);
+                flipper.setDisplayedChild(1);
+                titleView.setText(mContext.getString(R.string.wizard_step_2));
+                btnBack.setVisibility(View.VISIBLE);
+            } else if (step == 1) {
+                // To Step 3 (Preview)
+                int work = pickerWork.getValue();
+                int rest = pickerRest.getValue();
+                int cycle = work + rest;
+                for (int i = 0; i < 64; i++) {
+                    int dayInCycle = i % cycle;
+                    tempRules[i] = (dayInCycle < work) ? workDayShifts[dayInCycle] : 0;
+                }
+                previewGrid.setAdapter(new PreviewAdapter(tempRules));
+                flipper.setDisplayedChild(2);
+                titleView.setText(mContext.getString(R.string.wizard_step_3));
+                btnNext.setText(mContext.getString(R.string.wizard_finish));
+            } else {
+                // Finish
+                System.arraycopy(tempRules, 0, mRotationRules, 0, 64);
+                save();
+                updateUI();
+                ((AlertDialog) btnNext.getTag()).dismiss();
+            }
         });
 
-        dialogView.findViewById(R.id.preset_5_2).setOnClickListener(v -> applyRule(tempRules, 5, 2, adapter));
-        dialogView.findViewById(R.id.preset_4_2).setOnClickListener(v -> applyRule(tempRules, 4, 2, adapter));
-        dialogView.findViewById(R.id.preset_1_1).setOnClickListener(v -> applyRule(tempRules, 1, 1, adapter));
+        btnBack.setOnClickListener(v -> {
+            int step = flipper.getDisplayedChild();
+            if (step == 1) {
+                flipper.setDisplayedChild(0);
+                titleView.setText(mContext.getString(R.string.wizard_step_1));
+                btnBack.setVisibility(View.GONE);
+            } else if (step == 2) {
+                flipper.setDisplayedChild(1);
+                titleView.setText(mContext.getString(R.string.wizard_step_2));
+                btnNext.setText(mContext.getString(R.string.wizard_next));
+            }
+        });
+
+        btnReset.setOnClickListener(v -> {
+            for (int i = 0; i < 64; i++) mRotationRules[i] = 0;
+            save();
+            updateUI();
+            Toast.makeText(mContext, mContext.getString(R.string.wizard_reset), Toast.LENGTH_SHORT).show();
+            ((AlertDialog) btnNext.getTag()).dismiss();
+        });
 
         AlertDialog dialog = new AlertDialog.Builder(mContext)
                 .setView(dialogView)
                 .create();
-
-        dialogView.findViewById(R.id.btn_cancel).setOnClickListener(v -> dialog.dismiss());
-        dialogView.findViewById(R.id.btn_save).setOnClickListener(v -> {
-            System.arraycopy(tempRules, 0, mRotationRules, 0, 64);
-            save();
-            updateUI();
-            dialog.dismiss();
-        });
-
+        btnNext.setTag(dialog);
         dialog.show();
-    }
-
-    private void applyRule(int[] target, int work, int off, RecyclerView.Adapter adapter) {
-        if (work <= 0 || off <= 0) return;
-        int total = work + off;
-        for (int i = 0; i < 64; i++) {
-            target[i] = (i % total < work) ? 1 : 0;
-        }
-        adapter.notifyDataSetChanged();
-        Toast.makeText(mContext, "规则已自动填充", Toast.LENGTH_SHORT).show();
     }
 
     private void parsePayload(String payload) {
@@ -197,16 +235,59 @@ public class RotationPanel {
         mListener.onRotationChanged(mAlarm, mAlarm.rotationPayload);
     }
 
-    private class RotationAdapter extends RecyclerView.Adapter<RotationAdapter.ViewHolder> {
+    // --- Adapters ---
+
+    private class WorkDayAdapter extends RecyclerView.Adapter<WorkDayAdapter.ViewHolder> {
+        private final int count;
+        private final int[] shifts;
+
+        public WorkDayAdapter(int count, int[] shifts) { this.count = count; this.shifts = shifts; }
+
+        @NonNull
+        @Override
+        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View v = LayoutInflater.from(mContext).inflate(R.layout.item_work_day_assign, parent, false);
+            return new ViewHolder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+            holder.label.setText("第 " + (position + 1) + " 天");
+            int currentShift = shifts[position];
+            if (currentShift == 1) holder.group.check(R.id.btn_morning);
+            else if (currentShift == 2) holder.group.check(R.id.btn_afternoon);
+            else if (currentShift == 3) holder.group.check(R.id.btn_night);
+
+            holder.group.addOnButtonCheckedListener((group, checkedId, isChecked) -> {
+                if (!isChecked) return;
+                if (checkedId == R.id.btn_morning) shifts[position] = 1;
+                else if (checkedId == R.id.btn_afternoon) shifts[position] = 2;
+                else if (checkedId == R.id.btn_night) shifts[position] = 3;
+            });
+        }
+
+        @Override
+        public int getItemCount() { return count; }
+
+        class ViewHolder extends RecyclerView.ViewHolder {
+            TextView label; MaterialButtonToggleGroup group;
+            public ViewHolder(View v) {
+                super(v);
+                label = v.findViewById(R.id.day_label);
+                group = v.findViewById(R.id.shift_toggle_group);
+            }
+        }
+    }
+
+    private class PreviewAdapter extends RecyclerView.Adapter<PreviewAdapter.ViewHolder> {
         private final int[] rules;
-        public RotationAdapter(int[] rules) { this.rules = rules; }
+        public PreviewAdapter(int[] rules) { this.rules = rules; }
 
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             TextView tv = new TextView(mContext);
-            tv.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, 120));
+            tv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 100));
             tv.setGravity(android.view.Gravity.CENTER);
             tv.setBackgroundResource(android.R.drawable.btn_default);
             tv.setTextSize(10);
@@ -217,28 +298,14 @@ public class RotationPanel {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             TextView tv = (TextView) holder.itemView;
             int rule = rules[position];
-            String typeName = getShiftTypeName(rule);
-            tv.setText((position + 1) + "\n" + typeName);
-
+            tv.setText((position + 1) + "\n" + getShiftTypeName(rule));
             switch (rule) {
-                case 1 -> {
-                    tv.setBackgroundColor(Color.parseColor("#E3F2FD"));
-                    tv.setTextColor(Color.parseColor("#1976D2"));
-                }
-                case 2 -> {
-                    tv.setBackgroundColor(Color.parseColor("#FFF3E0"));
-                    tv.setTextColor(Color.parseColor("#F57C00"));
-                }
-                case 3 -> {
-                    tv.setBackgroundColor(Color.parseColor("#F3E5F5"));
-                    tv.setTextColor(Color.parseColor("#7B1FA2"));
-                }
-                default -> {
-                    tv.setBackgroundColor(Color.parseColor("#F5F5F5"));
-                    tv.setTextColor(Color.LTGRAY);
-                }
+                case 1 -> { tv.setBackgroundColor(Color.parseColor("#E3F2FD")); tv.setTextColor(Color.parseColor("#1976D2")); }
+                case 2 -> { tv.setBackgroundColor(Color.parseColor("#FFF3E0")); tv.setTextColor(Color.parseColor("#F57C00")); }
+                case 3 -> { tv.setBackgroundColor(Color.parseColor("#F3E5F5")); tv.setTextColor(Color.parseColor("#7B1FA2")); }
+                default -> { tv.setBackgroundColor(Color.parseColor("#F5F5F5")); tv.setTextColor(Color.LTGRAY); }
             }
-
+            // Allow micro-adjustments in preview
             tv.setOnClickListener(v -> {
                 rules[position] = (rules[position] + 1) % 4;
                 notifyItemChanged(position);
@@ -248,8 +315,6 @@ public class RotationPanel {
         @Override
         public int getItemCount() { return 64; }
 
-        class ViewHolder extends RecyclerView.ViewHolder {
-            public ViewHolder(@NonNull View itemView) { super(itemView); }
-        }
+        class ViewHolder extends RecyclerView.ViewHolder { public ViewHolder(View v) { super(v); } }
     }
 }

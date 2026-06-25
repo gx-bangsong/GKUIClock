@@ -1,120 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp">
 
     <TextView
+        android:id="@+id/wizard_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/edit_rotation_rules"
+        android:text="@string/wizard_step_1"
         android:textAppearance="?attr/textAppearanceTitleLarge"
-        android:layout_marginBottom="8dp" />
+        android:layout_marginBottom="16dp" />
 
-    <!-- Wizard Section -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="?attr/colorSurfaceVariant"
-        android:padding="8dp"
-        android:layout_marginBottom="12dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="快捷填充规则 (例如: 上4休2)"
-            android:textAppearance="?attr/textAppearanceLabelLarge" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="上" />
-            <EditText
-                android:id="@+id/wizard_work_days"
-                android:layout_width="40dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="5"
-                android:gravity="center" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="天, 休" />
-            <EditText
-                android:id="@+id/wizard_off_days"
-                android:layout_width="40dp"
-                android:layout_height="wrap_content"
-                android:inputType="number"
-                android:text="2"
-                android:gravity="center" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="天" />
-
-            <Button
-                android:id="@+id/btn_wizard_apply"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="应用"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp">
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/preset_5_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="上5休2"
-                    android:layout_marginEnd="4dp" />
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/preset_4_2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="上4休2"
-                    android:layout_marginEnd="4dp" />
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/preset_1_1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="上1休1" />
-            </LinearLayout>
-        </HorizontalScrollView>
-    </LinearLayout>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rotation_grid_full"
+    <ViewFlipper
+        android:id="@+id/wizard_flipper"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scrollbars="vertical" />
+        android:layout_weight="1">
+
+        <!-- Step 1: Pattern -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/wizard_work_label"
+                android:textAppearance="?attr/textAppearanceLabelLarge" />
+            <NumberPicker
+                android:id="@+id/picker_work"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/wizard_rest_label"
+                android:textAppearance="?attr/textAppearanceLabelLarge"
+                android:layout_marginTop="16dp" />
+            <NumberPicker
+                android:id="@+id/picker_rest"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- Step 2: Assign -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="为工作日批量分配班次"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:layout_marginBottom="12dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/work_day_list"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+        </LinearLayout>
+
+        <!-- Step 3: Preview -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rotation_preview_grid"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </ViewFlipper>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="end"
+        android:gravity="center_vertical"
         android:layout_marginTop="16dp">
 
         <Button
-            android:id="@+id/btn_cancel"
+            android:id="@+id/btn_reset"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@android:string/cancel"
-            android:layout_marginEnd="8dp" />
+            android:text="@string/wizard_reset" />
+
+        <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
 
         <Button
-            android:id="@+id/btn_save"
+            android:id="@+id/btn_back"
+            style="?attr/materialButtonOutlinedStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@android:string/ok" />
+            android:text="@string/wizard_back"
+            android:layout_marginEnd="8dp"
+            android:visibility="gone" />
+
+        <Button
+            android:id="@+id/btn_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/wizard_next" />
     </LinearLayout>
 </LinearLayout>

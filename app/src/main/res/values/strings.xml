@@ -1601,4 +1601,17 @@
     <string name="shift_type_night">Night</string>
     <string name="edit_rotation_rules">Edit Rotation Rules</string>
     <string name="shift_summary_format">Day %1$d of 64: %2$s</string>
+    <string name="wizard_step_1">Step 1: Cycle Pattern</string>
+    <string name="wizard_step_2">Step 2: Assign Shifts</string>
+    <string name="wizard_step_3">Step 3: Preview</string>
+    <string name="wizard_work_label">Work Days</string>
+    <string name="wizard_rest_label">Rest Days</string>
+    <string name="wizard_next">Next</string>
+    <string name="wizard_back">Back</string>
+    <string name="wizard_reset">Reset All</string>
+    <string name="wizard_finish">Save Rules</string>
+    <string name="shift_morning">Morning</string>
+    <string name="shift_afternoon">Afternoon</string>
+    <string name="shift_night">Night</string>
+    <string name="shift_off">Off</string>
 </resources>

@@ -793,4 +793,17 @@
     <string name="shift_type_night">夜班</string>
     <string name="edit_rotation_rules">编辑轮班规则</string>
     <string name="shift_summary_format">周期第 %1$d/64 天: %2$s</string>
+    <string name="wizard_step_1">第一步: 循环周期</string>
+    <string name="wizard_step_2">第二步: 分配班次</string>
+    <string name="wizard_step_3">第三步: 预览结果</string>
+    <string name="wizard_work_label">工作天数</string>
+    <string name="wizard_rest_label">休息天数</string>
+    <string name="wizard_next">下一步</string>
+    <string name="wizard_back">返回</string>
+    <string name="wizard_reset">全部重置</string>
+    <string name="wizard_finish">保存规则</string>
+    <string name="shift_morning">早班</string>
+    <string name="shift_afternoon">中班</string>
+    <string name="shift_night">夜班</string>
+    <string name="shift_off">休息</string>
 </resources>

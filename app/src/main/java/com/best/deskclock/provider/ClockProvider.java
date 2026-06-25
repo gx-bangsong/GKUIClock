@@ -29,6 +29,7 @@ import androidx.annotation.NonNull;
 import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.SdkUtils;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -187,6 +188,18 @@ public class ClockProvider extends ContentProvider {
         return true;
     }
 
+    private int matchUri(Uri uri) {
+        int match = sURIMatcher.match(uri);
+        if (match == -1) {
+            final List<String> segments = uri.getPathSegments();
+            if (segments.size() == 2) {
+                if (segments.get(0).equals("alarms")) return ALARMS_ID;
+                if (segments.get(0).equals("instances")) return INSTANCES_ID;
+            }
+        }
+        return match;
+    }
+
     @Override
     public Cursor query(@NonNull Uri uri, String[] projectionIn, String selection,
                         String[] selectionArgs, String sort) {
@@ -194,7 +207,7 @@ public class ClockProvider extends ContentProvider {
         SQLiteDatabase db = mOpenHelper.getReadableDatabase();
 
         // Generate the body of the query
-        int match = sURIMatcher.match(uri);
+        int match = matchUri(uri);
         switch (match) {
             case ALARMS -> qb.setTables(ALARMS_TABLE_NAME);
             case ALARMS_ID -> {
@@ -229,7 +242,7 @@ public class ClockProvider extends ContentProvider {
 
     @Override
     public String getType(@NonNull Uri uri) {
-        int match = sURIMatcher.match(uri);
+        int match = matchUri(uri);
         return switch (match) {
             case ALARMS -> "vnd.android.cursor.dir/alarms";
             case ALARMS_ID -> "vnd.android.cursor.item/alarms";
@@ -244,7 +257,8 @@ public class ClockProvider extends ContentProvider {
         int count;
         String alarmId;
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        switch (sURIMatcher.match(uri)) {
+        int match = matchUri(uri);
+        switch (match) {
             case ALARMS_ID -> {
                 alarmId = uri.getLastPathSegment();
                 count = db.update(ALARMS_TABLE_NAME, values,
@@ -285,7 +299,8 @@ public class ClockProvider extends ContentProvider {
         int count;
         String primaryKey;
         SQLiteDatabase db = mOpenHelper.getWritableDatabase();
-        switch (sURIMatcher.match(uri)) {
+        int match = matchUri(uri);
+        switch (match) {
             case ALARMS -> count = db.delete(ALARMS_TABLE_NAME, where, whereArgs);
             case ALARMS_ID -> {
                 primaryKey = uri.getLastPathSegment();
