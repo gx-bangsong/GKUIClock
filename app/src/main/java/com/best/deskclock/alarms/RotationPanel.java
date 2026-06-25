@@ -7,7 +7,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -34,7 +36,7 @@ public class RotationPanel {
 
     private Alarm mAlarm;
     private OnRotationChangedListener mListener;
-    private int[] mRotationRules = new int[64]; // 0: Off, 1: Morning, 2: Afternoon, 3: Night
+    private int[] mRotationRules = new int[64];
     private long mAnchorTimestamp;
 
     public interface OnRotationChangedListener {
@@ -117,11 +119,27 @@ public class RotationPanel {
     private void showGridDialog() {
         View dialogView = LayoutInflater.from(mContext).inflate(R.layout.dialog_rotation_grid, null);
         RecyclerView recyclerView = dialogView.findViewById(R.id.rotation_grid_full);
-        recyclerView.setLayoutManager(new GridLayoutManager(mContext, 7)); // Calendar style (7 days per week)
+        recyclerView.setLayoutManager(new GridLayoutManager(mContext, 7));
 
         int[] tempRules = mRotationRules.clone();
         RotationAdapter adapter = new RotationAdapter(tempRules);
         recyclerView.setAdapter(adapter);
+
+        EditText workDaysIn = dialogView.findViewById(R.id.wizard_work_days);
+        EditText offDaysIn = dialogView.findViewById(R.id.wizard_off_days);
+        Button btnApply = dialogView.findViewById(R.id.btn_wizard_apply);
+
+        btnApply.setOnClickListener(v -> {
+            try {
+                int work = Integer.parseInt(workDaysIn.getText().toString());
+                int off = Integer.parseInt(offDaysIn.getText().toString());
+                applyRule(tempRules, work, off, adapter);
+            } catch (Exception ignored) {}
+        });
+
+        dialogView.findViewById(R.id.preset_5_2).setOnClickListener(v -> applyRule(tempRules, 5, 2, adapter));
+        dialogView.findViewById(R.id.preset_4_2).setOnClickListener(v -> applyRule(tempRules, 4, 2, adapter));
+        dialogView.findViewById(R.id.preset_1_1).setOnClickListener(v -> applyRule(tempRules, 1, 1, adapter));
 
         AlertDialog dialog = new AlertDialog.Builder(mContext)
                 .setView(dialogView)
@@ -136,6 +154,16 @@ public class RotationPanel {
         });
 
         dialog.show();
+    }
+
+    private void applyRule(int[] target, int work, int off, RecyclerView.Adapter adapter) {
+        if (work <= 0 || off <= 0) return;
+        int total = work + off;
+        for (int i = 0; i < 64; i++) {
+            target[i] = (i % total < work) ? 1 : 0;
+        }
+        adapter.notifyDataSetChanged();
+        Toast.makeText(mContext, "规则已自动填充", Toast.LENGTH_SHORT).show();
     }
 
     private void parsePayload(String payload) {
@@ -189,34 +217,30 @@ public class RotationPanel {
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             TextView tv = (TextView) holder.itemView;
             int rule = rules[position];
-
-            // Format text: Day number + Shift Name
-            String dayNum = String.valueOf(position + 1);
             String typeName = getShiftTypeName(rule);
-            tv.setText(dayNum + "\n" + typeName);
+            tv.setText((position + 1) + "\n" + typeName);
 
-            // Color Coding
             switch (rule) {
-                case 1 -> { // Morning - Blue
+                case 1 -> {
                     tv.setBackgroundColor(Color.parseColor("#E3F2FD"));
                     tv.setTextColor(Color.parseColor("#1976D2"));
                 }
-                case 2 -> { // Afternoon - Orange
+                case 2 -> {
                     tv.setBackgroundColor(Color.parseColor("#FFF3E0"));
                     tv.setTextColor(Color.parseColor("#F57C00"));
                 }
-                case 3 -> { // Night - Purple
+                case 3 -> {
                     tv.setBackgroundColor(Color.parseColor("#F3E5F5"));
                     tv.setTextColor(Color.parseColor("#7B1FA2"));
                 }
-                default -> { // Off - Gray
+                default -> {
                     tv.setBackgroundColor(Color.parseColor("#F5F5F5"));
                     tv.setTextColor(Color.LTGRAY);
                 }
             }
 
             tv.setOnClickListener(v -> {
-                rules[position] = (rules[position] + 1) % 4; // Cycle 0-3
+                rules[position] = (rules[position] + 1) % 4;
                 notifyItemChanged(position);
             });
         }

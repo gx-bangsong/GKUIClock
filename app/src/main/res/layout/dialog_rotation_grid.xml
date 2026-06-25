@@ -10,7 +10,84 @@
         android:layout_height="wrap_content"
         android:text="@string/edit_rotation_rules"
         android:textAppearance="?attr/textAppearanceTitleLarge"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="8dp" />
+
+    <!-- Wizard Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?attr/colorSurfaceVariant"
+        android:padding="8dp"
+        android:layout_marginBottom="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="快捷填充规则 (例如: 上4休2)"
+            android:textAppearance="?attr/textAppearanceLabelLarge" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="上" />
+            <EditText
+                android:id="@+id/wizard_work_days"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="5"
+                android:gravity="center" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="天, 休" />
+            <EditText
+                android:id="@+id/wizard_off_days"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="2"
+                android:gravity="center" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="天" />
+
+            <Button
+                android:id="@+id/btn_wizard_apply"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="应用"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/preset_5_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="上5休2"
+                    android:layout_marginEnd="4dp" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/preset_4_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="上4休2"
+                    android:layout_marginEnd="4dp" />
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/preset_1_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="上1休1" />
+            </LinearLayout>
+        </HorizontalScrollView>
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rotation_grid_full"

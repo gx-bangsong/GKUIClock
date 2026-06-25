@@ -151,9 +151,9 @@ public class ClockProvider extends ContentProvider {
 
     static {
         sURIMatcher.addURI(ClockContract.AUTHORITY, "alarms", ALARMS);
-        sURIMatcher.addURI(ClockContract.AUTHORITY, "alarms/#", ALARMS_ID);
+        sURIMatcher.addURI(ClockContract.AUTHORITY, "alarms/*", ALARMS_ID);
         sURIMatcher.addURI(ClockContract.AUTHORITY, "instances", INSTANCES);
-        sURIMatcher.addURI(ClockContract.AUTHORITY, "instances/#", INSTANCES_ID);
+        sURIMatcher.addURI(ClockContract.AUTHORITY, "instances/*", INSTANCES_ID);
         sURIMatcher.addURI(ClockContract.AUTHORITY, "alarms_with_instances", ALARMS_WITH_INSTANCES);
     }
 
