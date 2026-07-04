@@ -45,6 +45,8 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.best.deskclock.ItemAdapter;
 import com.best.deskclock.R;
+import com.best.deskclock.settings.PreferencesKeys;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.events.Events;
@@ -228,6 +230,14 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
                 getAlarmTimeClickHandler().onRingtoneClicked(getItemHolder().item));
 
         shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
+        cycleLengthSlider.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            return false;
+        });
+        cycleLengthSlider.setOnTouchListener((v, event) -> {
+            v.getParent().requestDisallowInterceptTouchEvent(true);
+            return false;
+        });
         cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
             if (fromUser) {
                 int length = (int) value;
@@ -1350,6 +1360,15 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
 
     private void toggleShiftPanel() {
         final boolean isVisible = advancedShiftPanel.getVisibility() == View.VISIBLE;
+        if (!isVisible && !mPrefs.getBoolean(PreferencesKeys.KEY_ROTATION_GUIDE_SHOWN, false)) {
+            new MaterialAlertDialogBuilder(itemView.getContext())
+                .setTitle(R.string.rotation_guide_title)
+                .setMessage(R.string.rotation_guide_message)
+                .setPositiveButton(R.string.got_it, (dialog, which) -> {
+                    mPrefs.edit().putBoolean(PreferencesKeys.KEY_ROTATION_GUIDE_SHOWN, true).apply();
+                })
+                .show();
+        }
         androidx.transition.TransitionManager.beginDelayedTransition((ViewGroup) itemView.getParent());
         if (isVisible) {
             advancedShiftPanel.setVisibility(View.GONE);

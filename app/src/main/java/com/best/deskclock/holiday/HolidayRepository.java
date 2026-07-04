@@ -17,6 +17,7 @@
 package com.best.deskclock.holiday;
 
 import android.content.Context;
+import android.os.Looper;
 
 import com.best.deskclock.data.DataModel;
 
@@ -46,6 +47,8 @@ public class HolidayRepository {
         HolidayDatabase db = HolidayDatabase.getDatabase(context);
         mHolidayDao = db.holidayDao();
         mExecutorService = Executors.newSingleThreadExecutor();
+
+        // Caches are filled on-demand or during update.
     }
 
     public static HolidayRepository getInstance(Context context) {
@@ -70,6 +73,7 @@ public class HolidayRepository {
                 in.close();
                 mHolidayCache.clear();
                 mCompDayCache.clear();
+                // Caches will be populated on-demand.
             } catch (Exception e) {
                 LogUtils.e("Error updating holiday data", e);
             }
@@ -77,20 +81,20 @@ public class HolidayRepository {
     }
 
     public Holiday getHolidayByDate(String date) {
-        if (mHolidayCache.containsKey(date)) {
-            return mHolidayCache.get(date);
+        Holiday h = mHolidayCache.get(date);
+        if (h == null && Looper.myLooper() != Looper.getMainLooper()) {
+            h = mHolidayDao.getHolidayByDate(date);
+            if (h != null) mHolidayCache.put(date, h);
         }
-        Holiday h = mHolidayDao.getHolidayByDate(date);
-        if (h != null) mHolidayCache.put(date, h);
         return h;
     }
 
     public Holiday getCompDayByDate(String date) {
-        if (mCompDayCache.containsKey(date)) {
-            return mCompDayCache.get(date);
+        Holiday h = mCompDayCache.get(date);
+        if (h == null && Looper.myLooper() != Looper.getMainLooper()) {
+            h = mHolidayDao.getCompDayByDate(date);
+            if (h != null) mCompDayCache.put(date, h);
         }
-        Holiday h = mHolidayDao.getCompDayByDate(date);
-        if (h != null) mCompDayCache.put(date, h);
         return h;
     }
 
