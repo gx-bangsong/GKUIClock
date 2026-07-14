@@ -1396,9 +1396,8 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
                 })
                 .show();
         }
-        ViewGroup parent = (ViewGroup) itemView.getParent();
-        if (parent != null) {
-            androidx.transition.TransitionManager.beginDelayedTransition(parent);
+        if (itemView instanceof ViewGroup) {
+            androidx.transition.TransitionManager.beginDelayedTransition((ViewGroup) itemView);
         }
         if (isVisible) {
             advancedShiftPanel.setVisibility(View.GONE);
@@ -1411,6 +1410,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             shiftSetupCaret.animate().rotation(180).setDuration(200).start();
             repeatDays.setVisibility(View.GONE);
         }
+        itemView.requestLayout();
     }
 
     private void rebuildShiftGrid(int length) {
@@ -1546,7 +1546,10 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
                 anchorDateButton.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date()));
             }
             holidaySkipSwitch.setChecked(false);
-            if (shiftGridContainer.getChildCount() == 0) rebuildShiftGrid(7);
+            // Only rebuild grid if panel is actually visible to save cold-start time
+            if (advancedShiftPanel.getVisibility() == VISIBLE && shiftGridContainer.getChildCount() == 0) {
+                rebuildShiftGrid(7);
+            }
             return;
         }
         String[] parts = alarm.rotationPayload.split("\\|");

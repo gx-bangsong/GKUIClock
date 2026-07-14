@@ -65,17 +65,20 @@ public class HolidayRepository {
     public void updateWorkdayData() {
         mExecutorService.execute(() -> {
             try {
-                URL url = new URL(DataModel.getDataModel().getHolidayDataUrl());
-                BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-                Type listType = new TypeToken<List<Holiday>>() {}.getType();
-                List<Holiday> holidays = new Gson().fromJson(in, listType);
-                mHolidayDao.insertAll(holidays);
-                in.close();
-                mHolidayCache.clear();
-                mCompDayCache.clear();
-                // Caches will be populated on-demand.
+                String urlStr = DataModel.getDataModel().getHolidayDataUrl();
+                if (urlStr == null || urlStr.isEmpty()) return;
+                URL url = new URL(urlStr);
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
+                    Type listType = new TypeToken<List<Holiday>>() {}.getType();
+                    List<Holiday> holidays = new Gson().fromJson(in, listType);
+                    if (holidays != null) {
+                        mHolidayDao.insertAll(holidays);
+                        mHolidayCache.clear();
+                        mCompDayCache.clear();
+                    }
+                }
             } catch (Exception e) {
-                LogUtils.e("Error updating holiday data", e);
+                LogUtils.e("Error updating holiday data: " + e.getMessage());
             }
         });
     }
