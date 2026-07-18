@@ -5,10 +5,10 @@ import java.util.regex.Pattern;
 public final class ShiftAlarmUtils {
     /**
      * Regex for matching shift keywords in calendar event titles.
-     * Match regex for work shifts: ^(早班|中班|晚班|夜班|白班|Shift[:：]).*$
+     * Match regex for work shifts: ^(早班|中班|晚班|夜班|白班|Shift).*$
      */
     public static final Pattern SHIFT_TITLE_PATTERN =
-        Pattern.compile("^(早班|中班|晚班|夜班|白班|Shift[:：]).*$", Pattern.CASE_INSENSITIVE);
+        Pattern.compile("^(早班|中班|晚班|夜班|白班|Shift).*$", Pattern.CASE_INSENSITIVE);
 
     /**
      * Regex for matching custom alarm offsets inside calendar descriptions.
