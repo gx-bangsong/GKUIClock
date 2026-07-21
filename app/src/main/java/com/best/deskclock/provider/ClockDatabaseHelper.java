@@ -27,7 +27,7 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
     static final String ALARMS_TABLE_NAME = "alarm_templates";
     static final String INSTANCES_TABLE_NAME = "alarm_instances";
 
-    private static final int DATABASE_VERSION = 24;
+    private static final int DATABASE_VERSION = 25;
     private static final int MINIMUM_SUPPORTED_VERSION = 15;
 
     private final Context mContext;
@@ -84,6 +84,9 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
                 ClockContract.InstancesColumns.ALARM_VOLUME + " INTEGER NOT NULL, " +
                 ClockContract.InstancesColumns.MISSED_ALARM_REPEAT_LIMIT + " INTEGER NOT NULL DEFAULT 0, " +
                 ClockContract.InstancesColumns.MISSED_ALARM_REPEAT_COUNT + " INTEGER NOT NULL DEFAULT 0, " +
+                ClockContract.InstancesColumns.SOURCE_TYPE + " INTEGER NOT NULL DEFAULT 0, " +
+                ClockContract.InstancesColumns.SYNC_KEY + " TEXT, " +
+                ClockContract.InstancesColumns.SYNC_STATE + " INTEGER NOT NULL DEFAULT 0, " +
                 ClockContract.InstancesColumns.ALARM_ID + " INTEGER REFERENCES " +
                 ALARMS_TABLE_NAME + "(" + ClockContract.AlarmsColumns._ID + ") " +
                 "ON UPDATE CASCADE ON DELETE CASCADE);");
@@ -232,6 +235,15 @@ class ClockDatabaseHelper extends SQLiteOpenHelper {
             LogUtils.i("Added rotation_payload column for version 24 upgrade.");
         }
 
+        if (oldVersion < 25) {
+            db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " +
+                    ClockContract.InstancesColumns.SOURCE_TYPE + " INTEGER NOT NULL DEFAULT 0;");
+            db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " +
+                    ClockContract.InstancesColumns.SYNC_KEY + " TEXT;");
+            db.execSQL("ALTER TABLE " + INSTANCES_TABLE_NAME + " ADD COLUMN " +
+                    ClockContract.InstancesColumns.SYNC_STATE + " INTEGER NOT NULL DEFAULT 0;");
+            LogUtils.i("Added source_type, sync_key, and sync_state to alarm_instances for version 25 upgrade.");
+        }
     }
 
     long fixAlarmInsert(ContentValues values) {

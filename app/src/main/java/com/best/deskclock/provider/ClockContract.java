@@ -310,5 +310,21 @@ public final class ClockContract {
          * <p>Type: INTEGER</p>
          */
         String MISSED_ALARM_REPEAT_COUNT = "missed_alarm_repeat_count";
+
+        /**
+         * Source type for shift alarm.
+         * 0: Manual, 1: Calendar, 2: Rotation
+         */
+        String SOURCE_TYPE = "source_type";
+
+        /**
+         * Stable unique key for sync.
+         */
+        String SYNC_KEY = "sync_key";
+
+        /**
+         * Sync state (e.g. Skipped/Dismissed).
+         */
+        String SYNC_STATE = "sync_state";
     }
 }
