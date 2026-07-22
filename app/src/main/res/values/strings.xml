@@ -1614,4 +1614,13 @@
     <string name="shift_afternoon">Afternoon</string>
     <string name="shift_night">Night</string>
     <string name="shift_off">Off</string>
+
+    <string name="upcoming_shifts_title">Upcoming Shift Alarms</string>
+    <string name="sync_now">Sync Now</string>
+    <string name="synced_successfully_at">Synced successfully at %s</string>
+    <string name="sync_failed_with_error">Sync failed: %s</string>
+    <string name="missing_calendar_permission_warning">Missing Calendar Permission. Click to grant.</string>
+    <string name="no_upcoming_shifts">No synchronized shift alarms in the next 7 days</string>
+    <string name="skip_shift_short">Skip</string>
+    <string name="missing_calendar_permission_toast">Calendar permission is required to synchronize shift alarms</string>
 </resources>

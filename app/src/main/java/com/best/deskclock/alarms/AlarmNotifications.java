@@ -89,7 +89,7 @@ public final class AlarmNotifications {
         final Alarm alarm = Alarm.getAlarm(context.getContentResolver(), instance.mAlarmId);
         final String contentTitle;
 
-        if (alarm == null && !ShiftAlarmUtils.isEphemeralId(instance.mId)) {
+        if (alarm == null && instance.mSourceType == 0) {
             LogUtils.wtf("Failed to retrieve alarm with ID: %d", instance.mAlarmId);
             return;
         }
@@ -139,7 +139,7 @@ public final class AlarmNotifications {
                 PendingIntent.getService(context, id, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT
                         | PendingIntent.FLAG_IMMUTABLE));
 
-        if (ShiftAlarmUtils.isEphemeralId(instance.mId)) {
+        if (instance.mSourceType != 0) {
             Intent skipIntent = new Intent(context, ShiftActionReceiver.class)
                     .setAction(ShiftActionReceiver.ACTION_SKIP_SHIFT)
                     .putExtra("instance_id", instance.mId);
@@ -426,7 +426,7 @@ public final class AlarmNotifications {
         final String dismissActionTitle;
         final Alarm alarm = Alarm.getAlarm(service.getContentResolver(), instance.mAlarmId);
 
-        if (alarm == null && !ShiftAlarmUtils.isEphemeralId(instance.mId)) {
+        if (alarm == null && instance.mSourceType == 0) {
             LogUtils.wtf("Failed to retrieve alarm with ID: %d", instance.mAlarmId);
             return;
         }

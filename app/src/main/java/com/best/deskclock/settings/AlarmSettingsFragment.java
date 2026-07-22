@@ -52,6 +52,9 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_VOLUME_BUTTONS;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_WEEK_START;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_UPDATE_HOLIDAY_DATA;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_HOLIDAY_DATA_URL;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_CALENDAR_SHIFT_SYNC;
+import com.best.deskclock.alarms.ShiftCalendarManager;
+import com.best.deskclock.utils.LogUtils;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -150,6 +153,22 @@ public class AlarmSettingsFragment extends ScreenFragment
     ListPreference mMaterialDatePickerStylePref;
     Preference mHolidayDataUrlPref;
     Preference mAlarmDisplayCustomizationPref;
+    SwitchPreferenceCompat mCalendarShiftSyncPref;
+
+    private final ActivityResultLauncher<String> calendarPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    LogUtils.i("AlarmSettingsFragment", "Calendar permission granted.");
+                    ShiftCalendarManager.getInstance(requireContext()).registerObserver();
+                    ShiftCalendarManager.getInstance(requireContext()).updateShiftAlarms();
+                } else {
+                    LogUtils.w("AlarmSettingsFragment", "Calendar permission denied.");
+                    if (mCalendarShiftSyncPref != null) {
+                        mCalendarShiftSyncPref.setChecked(false);
+                    }
+                    CustomToast.show(requireContext(), "Missing Calendar Permission");
+                }
+            });
 
     private final ActivityResultLauncher<Intent> fontPickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -277,6 +296,22 @@ public class AlarmSettingsFragment extends ScreenFragment
     @Override
     public boolean onPreferenceChange(Preference pref, Object newValue) {
         switch (pref.getKey()) {
+            case KEY_CALENDAR_SHIFT_SYNC -> {
+                Utils.setVibrationTime(requireContext(), 50);
+                boolean isChecked = (boolean) newValue;
+                if (isChecked) {
+                    if (androidx.core.content.ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_CALENDAR) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                        calendarPermissionLauncher.launch(android.Manifest.permission.READ_CALENDAR);
+                        return false;
+                    } else {
+                        ShiftCalendarManager.getInstance(requireContext()).registerObserver();
+                        ShiftCalendarManager.getInstance(requireContext()).updateShiftAlarms();
+                    }
+                } else {
+                    ShiftCalendarManager.getInstance(requireContext()).unregisterObserver();
+                    ShiftCalendarManager.getInstance(requireContext()).updateShiftAlarms();
+                }
+            }
             case KEY_DISPLAY_ENABLED_ALARMS_FIRST, KEY_ENABLE_ALARM_FAB_LONG_PRESS,
                  KEY_DISPLAY_DISMISS_BUTTON, KEY_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT,
                  KEY_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS,
@@ -752,6 +787,11 @@ public class AlarmSettingsFragment extends ScreenFragment
         if (mHolidayDataUrlPref != null) {
             mHolidayDataUrlPref.setSummary(SettingsDAO.getHolidayDataUrl(mPrefs));
             mHolidayDataUrlPref.setOnPreferenceChangeListener(this);
+        }
+
+        mCalendarShiftSyncPref = findPreference(KEY_CALENDAR_SHIFT_SYNC);
+        if (mCalendarShiftSyncPref != null) {
+            mCalendarShiftSyncPref.setOnPreferenceChangeListener(this);
         }
     }
 

@@ -28,6 +28,11 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
 
+    <permission
+        android:name="com.best.deskclock.permission.RECEIVE_SHIFT_SYNC"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.best.deskclock.permission.RECEIVE_SHIFT_SYNC" />
+
     <application
         android:name="com.best.deskclock.DeskClockApplication"
         android:allowBackup="false"
@@ -42,6 +47,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DeskClock"
         tools:targetApi="s">
+        <receiver android:name="com.best.deskclock.alarms.ShiftSyncReceiver"
+            android:exported="true"
+            android:permission="com.best.deskclock.permission.RECEIVE_SHIFT_SYNC">
+            <intent-filter>
+                <action android:name="com.best.deskclock.action.SYNC_CALENDAR_SHIFTS" />
+            </intent-filter>
+        </receiver>
+
         <receiver android:name="com.best.deskclock.alarms.ShiftActionReceiver" android:exported="false">
             <intent-filter>
                 <action android:name="com.best.deskclock.action.SKIP_SHIFT" />

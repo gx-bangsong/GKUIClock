@@ -369,7 +369,7 @@
             android:key="key_calendar_shift_sync"
             android:title="@string/calendar_shift_sync_title"
             android:summary="@string/calendar_shift_sync_summary"
-            android:defaultValue="true"
+            android:defaultValue="false"
             app:iconSpaceReserved="false"
             app:singleLineTitle="false"
             tools:layout="@layout/settings_preference_layout" />

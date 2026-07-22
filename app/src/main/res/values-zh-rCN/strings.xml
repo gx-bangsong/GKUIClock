@@ -806,4 +806,13 @@
     <string name="shift_afternoon">中班</string>
     <string name="shift_night">夜班</string>
     <string name="shift_off">休息</string>
+
+    <string name="upcoming_shifts_title">即将到来的班次闹钟</string>
+    <string name="sync_now">立即同步</string>
+    <string name="synced_successfully_at">同步成功于 %s</string>
+    <string name="sync_failed_with_error">同步失败：%s</string>
+    <string name="missing_calendar_permission_warning">缺少日历权限，点击授权</string>
+    <string name="no_upcoming_shifts">未来 7 天内没有同步的班次闹钟</string>
+    <string name="skip_shift_short">跳过</string>
+    <string name="missing_calendar_permission_toast">同步班次闹钟需要日历权限</string>
 </resources>

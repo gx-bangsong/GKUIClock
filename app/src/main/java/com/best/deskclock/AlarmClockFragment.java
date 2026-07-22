@@ -110,6 +110,24 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     private AlarmTimeClickHandler mAlarmTimeClickHandler;
     private LinearLayoutManager mLayoutManager;
 
+    // Upcoming shift views
+    private View mUpcomingShiftsCard;
+    private android.widget.TextView mSyncStatusText;
+    private android.widget.LinearLayout mUpcomingShiftsContainer;
+    private View mNoShiftsText;
+    private View mSyncNowButton;
+
+    private final androidx.activity.result.ActivityResultLauncher<String> mCalendarPermissionLauncher =
+            registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(), isGranted -> {
+                if (isGranted) {
+                    com.best.deskclock.alarms.ShiftCalendarManager.getInstance(requireContext()).registerObserver();
+                    com.best.deskclock.alarms.ShiftCalendarManager.getInstance(requireContext()).updateShiftAlarms();
+                    refreshUpcomingShiftsUI();
+                } else {
+                    android.widget.Toast.makeText(requireContext(), getString(R.string.missing_calendar_permission_toast), android.widget.Toast.LENGTH_SHORT).show();
+                }
+            });
+
     /**
      * The public no-arg constructor required by all fragments.
      */
@@ -135,6 +153,20 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         final View v = inflater.inflate(R.layout.alarm_clock, container, false);
         mContext = requireContext();
         mMainLayout = v.findViewById(R.id.main);
+
+        mUpcomingShiftsCard = v.findViewById(R.id.upcoming_shifts_card);
+        mSyncStatusText = v.findViewById(R.id.sync_status_text);
+        mUpcomingShiftsContainer = v.findViewById(R.id.upcoming_shifts_container);
+        mNoShiftsText = v.findViewById(R.id.no_shifts_text);
+        mSyncNowButton = v.findViewById(R.id.sync_now_button);
+
+        if (mSyncNowButton != null) {
+            mSyncNowButton.setOnClickListener(view -> {
+                com.best.deskclock.alarms.ShiftCalendarManager.getInstance(requireContext()).updateShiftAlarms();
+                android.widget.Toast.makeText(requireContext(), "Syncing...", android.widget.Toast.LENGTH_SHORT).show();
+                view.postDelayed(this::refreshUpcomingShiftsUI, 2500);
+            });
+        }
         mRecyclerView = v.findViewById(R.id.alarms_recycler_view);
         TextView alarmsEmptyView = v.findViewById(R.id.alarms_empty_view);
         final boolean isTablet = ThemeUtils.isTablet();
@@ -322,6 +354,9 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     @Override
     public void onResume() {
         super.onResume();
+        com.best.deskclock.alarms.ShiftCalendarManager.getInstance(requireContext()).registerObserver();
+        com.best.deskclock.alarms.ShiftCalendarManager.getInstance(requireContext()).updateShiftAlarms();
+        refreshUpcomingShiftsUI();
 
         // Schedule a runnable to update the "Today/Tomorrow" values displayed for non-repeating
         // alarms when midnight passes.
@@ -402,7 +437,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         final List<AlarmItemHolder> itemHolders = new ArrayList<>(data.getCount());
         for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
             final Alarm alarm = new Alarm(data);
-            if (ShiftAlarmUtils.isEphemeralId(alarm.id)) continue;
+
             final AlarmInstance alarmInstance = alarm.canPreemptivelyDismiss(requireContext())
                     ? new AlarmInstance(data, true)
                     : null;
@@ -410,6 +445,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
             itemHolders.add(itemHolder);
         }
         setAdapterItems(itemHolders, SystemClock.elapsedRealtime());
+        refreshUpcomingShiftsUI();
     }
 
     /**
@@ -609,6 +645,105 @@ public final class AlarmClockFragment extends DeskClockFragment implements
      * This runnable executes at midnight and refreshes the display of all alarms. Collapsed alarms
      * that do no repeat will have their "Tomorrow" strings updated to say "Today".
      */
+    private void refreshUpcomingShiftsUI() {
+        if (mUpcomingShiftsCard == null) return;
+
+        final boolean enabled = SettingsDAO.isCalendarShiftSyncEnabled(mPrefs);
+        if (!enabled) {
+            mUpcomingShiftsCard.setVisibility(View.GONE);
+            return;
+        }
+
+        mUpcomingShiftsCard.setVisibility(View.VISIBLE);
+
+        // Check permission
+        if (androidx.core.content.ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.READ_CALENDAR)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            mSyncStatusText.setText(R.string.missing_calendar_permission_warning);
+            mSyncStatusText.setTextColor(com.google.android.material.color.MaterialColors.getColor(mContext, com.google.android.material.R.attr.colorError, Color.RED));
+            mUpcomingShiftsCard.setOnClickListener(view -> {
+                mCalendarPermissionLauncher.launch(android.Manifest.permission.READ_CALENDAR);
+            });
+            mUpcomingShiftsContainer.removeAllViews();
+            mNoShiftsText.setVisibility(View.VISIBLE);
+            return;
+        }
+
+        mUpcomingShiftsCard.setOnClickListener(null);
+        mSyncStatusText.setTextColor(com.google.android.material.color.MaterialColors.getColor(mContext, com.google.android.material.R.attr.colorOnSurfaceVariant, Color.GRAY));
+
+        com.best.deskclock.alarms.ShiftCalendarManager syncManager = com.best.deskclock.alarms.ShiftCalendarManager.getInstance(requireContext());
+        if (syncManager.isLastSyncSuccess()) {
+            if (syncManager.getLastSyncTime() > 0) {
+                String timeStr = android.text.format.DateFormat.getTimeFormat(requireContext()).format(new java.util.Date(syncManager.getLastSyncTime()));
+                mSyncStatusText.setText(getString(R.string.synced_successfully_at, timeStr));
+            } else {
+                mSyncStatusText.setText("Synced successfully");
+            }
+        } else {
+            String err = syncManager.getLastSyncError();
+            if (err != null) {
+                mSyncStatusText.setText(getString(R.string.sync_failed_with_error, err));
+            } else {
+                mSyncStatusText.setText("Sync failed");
+            }
+        }
+
+        mUpcomingShiftsContainer.removeAllViews();
+
+        android.content.ContentResolver cr = requireContext().getContentResolver();
+        List<AlarmInstance> instances = AlarmInstance.getInstances(cr, "source_type = 1 OR source_type = 2");
+
+        // Sort by time ascending
+        instances.sort((a, b) -> Long.compare(a.getAlarmTime().getTimeInMillis(), b.getAlarmTime().getTimeInMillis()));
+
+        // Filter out instances that have already passed, or are snoozed/dismissed
+        java.util.List<AlarmInstance> activeShifts = new java.util.ArrayList<>();
+        for (AlarmInstance inst : instances) {
+            if (inst.getAlarmTime().getTimeInMillis() <= System.currentTimeMillis()) {
+                continue;
+            }
+            if (inst.mAlarmState == AlarmInstance.DISMISSED_STATE || inst.mAlarmState == AlarmInstance.PREDISMISSED_STATE) {
+                continue;
+            }
+            activeShifts.add(inst);
+        }
+
+        if (activeShifts.isEmpty()) {
+            mNoShiftsText.setVisibility(View.VISIBLE);
+        } else {
+            mNoShiftsText.setVisibility(View.GONE);
+            int count = Math.min(activeShifts.size(), 3);
+            LayoutInflater inflater = LayoutInflater.from(requireContext());
+            for (int i = 0; i < count; i++) {
+                AlarmInstance inst = activeShifts.get(i);
+                View itemView = inflater.inflate(R.layout.layout_upcoming_shift_item, mUpcomingShiftsContainer, false);
+
+                android.widget.ImageView iconView = itemView.findViewById(R.id.shift_icon);
+                android.widget.TextView titleView = itemView.findViewById(R.id.shift_title);
+                android.widget.TextView timeView = itemView.findViewById(R.id.shift_time);
+                View skipButton = itemView.findViewById(R.id.skip_shift_button);
+
+                titleView.setText(inst.mLabel);
+                timeView.setText(com.best.deskclock.utils.AlarmUtils.getAlarmText(requireContext(), inst, true));
+
+                if (inst.mSourceType == 2) {
+                    iconView.setImageResource(R.drawable.ic_repeat);
+                } else {
+                    iconView.setImageResource(R.drawable.ic_calendar_clock);
+                }
+
+                skipButton.setOnClickListener(view -> {
+                    com.best.deskclock.alarms.AlarmStateManager.setPreDismissState(requireContext(), inst);
+                    android.widget.Toast.makeText(requireContext(), "Shift skipped", android.widget.Toast.LENGTH_SHORT).show();
+                    refreshUpcomingShiftsUI();
+                });
+
+                mUpcomingShiftsContainer.addView(itemView);
+            }
+        }
+    }
+
     private final class MidnightRunnable implements Runnable {
         @Override
         public void run() {

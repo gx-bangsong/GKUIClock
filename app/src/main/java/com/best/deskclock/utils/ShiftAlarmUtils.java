@@ -1,5 +1,6 @@
 package com.best.deskclock.utils;
 
+import com.best.deskclock.provider.AlarmInstance;
 import java.util.regex.Pattern;
 
 public final class ShiftAlarmUtils {
@@ -23,12 +24,6 @@ public final class ShiftAlarmUtils {
     public static final String IGNORE_HOLIDAY_KEYWORD = "#IgnoreHoliday";
 
     /**
-     * Strictly negative ID range for ephemeral alarms: [-10000 to -19999].
-     */
-    public static final long EPHEMERAL_ID_START = -10000L;
-    public static final long EPHEMERAL_ID_END = -19999L;
-
-    /**
      * Default offset in minutes before the event start time.
      */
     public static final int DEFAULT_OFFSET_MINUTES = 90;
@@ -47,11 +42,25 @@ public final class ShiftAlarmUtils {
         // Prevent instantiation
     }
 
-    public static boolean isRotationId(long id) {
-        return id <= -20000L && id >= -29999L;
+    /**
+     * Helper to check if an AlarmInstance is a Calendar-synced Shift Alarm.
+     */
+    public static boolean isCalendarShift(AlarmInstance instance) {
+        return instance != null && instance.mSourceType == 1;
     }
 
+    /**
+     * Helper to check if an AlarmInstance is a local Rotation Shift Alarm.
+     */
+    public static boolean isRotation(AlarmInstance instance) {
+        return instance != null && instance.mSourceType == 2;
+    }
+
+    /**
+     * Backward compatibility check for any ephemeral instances (Calendar shift or rotation).
+     */
     public static boolean isEphemeralId(long id) {
-        return (id <= EPHEMERAL_ID_START && id >= EPHEMERAL_ID_END) || (id <= -20000L && id >= -29999L);
+        // Let's keep this if needed, but we will migrate checks to use sourceType.
+        return id <= -10000L && id >= -29999L;
     }
 }
