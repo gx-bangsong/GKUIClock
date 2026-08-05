@@ -5,28 +5,37 @@
     SPDX-License-Identifier: Apache-2.0 AND GPL-3.0-only
 -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/main"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <!-- Due to the ViewPager and the location of FAB, paddings are set
-         in the AlarmClockFragment.java file. -->
-    <com.best.deskclock.AlarmRecyclerView
-        android:id="@+id/alarms_recycler_view"
+    <include layout="@layout/layout_upcoming_shifts" />
+
+    <FrameLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false" />
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/alarms_empty_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:contentDescription="@string/no_alarms"
-        android:gravity="center_horizontal"
-        android:text="@string/no_alarms"
-        android:textSize="30sp"
-        android:visibility="gone" />
+        <!-- Due to the ViewPager and the location of FAB, paddings are set
+             in the AlarmClockFragment.java file. -->
+        <com.best.deskclock.AlarmRecyclerView
+            android:id="@+id/alarms_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false" />
 
-</FrameLayout>
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/alarms_empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:contentDescription="@string/no_alarms"
+            android:gravity="center_horizontal"
+            android:text="@string/no_alarms"
+            android:textSize="30sp"
+            android:visibility="gone" />
+    </FrameLayout>
+
+</LinearLayout>

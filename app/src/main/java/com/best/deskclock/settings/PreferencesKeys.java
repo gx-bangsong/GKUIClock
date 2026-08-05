@@ -398,5 +398,6 @@ public class PreferencesKeys {
     public static final String KEY_NOTIFICATION_PERMISSION = "key_notification_permission";
     public static final String KEY_FULL_SCREEN_NOTIFICATION_PERMISSION = "key_full_screen_notification_permission";
     public static final String KEY_SHOW_LOCKSCREEN_PERMISSION = "key_show_lockscreen_permission";
+    public static final String KEY_CALENDAR_SHIFT_SYNC = "key_calendar_shift_sync";
     public static final String KEY_ROTATION_GUIDE_SHOWN = "key_rotation_guide_shown";
 }

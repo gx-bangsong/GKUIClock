@@ -23,6 +23,7 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_VOLUME_SETTI
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_VOLUME_SETTING;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_AUTO_ROUTING_TO_EXTERNAL_AUDIO_DEVICE;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_AUTO_SILENCE_DURATION;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_CALENDAR_SHIFT_SYNC;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_DEFAULT_ALARM_RINGTONE;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_DISPLAY_DISMISS_BUTTON;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_DISPLAY_ENABLED_ALARMS_FIRST;
@@ -53,8 +54,10 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_WEEK_START;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_UPDATE_HOLIDAY_DATA;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_HOLIDAY_DATA_URL;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -71,6 +74,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
@@ -83,6 +87,7 @@ import com.best.deskclock.VibrationPatternDialogFragment;
 import com.best.deskclock.VibrationStartDelayDialogFragment;
 import com.best.deskclock.VolumeCrescendoDurationDialogFragment;
 import com.best.deskclock.alarms.AlarmUpdateHandler;
+import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.data.Weekdays;
@@ -150,6 +155,30 @@ public class AlarmSettingsFragment extends ScreenFragment
     ListPreference mMaterialDatePickerStylePref;
     Preference mHolidayDataUrlPref;
     Preference mAlarmDisplayCustomizationPref;
+    SwitchPreferenceCompat mCalendarShiftSyncPref;
+
+    private final ActivityResultLauncher<String> calendarPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (mCalendarShiftSyncPref == null) {
+                    return;
+                }
+
+                if (granted) {
+                    // The original preference change was rejected while the permission dialog was
+                    // open. Persist the opt-in now, then start synchronization.
+                    mPrefs.edit().putBoolean(KEY_CALENDAR_SHIFT_SYNC, true).apply();
+                    mCalendarShiftSyncPref.setChecked(true);
+                    final ShiftCalendarManager manager =
+                            ShiftCalendarManager.getInstance(requireContext());
+                    manager.registerObserver();
+                    manager.requestImmediateSync();
+                } else {
+                    mPrefs.edit().putBoolean(KEY_CALENDAR_SHIFT_SYNC, false).apply();
+                    mCalendarShiftSyncPref.setChecked(false);
+                    CustomToast.show(requireContext(),
+                            R.string.missing_calendar_permission_toast);
+                }
+            });
 
     private final ActivityResultLauncher<Intent> fontPickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -277,6 +306,29 @@ public class AlarmSettingsFragment extends ScreenFragment
     @Override
     public boolean onPreferenceChange(Preference pref, Object newValue) {
         switch (pref.getKey()) {
+            case KEY_CALENDAR_SHIFT_SYNC -> {
+                Utils.setVibrationTime(requireContext(), 50);
+                final boolean enabled = (boolean) newValue;
+                if (enabled && ContextCompat.checkSelfPermission(requireContext(),
+                        Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                    calendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR);
+                    return false;
+                }
+
+                // Preference writes happen after this callback returns. Post manager work so it
+                // observes the new value instead of the old one.
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    final ShiftCalendarManager manager =
+                            ShiftCalendarManager.getInstance(requireContext());
+                    if (enabled) {
+                        manager.registerObserver();
+                    } else {
+                        manager.unregisterObserver();
+                    }
+                    manager.requestImmediateSync();
+                });
+            }
+
             case KEY_DISPLAY_ENABLED_ALARMS_FIRST, KEY_ENABLE_ALARM_FAB_LONG_PRESS,
                  KEY_DISPLAY_DISMISS_BUTTON, KEY_ENABLE_ALARM_VIBRATIONS_BY_DEFAULT,
                  KEY_ENABLE_SNOOZED_OR_DISMISSED_ALARM_VIBRATIONS,
@@ -752,6 +804,11 @@ public class AlarmSettingsFragment extends ScreenFragment
         if (mHolidayDataUrlPref != null) {
             mHolidayDataUrlPref.setSummary(SettingsDAO.getHolidayDataUrl(mPrefs));
             mHolidayDataUrlPref.setOnPreferenceChangeListener(this);
+        }
+
+        mCalendarShiftSyncPref = findPreference(KEY_CALENDAR_SHIFT_SYNC);
+        if (mCalendarShiftSyncPref != null) {
+            mCalendarShiftSyncPref.setOnPreferenceChangeListener(this);
         }
     }
 

@@ -305,5 +305,24 @@ public final class ClockContract {
          * <p>Type: INTEGER</p>
          */
         String MISSED_ALARM_REPEAT_COUNT = "missed_alarm_repeat_count";
+
+        /**
+         * Identifies who created an alarm instance.
+         * <p>Type: INTEGER; see {@link AlarmInstance#SOURCE_TYPE_STANDARD} and
+         * {@link AlarmInstance#SOURCE_TYPE_CALENDAR}.</p>
+         */
+        String SOURCE_TYPE = "source_type";
+
+        /**
+         * Stable identifier used to reconcile an externally synchronized instance.
+         * <p>Type: TEXT</p>
+         */
+        String SYNC_KEY = "sync_key";
+
+        /**
+         * Persistent state owned by the external synchronization layer.
+         * <p>Type: INTEGER; see {@link AlarmInstance#SYNC_STATE_NONE}.</p>
+         */
+        String SYNC_STATE = "sync_state";
     }
 }
