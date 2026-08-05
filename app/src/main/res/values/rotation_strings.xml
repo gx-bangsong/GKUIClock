@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="advanced_shift_setup" translatable="false">Advanced Shift Setup</string>
+    <string name="cycle_length" translatable="false">Cycle Length:</string>
+    <string name="anchor_date" translatable="false">Anchor Date:</string>
+    <string name="holiday_skip" translatable="false">Holiday Skip</string>
+    <string name="off" translatable="false">Off</string>
+    <string name="days_count" translatable="false">%d days</string>
+    <string name="shift_day_description" translatable="false">Shift cycle day %d alarm time</string>
+    <string name="shift_cycle_day_n" translatable="false">Shift Cycle Day %d</string>
+    <string name="rotation_guide_title" translatable="false">Shift Rotation Mode</string>
+    <string name="rotation_guide_message" translatable="false">This mode allows you to create an alarm schedule that repeats over a multi-day cycle instead of a standard weekly one.\n\n1. Define the cycle length (e.g., 4 days).\n2. Set an anchor date to start the rotation.\n3. Configure different alarm times for each day in the cycle.\n\nYou can also enable Holiday Skip to automatically suppress alarms on statutory holidays.</string>
+    <string name="got_it" translatable="false">Got it</string>
+</resources>

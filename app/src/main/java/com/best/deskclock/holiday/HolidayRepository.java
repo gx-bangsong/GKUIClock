@@ -17,6 +17,7 @@
 package com.best.deskclock.holiday;
 
 import android.content.Context;
+import android.os.Looper;
 
 import com.best.deskclock.data.DataModel;
 
@@ -28,6 +29,8 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import com.best.deskclock.utils.LogUtils;
@@ -37,11 +40,15 @@ public class HolidayRepository {
     private static volatile HolidayRepository sInstance;
     private final HolidayDao mHolidayDao;
     private final ExecutorService mExecutorService;
+    private final Map<String, Holiday> mHolidayCache = new ConcurrentHashMap<>();
+    private final Map<String, Holiday> mCompDayCache = new ConcurrentHashMap<>();
 
     private HolidayRepository(Context context) {
         HolidayDatabase db = HolidayDatabase.getDatabase(context);
         mHolidayDao = db.holidayDao();
         mExecutorService = Executors.newSingleThreadExecutor();
+
+        // Caches are filled on-demand or during update.
     }
 
     public static HolidayRepository getInstance(Context context) {
@@ -58,24 +65,40 @@ public class HolidayRepository {
     public void updateWorkdayData() {
         mExecutorService.execute(() -> {
             try {
-                URL url = new URL(DataModel.getDataModel().getHolidayDataUrl());
-                BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
-                Type listType = new TypeToken<List<Holiday>>() {}.getType();
-                List<Holiday> holidays = new Gson().fromJson(in, listType);
-                mHolidayDao.insertAll(holidays);
-                in.close();
+                String urlStr = DataModel.getDataModel().getHolidayDataUrl();
+                if (urlStr == null || urlStr.isEmpty()) return;
+                URL url = new URL(urlStr);
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()))) {
+                    Type listType = new TypeToken<List<Holiday>>() {}.getType();
+                    List<Holiday> holidays = new Gson().fromJson(in, listType);
+                    if (holidays != null) {
+                        mHolidayDao.insertAll(holidays);
+                        mHolidayCache.clear();
+                        mCompDayCache.clear();
+                    }
+                }
             } catch (Exception e) {
-                LogUtils.e("Error updating holiday data", e);
+                LogUtils.e("Error updating holiday data: " + e.getMessage());
             }
         });
     }
 
     public Holiday getHolidayByDate(String date) {
-        return mHolidayDao.getHolidayByDate(date);
+        Holiday h = mHolidayCache.get(date);
+        if (h == null && Looper.myLooper() != Looper.getMainLooper()) {
+            h = mHolidayDao.getHolidayByDate(date);
+            if (h != null) mHolidayCache.put(date, h);
+        }
+        return h;
     }
 
     public Holiday getCompDayByDate(String date) {
-        return mHolidayDao.getCompDayByDate(date);
+        Holiday h = mCompDayCache.get(date);
+        if (h == null && Looper.myLooper() != Looper.getMainLooper()) {
+            h = mHolidayDao.getCompDayByDate(date);
+            if (h != null) mCompDayCache.put(date, h);
+        }
+        return h;
     }
 
     public List<Holiday> getAllHolidays() {

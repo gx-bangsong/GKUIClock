@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="advanced_shift_setup">高级轮班设置</string>
+    <string name="cycle_length">周期长度：</string>
+    <string name="anchor_date">锚定日期：</string>
+    <string name="holiday_skip">法定节假日跳过</string>
+    <string name="off">关闭</string>
+    <string name="days_count">%d 天</string>
+    <string name="shift_day_description">轮班周期第 %d 天闹钟时间</string>
+    <string name="shift_cycle_day_n">轮班周期第 %d 天</string>
+</resources>

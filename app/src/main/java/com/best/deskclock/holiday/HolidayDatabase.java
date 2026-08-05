@@ -36,7 +36,7 @@ public abstract class HolidayDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     HolidayDatabase.class, "holiday_database")
-                            .build();
+                            .allowMainThreadQueries().build();
                 }
             }
         }
