@@ -23,6 +23,12 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.FLASHLIGHT"/>
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+
+    <permission
+        android:name="com.best.deskclock.permission.RECEIVE_SHIFT_SYNC"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="com.best.deskclock.permission.RECEIVE_SHIFT_SYNC" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
@@ -41,6 +47,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DeskClock"
         tools:targetApi="s">
+
+        <receiver
+            android:name="com.best.deskclock.alarms.ShiftSyncReceiver"
+            android:exported="true"
+            android:permission="com.best.deskclock.permission.RECEIVE_SHIFT_SYNC">
+            <intent-filter>
+                <action android:name="com.best.deskclock.action.SYNC_CALENDAR_SHIFTS" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="com.best.deskclock.alarms.ShiftActionReceiver"
+            android:exported="false" />
 
         <!-- ============================================================== -->
         <!-- Main app components.                                           -->
@@ -184,6 +203,7 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.USER_UNLOCKED" />
                 <action android:name="org.codeaurora.poweroffalarm.action.UPDATE_ALARM" />
             </intent-filter>
         </receiver>
@@ -196,6 +216,11 @@
             android:name="com.best.deskclock.alarms.AlarmService"
             android:directBootAware="true"
             android:foregroundServiceType="systemExempted" />
+
+        <service
+            android:name="com.best.deskclock.alarms.ShiftCalendarSyncJobService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
 
         <!-- ============================================================== -->
         <!-- Timer components.                                              -->

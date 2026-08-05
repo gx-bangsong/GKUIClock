@@ -792,7 +792,9 @@ public class AlarmActivity extends AppCompatActivity implements View.OnClickList
         final Alarm alarm = Alarm.getAlarm(getContentResolver(), mAlarmInstance.mAlarmId);
 
         if (alarm == null) {
-            LogUtils.wtf("Failed to retrieve alarm with ID: %d", mAlarmInstance.mAlarmId);
+            if (!mAlarmInstance.isCalendarShift()) {
+                LogUtils.wtf("Failed to retrieve alarm with ID: %d", mAlarmInstance.mAlarmId);
+            }
             return false;
         }
 

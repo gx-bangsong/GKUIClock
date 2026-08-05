@@ -44,6 +44,12 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
      */
     public static final long INVALID_ID = -1;
 
+    public static final int SOURCE_TYPE_STANDARD = 0;
+    public static final int SOURCE_TYPE_CALENDAR = 1;
+
+    public static final int SYNC_STATE_NONE = 0;
+    public static final int SYNC_STATE_SKIPPED = 1;
+
     /**
      * Offset from alarm time to stop showing missed notification.
      */
@@ -70,7 +76,10 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             CRESCENDO_DURATION,
             ALARM_VOLUME,
             HOLIDAY_OPTION,
-            ROTATION_PAYLOAD
+            ROTATION_PAYLOAD,
+            SOURCE_TYPE,
+            SYNC_KEY,
+            SYNC_STATE
     };
 
     /**
@@ -98,8 +107,11 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     private static final int ALARM_VOLUME_INDEX = 18;
     private static final int HOLIDAY_OPTION_INDEX = 19;
     private static final int ROTATION_PAYLOAD_INDEX = 20;
+    private static final int SOURCE_TYPE_INDEX = 21;
+    private static final int SYNC_KEY_INDEX = 22;
+    private static final int SYNC_STATE_INDEX = 23;
 
-    private static final int COLUMN_COUNT = ROTATION_PAYLOAD_INDEX + 1;
+    private static final int COLUMN_COUNT = SYNC_STATE_INDEX + 1;
     // Public fields
     public long mId;
     public int mYear;
@@ -123,6 +135,9 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
     public int mAlarmVolume;
     public int mHolidayOption;
     public String mRotationPayload;
+    public int mSourceType;
+    public String mSyncKey;
+    public int mSyncState;
 
     public AlarmInstance(Calendar calendar, Long alarmId) {
         this(calendar);
@@ -146,6 +161,9 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         mAlarmVolume = DEFAULT_ALARM_VOLUME;
         mHolidayOption = 0;
         mRotationPayload = null;
+        mSourceType = SOURCE_TYPE_STANDARD;
+        mSyncKey = null;
+        mSyncState = SYNC_STATE_NONE;
     }
 
     public AlarmInstance(AlarmInstance instance) {
@@ -170,6 +188,9 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         this.mAlarmVolume = instance.mAlarmVolume;
         this.mHolidayOption = instance.mHolidayOption;
         this.mRotationPayload = instance.mRotationPayload;
+        this.mSourceType = instance.mSourceType;
+        this.mSyncKey = instance.mSyncKey;
+        this.mSyncState = instance.mSyncState;
     }
 
     public AlarmInstance(Cursor c, boolean joinedTable) {
@@ -192,6 +213,14 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             mAlarmVolume = c.getInt(Alarm.INSTANCE_ALARM_VOLUME_INDEX);
             mHolidayOption = c.getInt(Alarm.INSTANCE_HOLIDAY_OPTION_INDEX);
             mRotationPayload = c.getString(Alarm.INSTANCE_ROTATION_PAYLOAD_INDEX);
+            mRingtone = c.isNull(Alarm.RINGTONE_INDEX)
+                    ? RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                    : Uri.parse(c.getString(Alarm.RINGTONE_INDEX));
+            mAlarmId = c.getLong(Alarm.ID_INDEX);
+            mAlarmState = c.getInt(Alarm.INSTANCE_STATE_INDEX);
+            mSourceType = SOURCE_TYPE_STANDARD;
+            mSyncKey = null;
+            mSyncState = SYNC_STATE_NONE;
         } else {
             mId = c.getLong(ID_INDEX);
             mYear = c.getInt(YEAR_INDEX);
@@ -211,19 +240,17 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
             mAlarmVolume = c.getInt(ALARM_VOLUME_INDEX);
             mHolidayOption = c.getInt(HOLIDAY_OPTION_INDEX);
             mRotationPayload = c.getString(ROTATION_PAYLOAD_INDEX);
+            mRingtone = c.isNull(RINGTONE_INDEX)
+                    ? RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                    : Uri.parse(c.getString(RINGTONE_INDEX));
+            if (!c.isNull(ALARM_ID_INDEX)) {
+                mAlarmId = c.getLong(ALARM_ID_INDEX);
+            }
+            mAlarmState = c.getInt(ALARM_STATE_INDEX);
+            mSourceType = c.getInt(SOURCE_TYPE_INDEX);
+            mSyncKey = c.getString(SYNC_KEY_INDEX);
+            mSyncState = c.getInt(SYNC_STATE_INDEX);
         }
-        if (c.isNull(RINGTONE_INDEX)) {
-            // Should we be saving this with the current ringtone or leave it null
-            // so it changes when user changes default ringtone?
-            mRingtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        } else {
-            mRingtone = Uri.parse(c.getString(RINGTONE_INDEX));
-        }
-
-        if (!c.isNull(ALARM_ID_INDEX)) {
-            mAlarmId = c.getLong(ALARM_ID_INDEX);
-        }
-        mAlarmState = c.getInt(ALARM_STATE_INDEX);
     }
 
     public ContentValues createContentValues() {
@@ -258,8 +285,15 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
         values.put(ALARM_VOLUME, mAlarmVolume);
         values.put(HOLIDAY_OPTION, mHolidayOption);
         values.put(ROTATION_PAYLOAD, mRotationPayload);
+        values.put(SOURCE_TYPE, mSourceType);
+        values.put(SYNC_KEY, mSyncKey);
+        values.put(SYNC_STATE, mSyncState);
 
         return values;
+    }
+
+    public boolean isCalendarShift() {
+        return mSourceType == SOURCE_TYPE_CALENDAR;
     }
 
     public static Intent createIntent(Context context, Class<?> cls, long instanceId) {
@@ -513,6 +547,9 @@ public final class AlarmInstance implements ClockContract.InstancesColumns {
                 ", mMissedAlarmRepeatLimit=" + mMissedAlarmRepeatLimit +
                 ", mCrescendoDuration=" + mCrescendoDuration +
                 ", mAlarmVolume=" + mAlarmVolume +
+                ", mSourceType=" + mSourceType +
+                ", mSyncKey='" + mSyncKey + '\'' +
+                ", mSyncState=" + mSyncState +
                 '}';
     }
     public static void addInstance(android.content.ContentResolver cr, AlarmInstance instance) {

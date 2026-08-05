@@ -10,9 +10,11 @@ import static com.best.deskclock.DeskClockApplication.getDefaultSharedPreference
 import static com.best.deskclock.settings.PreferencesDefaultValues.SPINNER_TIME_PICKER_STYLE;
 import static com.best.deskclock.uidata.UiDataModel.Tab.ALARMS;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -27,11 +29,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -45,6 +52,8 @@ import com.best.deskclock.alarms.CustomSpinnerTimePickerDialog;
 import com.best.deskclock.alarms.MaterialTimePickerDialog;
 import com.best.deskclock.alarms.OnTimeSetListener;
 import com.best.deskclock.alarms.ScrollHandler;
+import com.best.deskclock.alarms.ShiftActionReceiver;
+import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.alarms.dataadapter.AlarmItemHolder;
 import com.best.deskclock.alarms.dataadapter.AlarmItemViewHolder;
 import com.best.deskclock.alarms.dataadapter.CollapsedAlarmViewHolder;
@@ -54,6 +63,7 @@ import com.best.deskclock.events.Events;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.uidata.UiDataModel;
+import com.best.deskclock.utils.AlarmUtils;
 import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.ThemeUtils;
 import com.best.deskclock.utils.Utils;
@@ -65,6 +75,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -95,6 +106,34 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     // Views
     private ViewGroup mMainLayout;
     private AlarmRecyclerView mRecyclerView;
+    private View mUpcomingShiftsCard;
+    private TextView mSyncStatusText;
+    private LinearLayout mUpcomingShiftsContainer;
+    private View mNoShiftsText;
+    private View mSyncNowButton;
+
+    private final ShiftCalendarManager.SyncListener mShiftSyncListener = () -> {
+        if (isAdded() && getView() != null) {
+            refreshUpcomingShiftsUI();
+        }
+    };
+
+    private final ActivityResultLauncher<String> mCalendarPermissionLauncher =
+            registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
+                if (granted) {
+                    final ShiftCalendarManager manager =
+                            ShiftCalendarManager.getInstance(requireContext());
+                    manager.registerObserver();
+                    manager.requestImmediateSync();
+                } else if (isAdded()) {
+                    Toast.makeText(requireContext(),
+                            R.string.missing_calendar_permission_toast,
+                            Toast.LENGTH_SHORT).show();
+                }
+                if (isAdded() && getView() != null) {
+                    refreshUpcomingShiftsUI();
+                }
+            });
 
     // Data
     private Loader<?> mCursorLoader;
@@ -134,6 +173,12 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         final View v = inflater.inflate(R.layout.alarm_clock, container, false);
         mContext = requireContext();
         mMainLayout = v.findViewById(R.id.main);
+        mUpcomingShiftsCard = v.findViewById(R.id.upcoming_shifts_card);
+        mSyncStatusText = v.findViewById(R.id.sync_status_text);
+        mUpcomingShiftsContainer = v.findViewById(R.id.upcoming_shifts_container);
+        mNoShiftsText = v.findViewById(R.id.no_shifts_text);
+        mSyncNowButton = v.findViewById(R.id.sync_now_button);
+        mSyncNowButton.setOnClickListener(view -> requestCalendarSyncFromUi());
         mRecyclerView = v.findViewById(R.id.alarms_recycler_view);
         TextView alarmsEmptyView = v.findViewById(R.id.alarms_empty_view);
         final boolean isTablet = ThemeUtils.isTablet();
@@ -319,8 +364,20 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        ShiftCalendarManager.getInstance(requireContext()).addListener(mShiftSyncListener);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+
+        final ShiftCalendarManager shiftManager =
+                ShiftCalendarManager.getInstance(requireContext());
+        shiftManager.registerObserver();
+        shiftManager.requestSync();
+        refreshUpcomingShiftsUI();
 
         // Schedule a runnable to update the "Today/Tomorrow" values displayed for non-repeating
         // alarms when midnight passes.
@@ -371,6 +428,12 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         mAlarmUpdateHandler.hideUndoBar();
     }
 
+    @Override
+    public void onStop() {
+        ShiftCalendarManager.getInstance(requireContext()).removeListener(mShiftSyncListener);
+        super.onStop();
+    }
+
     /**
      * Perform smooth scroll to position.
      */
@@ -408,6 +471,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
             itemHolders.add(itemHolder);
         }
         setAdapterItems(itemHolders, SystemClock.elapsedRealtime());
+        refreshUpcomingShiftsUI();
     }
 
     /**
@@ -584,6 +648,110 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     public void setAlarmVolume(Alarm alarm, int alarmVolume) {
         alarm.alarmVolume = alarmVolume;
         mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+    }
+
+    private void requestCalendarSyncFromUi() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CALENDAR)
+                != PackageManager.PERMISSION_GRANTED) {
+            mCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR);
+            return;
+        }
+
+        final ShiftCalendarManager manager =
+                ShiftCalendarManager.getInstance(requireContext());
+        manager.registerObserver();
+        manager.requestImmediateSync();
+        Toast.makeText(requireContext(), R.string.calendar_sync_requested,
+                Toast.LENGTH_SHORT).show();
+        refreshUpcomingShiftsUI();
+    }
+
+    private void refreshUpcomingShiftsUI() {
+        if (!isAdded() || mUpcomingShiftsCard == null || mSyncStatusText == null
+                || mUpcomingShiftsContainer == null || mNoShiftsText == null) {
+            return;
+        }
+
+        if (!SettingsDAO.isCalendarShiftSyncEnabled(mPrefs)) {
+            mUpcomingShiftsCard.setVisibility(View.GONE);
+            return;
+        }
+        mUpcomingShiftsCard.setVisibility(View.VISIBLE);
+        mUpcomingShiftsContainer.removeAllViews();
+
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CALENDAR)
+                != PackageManager.PERMISSION_GRANTED) {
+            mSyncStatusText.setText(R.string.missing_calendar_permission_warning);
+            mSyncStatusText.setTextColor(MaterialColors.getColor(mContext,
+                    com.google.android.material.R.attr.colorError, Color.RED));
+            mNoShiftsText.setVisibility(View.VISIBLE);
+            mSyncNowButton.setEnabled(true);
+            return;
+        }
+
+        final ShiftCalendarManager manager =
+                ShiftCalendarManager.getInstance(requireContext());
+        mSyncStatusText.setTextColor(MaterialColors.getColor(mContext,
+                com.google.android.material.R.attr.colorOnSurfaceVariant, Color.GRAY));
+        mSyncNowButton.setEnabled(!manager.isSyncInProgress());
+
+        if (manager.isSyncInProgress()) {
+            mSyncStatusText.setText(R.string.calendar_sync_in_progress);
+        } else if (manager.getLastSyncTime() == 0) {
+            mSyncStatusText.setText(R.string.calendar_sync_not_started);
+        } else if (manager.isLastSyncSuccess()) {
+            final String time = android.text.format.DateFormat.getTimeFormat(requireContext())
+                    .format(new Date(manager.getLastSyncTime()));
+            mSyncStatusText.setText(getString(R.string.calendar_sync_success,
+                    manager.getLastSyncCount(), time));
+        } else {
+            final String error = manager.getLastSyncError();
+            mSyncStatusText.setText(getString(R.string.calendar_sync_failed,
+                    error == null ? getString(R.string.calendar_sync_not_started) : error));
+            mSyncStatusText.setTextColor(MaterialColors.getColor(mContext,
+                    com.google.android.material.R.attr.colorError, Color.RED));
+        }
+
+        final List<AlarmInstance> instances = AlarmInstance.getInstances(
+                requireContext().getContentResolver(), AlarmInstance.SOURCE_TYPE + " = ?",
+                String.valueOf(AlarmInstance.SOURCE_TYPE_CALENDAR));
+        instances.sort((left, right) -> Long.compare(
+                left.getAlarmTime().getTimeInMillis(),
+                right.getAlarmTime().getTimeInMillis()));
+
+        final List<AlarmInstance> upcoming = new ArrayList<>();
+        final long now = System.currentTimeMillis();
+        for (AlarmInstance instance : instances) {
+            if (instance.getAlarmTime().getTimeInMillis() <= now
+                    || instance.mAlarmState == AlarmInstance.DISMISSED_STATE
+                    || instance.mAlarmState == AlarmInstance.PREDISMISSED_STATE
+                    || instance.mAlarmState == AlarmInstance.MISSED_STATE) {
+                continue;
+            }
+            upcoming.add(instance);
+        }
+
+        mNoShiftsText.setVisibility(upcoming.isEmpty() ? View.VISIBLE : View.GONE);
+        final LayoutInflater inflater = LayoutInflater.from(requireContext());
+        for (int index = 0; index < Math.min(upcoming.size(), 3); index++) {
+            final AlarmInstance instance = upcoming.get(index);
+            final View item = inflater.inflate(R.layout.layout_upcoming_shift_item,
+                    mUpcomingShiftsContainer, false);
+            final TextView title = item.findViewById(R.id.shift_title);
+            final TextView time = item.findViewById(R.id.shift_time);
+            final View skip = item.findViewById(R.id.skip_shift_button);
+
+            title.setText(instance.getLabelOrDefault(requireContext()));
+            time.setText(AlarmUtils.getAlarmText(requireContext(), instance, true));
+            skip.setOnClickListener(view -> {
+                if (ShiftActionReceiver.skipShift(requireContext(), instance.mId)) {
+                    Toast.makeText(requireContext(), R.string.shift_skipped,
+                            Toast.LENGTH_SHORT).show();
+                }
+                refreshUpcomingShiftsUI();
+            });
+            mUpcomingShiftsContainer.addView(item);
+        }
     }
 
     /**

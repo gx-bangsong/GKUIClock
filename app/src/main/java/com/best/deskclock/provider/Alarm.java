@@ -519,6 +519,14 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     }
 
     /**
+     * Null-safe overload for standalone instances, such as calendar-synchronized alarms, which do
+     * not have a parent row in the alarm template table.
+     */
+    public static Alarm getAlarm(ContentResolver cr, Long alarmId) {
+        return alarmId == null ? null : getAlarm(cr, alarmId.longValue());
+    }
+
+    /**
      * Get all alarms given conditions.
      *
      * @param cr            provides access to the content model

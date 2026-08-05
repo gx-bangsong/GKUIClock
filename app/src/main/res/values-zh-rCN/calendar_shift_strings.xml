@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="calendar_shift_sync_title">日历轮班闹钟同步</string>
+    <string name="calendar_shift_sync_summary">根据系统日历中兼容的班次事件自动创建闹钟</string>
+    <string name="calendar_shift_default_label">日历班次</string>
+    <string name="upcoming_shifts_title">即将到来的日历班次闹钟</string>
+    <string name="sync_now">立即同步</string>
+    <string name="calendar_sync_not_started">尚未同步</string>
+    <string name="calendar_sync_in_progress">正在同步日历…</string>
+    <string name="calendar_sync_success">已于 %2$s 同步 %1$d 个班次闹钟</string>
+    <string name="calendar_sync_failed">同步失败：%s</string>
+    <string name="missing_calendar_permission_warning">需要日历权限，点击同步按钮进行授权</string>
+    <string name="missing_calendar_permission_toast">同步班次闹钟需要日历权限</string>
+    <string name="no_upcoming_shifts">未来 7 天内没有日历班次闹钟</string>
+    <string name="skip_this_shift">跳过本次班次</string>
+    <string name="skip_shift_short">跳过</string>
+    <string name="shift_skipped">已跳过本次班次闹钟</string>
+    <string name="calendar_sync_requested">已开始同步日历</string>
+</resources>

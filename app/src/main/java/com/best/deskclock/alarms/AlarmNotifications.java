@@ -88,17 +88,13 @@ public final class AlarmNotifications {
         final Alarm alarm = Alarm.getAlarm(context.getContentResolver(), instance.mAlarmId);
         final String contentTitle;
 
-        if (alarm == null) {
+        if (alarm == null && !instance.isCalendarShift()) {
             LogUtils.wtf("Failed to retrieve alarm with ID: %d", instance.mAlarmId);
             return;
         }
 
-        if (!alarm.daysOfWeek.isRepeating()) {
-            if (alarm.deleteAfterUse) {
-                contentTitle = context.getString(R.string.occasional_alarm_alert_predismiss_title);
-            } else {
-                contentTitle = context.getString(R.string.alarm_alert_predismiss_title);
-            }
+        if (alarm != null && !alarm.daysOfWeek.isRepeating() && alarm.deleteAfterUse) {
+            contentTitle = context.getString(R.string.occasional_alarm_alert_predismiss_title);
         } else {
             contentTitle = context.getString(R.string.alarm_alert_predismiss_title);
         }
@@ -122,7 +118,7 @@ public final class AlarmNotifications {
         // Setup up dismiss action
         final int id = instance.hashCode();
         final String dismissActionTitle;
-        if (!alarm.daysOfWeek.isRepeating() && alarm.deleteAfterUse) {
+        if (alarm != null && !alarm.daysOfWeek.isRepeating() && alarm.deleteAfterUse) {
             dismissActionTitle = context.getString(R.string.alarm_alert_dismiss_and_delete_text);
         } else {
             dismissActionTitle = context.getString(R.string.alarm_alert_dismiss_text);
@@ -133,6 +129,15 @@ public final class AlarmNotifications {
         builder.addAction(R.drawable.ic_alarm_off, dismissActionTitle,
                 PendingIntent.getService(context, id, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT
                         | PendingIntent.FLAG_IMMUTABLE));
+
+        if (instance.isCalendarShift()) {
+            final Intent skipIntent = new Intent(context, ShiftActionReceiver.class)
+                    .setAction(ShiftActionReceiver.ACTION_SKIP_SHIFT)
+                    .putExtra(ShiftActionReceiver.EXTRA_INSTANCE_ID, instance.mId);
+            builder.addAction(R.drawable.ic_clear, context.getString(R.string.skip_this_shift),
+                    PendingIntent.getBroadcast(context, id + 1, skipIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
+        }
 
         // Setup content action if instance is owned by alarm
         Intent viewAlarmIntent = createViewAlarmIntent(context, instance);
@@ -412,18 +417,14 @@ public final class AlarmNotifications {
         final String dismissActionTitle;
         final Alarm alarm = Alarm.getAlarm(service.getContentResolver(), instance.mAlarmId);
 
-        if (alarm == null) {
+        if (alarm == null && !instance.isCalendarShift()) {
             LogUtils.wtf("Failed to retrieve alarm with ID: %d", instance.mAlarmId);
             return;
         }
 
         // Setup up dismiss action
-        if (!alarm.daysOfWeek.isRepeating()) {
-            if (alarm.deleteAfterUse) {
-                dismissActionTitle = resources.getString(R.string.alarm_alert_dismiss_and_delete_text);
-            } else {
-                dismissActionTitle = resources.getString(R.string.alarm_alert_dismiss_text);
-            }
+        if (alarm != null && !alarm.daysOfWeek.isRepeating() && alarm.deleteAfterUse) {
+            dismissActionTitle = resources.getString(R.string.alarm_alert_dismiss_and_delete_text);
         } else {
             dismissActionTitle = resources.getString(R.string.alarm_alert_dismiss_text);
         }

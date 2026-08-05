@@ -19,6 +19,7 @@ package com.best.deskclock.holiday;
 import android.content.Context;
 import android.os.Looper;
 
+import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.data.DataModel;
 
 import com.google.gson.Gson;
@@ -38,13 +39,15 @@ import com.best.deskclock.utils.LogUtils;
 public class HolidayRepository {
 
     private static volatile HolidayRepository sInstance;
+    private final Context mContext;
     private final HolidayDao mHolidayDao;
     private final ExecutorService mExecutorService;
     private final Map<String, Holiday> mHolidayCache = new ConcurrentHashMap<>();
     private final Map<String, Holiday> mCompDayCache = new ConcurrentHashMap<>();
 
     private HolidayRepository(Context context) {
-        HolidayDatabase db = HolidayDatabase.getDatabase(context);
+        mContext = context.getApplicationContext();
+        HolidayDatabase db = HolidayDatabase.getDatabase(mContext);
         mHolidayDao = db.holidayDao();
         mExecutorService = Executors.newSingleThreadExecutor();
 
@@ -75,6 +78,7 @@ public class HolidayRepository {
                         mHolidayDao.insertAll(holidays);
                         mHolidayCache.clear();
                         mCompDayCache.clear();
+                        ShiftCalendarManager.getInstance(mContext).requestSync();
                     }
                 }
             } catch (Exception e) {

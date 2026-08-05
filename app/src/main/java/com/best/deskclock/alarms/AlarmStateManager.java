@@ -155,6 +155,11 @@ public final class AlarmStateManager extends BroadcastReceiver {
         }, 300);
     }
 
+    /** Recomputes the framework's next-alarm indicator after a batch synchronization. */
+    public static void refreshNextAlarm(Context context) {
+        updateNextAlarm(context);
+    }
+
 
     /**
      * Returns an alarm instance of an alarm that's going to fire next.
@@ -269,6 +274,10 @@ public final class AlarmStateManager extends BroadcastReceiver {
             nextRepeatedInstance.addInstance(cr);
             registerInstance(context, nextRepeatedInstance, true);
         }
+
+        // A parent alarm moving or becoming disabled may remove a +/-30 minute conflict with a
+        // calendar shift. Reconcile after the state transition settles.
+        ShiftCalendarManager.getInstance(context).requestSync();
     }
 
     /**
@@ -647,21 +656,26 @@ public final class AlarmStateManager extends BroadcastReceiver {
             }
         } else if (instance.mAlarmState == AlarmInstance.MISSED_STATE) {
             if (currentTime.before(alarmTime)) {
-                if (instance.mAlarmId == null) {
+                if (instance.isCalendarShift()) {
+                    // A backwards clock change can make a missed calendar occurrence upcoming
+                    // again. It has no parent template to re-enable, so let the normal time-based
+                    // state logic below schedule it directly.
+                    instance.mAlarmState = AlarmInstance.SILENT_STATE;
+                } else if (instance.mAlarmId == null) {
                     LogUtils.i("Cannot restore missed instance for one-time alarm");
                     // This instance parent got deleted (ie. deleteAfterUse), so we should not re-activate it.
                     deleteInstanceAndUpdateParent(context, instance);
                     return;
+                } else {
+                    // TODO: This will re-activate missed snoozed alarms, but will
+                    //  use our normal notifications. This is not ideal, but very rare use-case.
+                    //  We should look into fixing this in the future.
+
+                    // Make sure we re-enable the parent alarm of the instance
+                    // because it will get activated by the below code.
+                    Objects.requireNonNull(alarm).enabled = true;
+                    alarm.updateAlarm(cr);
                 }
-
-                // TODO: This will re-activate missed snoozed alarms, but will
-                //  use our normal notifications. This is not ideal, but very rare use-case.
-                //  We should look into fixing this in the future.
-
-                // Make sure we re-enable the parent alarm of the instance
-                // because it will get activated by by the below code
-                Objects.requireNonNull(alarm).enabled = true;
-                alarm.updateAlarm(cr);
             }
         } else if (instance.mAlarmState == AlarmInstance.PREDISMISSED_STATE) {
             if (currentTime.before(alarmTime)) {
@@ -740,6 +754,14 @@ public final class AlarmStateManager extends BroadcastReceiver {
         Collections.sort(instances, (lhs, rhs) -> rhs.getAlarmTime().compareTo(lhs.getAlarmTime()));
 
         for (AlarmInstance instance : instances) {
+            if (instance.isCalendarShift()) {
+                // Calendar instances intentionally have no parent alarm template. Preserve their
+                // snooze/pre-dismiss state across reboot and time-zone changes; the calendar
+                // reconciliation that follows will update their schedule if necessary.
+                registerInstance(context, instance, false);
+                continue;
+            }
+
             final Alarm alarm = Alarm.getAlarm(contentResolver, instance.mAlarmId);
             if (alarm == null) {
                 unregisterInstance(context, instance);
