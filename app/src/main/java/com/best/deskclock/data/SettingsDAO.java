@@ -581,7 +581,16 @@ public final class SettingsDAO {
      * @return the duration for which a timer can ring before expiring and being reset.
      */
     static int getTimerAutoSilenceDuration(SharedPreferences prefs) {
-        return prefs.getInt(KEY_TIMER_AUTO_SILENCE_DURATION, DEFAULT_TIMER_AUTO_SILENCE_DURATION);
+        try {
+            return prefs.getInt(KEY_TIMER_AUTO_SILENCE_DURATION, DEFAULT_TIMER_AUTO_SILENCE_DURATION);
+        } catch (ClassCastException e) {
+            try {
+                String val = prefs.getString(KEY_TIMER_AUTO_SILENCE_DURATION, String.valueOf(DEFAULT_TIMER_AUTO_SILENCE_DURATION));
+                return Integer.parseInt(val);
+            } catch (Exception ex) {
+                return DEFAULT_TIMER_AUTO_SILENCE_DURATION;
+            }
+        }
     }
 
     /**
@@ -1579,5 +1588,10 @@ public final class SettingsDAO {
      */
     public static int getAlarmSecondsHandColor(SharedPreferences prefs, Context context) {
         return prefs.getInt("key_alarm_seconds_hand_color", Color.RED);
+    }
+
+    /** Calendar access is privacy-sensitive, so shift synchronization is opt-in. */
+    public static boolean isCalendarShiftSyncEnabled(SharedPreferences prefs) {
+        return prefs.getBoolean(KEY_CALENDAR_SHIFT_SYNC, false);
     }
 }

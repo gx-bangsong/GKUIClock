@@ -45,6 +45,8 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.best.deskclock.ItemAdapter;
 import com.best.deskclock.R;
+import com.best.deskclock.settings.PreferencesKeys;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.events.Events;
@@ -55,8 +57,34 @@ import com.best.deskclock.utils.AnimatorUtils;
 import com.best.deskclock.utils.DeviceUtils;
 import com.best.deskclock.utils.RingtoneUtils;
 
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
+import androidx.transition.TransitionManager;
+import androidx.fragment.app.FragmentManager;
+import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
+import com.google.android.material.slider.Slider;
+import com.google.android.material.materialswitch.MaterialSwitch;
+import android.text.TextUtils;
+import java.util.Calendar;
+import java.util.Date;
+import android.text.format.DateFormat;
+import java.text.SimpleDateFormat;
 import com.google.android.material.color.MaterialColors;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import androidx.core.util.Pair;
+import com.best.deskclock.alarms.ShiftCalendarManager;
+import com.best.deskclock.utils.LogUtils;
+import android.widget.Toast;
+import java.util.TimeZone;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import java.lang.reflect.Type;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Collections;
+import java.util.ArrayList;
 
 import java.util.List;
 import java.util.Locale;
@@ -94,6 +122,24 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final TextView alarmVolumeValue;
     private final Chip delete;
     private final Chip duplicate;
+    private final View shiftSetupActivator;
+    private final ImageView shiftSetupCaret;
+    private final View advancedShiftPanel;
+    private final Slider cycleLengthSlider;
+    private final TextView cycleLengthValue;
+    private final com.google.android.material.button.MaterialButton anchorDateButton;
+    private final MaterialSwitch holidaySkipSwitch;
+    private final ChipGroup shiftGridContainer;
+    private final MaterialSwitch calendarSyncSwitch;
+    private final View calendarSelectionLayout;
+    private final com.google.android.material.button.MaterialButton calendarSelectorButton;
+    private final com.google.android.material.button.MaterialButton annualLeaveButton;
+    private final TextView annualLeaveStatusText;
+    private final java.util.Stack<android.view.View> mNodePool = new java.util.Stack<>();
+    private final android.os.Handler mHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable mSavePayloadRunnable = this::saveRotationPayload;
+    private boolean mIsDraggingSlider = false;
+    private int mPendingCycleLength = -1;
 
     private final boolean mHasVibrator;
     private final boolean mHasFlash;
@@ -138,6 +184,19 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         delete = itemView.findViewById(R.id.delete);
         duplicate = itemView.findViewById(R.id.duplicate);
         holidayOption = itemView.findViewById(R.id.holiday_option);
+        shiftSetupActivator = itemView.findViewById(R.id.shift_setup_activator);
+        shiftSetupCaret = itemView.findViewById(R.id.shift_setup_caret);
+        advancedShiftPanel = itemView.findViewById(R.id.advanced_shift_panel);
+        cycleLengthSlider = itemView.findViewById(R.id.cycle_length_slider);
+        cycleLengthValue = itemView.findViewById(R.id.cycle_length_value);
+        anchorDateButton = itemView.findViewById(R.id.anchor_date_button);
+        holidaySkipSwitch = itemView.findViewById(R.id.holiday_skip_switch);
+        shiftGridContainer = itemView.findViewById(R.id.shift_grid_container);
+        calendarSyncSwitch = itemView.findViewById(R.id.calendar_sync_switch);
+        calendarSelectionLayout = itemView.findViewById(R.id.calendar_selection_layout);
+        calendarSelectorButton = itemView.findViewById(R.id.calendar_selector_button);
+        annualLeaveButton = itemView.findViewById(R.id.annual_leave_button);
+        annualLeaveStatusText = itemView.findViewById(R.id.annual_leave_status_text);
 
         // Collapse handler
         itemView.setOnClickListener(v -> {
@@ -197,6 +256,70 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         // Ringtone editor handler
         ringtone.setOnClickListener(v ->
                 getAlarmTimeClickHandler().onRingtoneClicked(getItemHolder().item));
+
+        shiftSetupActivator.setOnClickListener(v -> toggleShiftPanel());
+        cycleLengthSlider.setOnTouchListener((v, event) -> {
+            int action = event.getActionMasked();
+            if (action == android.view.MotionEvent.ACTION_DOWN || action == android.view.MotionEvent.ACTION_MOVE) {
+                android.view.ViewParent p = v.getParent();
+                while (p != null) {
+                    p.requestDisallowInterceptTouchEvent(true);
+                    if (p instanceof androidx.recyclerview.widget.RecyclerView) break;
+                    p = p.getParent();
+                }
+            }
+            return false;
+        });
+        cycleLengthSlider.addOnSliderTouchListener(new com.google.android.material.slider.Slider.OnSliderTouchListener() {
+            @Override
+            public void onStartTrackingTouch(com.google.android.material.slider.Slider slider) {
+                mIsDraggingSlider = true;
+                com.best.deskclock.utils.LogUtils.v("RotationSlider: Start tracking at " + slider.getValue());
+            }
+
+            @Override
+            public void onStopTrackingTouch(com.google.android.material.slider.Slider slider) {
+                mIsDraggingSlider = false;
+                com.best.deskclock.utils.LogUtils.v("RotationSlider: Stop tracking at " + slider.getValue());
+                // Immediate update when touch stops
+                mHandler.removeCallbacks(mSavePayloadRunnable);
+                mHandler.post(mSavePayloadRunnable);
+            }
+        });
+        cycleLengthSlider.addOnChangeListener((slider, value, fromUser) -> {
+            if (fromUser) {
+                int length = (int) value;
+                mPendingCycleLength = length;
+                cycleLengthValue.setText(itemView.getContext().getString(R.string.days_count, length));
+                // Delay rebuilding grid until user stops or debounce
+                mHandler.removeCallbacks(mSavePayloadRunnable);
+                mHandler.postDelayed(mSavePayloadRunnable, 300);
+            }
+        });
+        holidaySkipSwitch.setOnClickListener(v -> { mHandler.removeCallbacks(mSavePayloadRunnable); mHandler.post(mSavePayloadRunnable); });
+        
+        calendarSyncSwitch.setOnClickListener(v -> {
+            boolean isChecked = ((MaterialSwitch) v).isChecked();
+            if (isChecked) {
+                Context ctx = v.getContext();
+                if (androidx.core.content.ContextCompat.checkSelfPermission(ctx, android.Manifest.permission.READ_CALENDAR) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    ((MaterialSwitch) v).setChecked(false);
+                    if (ctx instanceof AppCompatActivity) {
+                        androidx.core.app.ActivityCompat.requestPermissions((AppCompatActivity) ctx, new String[]{android.Manifest.permission.READ_CALENDAR}, 123);
+                    } else {
+                        Toast.makeText(ctx, R.string.missing_calendar_permission, Toast.LENGTH_LONG).show();
+                    }
+                    return;
+                }
+            }
+            mHandler.removeCallbacks(mSavePayloadRunnable);
+            mHandler.post(mSavePayloadRunnable);
+        });
+        
+        calendarSelectorButton.setOnClickListener(v -> showCalendarSelectorDialog());
+        annualLeaveButton.setOnClickListener(v -> showAnnualLeaveDatePicker());
+
+        anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
 
         // Vibrator checkbox handler
         vibrate.setOnClickListener(v ->
@@ -282,7 +405,6 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     @Override
     protected void onBindItemView(final AlarmItemHolder itemHolder) {
         super.onBindItemView(itemHolder);
-
         final Alarm alarm = itemHolder.item;
         final Context context = itemView.getContext();
         bindEditLabel(context, alarm);
@@ -291,6 +413,11 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         bindSelectedDate(alarm);
         bindRingtone(context, alarm);
         bindVibrator(context, alarm);
+        if (!android.text.TextUtils.isEmpty(alarm.rotationPayload) && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+            repeatDays.setVisibility(GONE);
+        } else {
+            repeatDays.setVisibility(VISIBLE);
+        }
         bindFlash(alarm);
         bindDeleteOccasionalAlarmAfterUse(alarm);
         bindEditLabelAnnotations(alarm);
@@ -301,6 +428,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         bindAlarmVolume(context, alarm);
         bindDeleteAndDuplicateButtons();
         bindHolidayOption(context, alarm);
+        bindShiftSetup(context, alarm);
 
         // If this view is bound without coming from a CollapsedAlarmViewHolder (e.g.
         // when calling expand() before this alarm was visible in it's collapsed state),
@@ -327,6 +455,8 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         snoozeDurationValue.setAlpha(1f);
         missedAlarmRepeatLimitTitle.setAlpha(1f);
         missedAlarmRepeatLimitValue.setAlpha(1f);
+        shiftSetupActivator.setAlpha(1f);
+        advancedShiftPanel.setAlpha(1f);
         crescendoDurationTitle.setAlpha(1f);
         crescendoDurationValue.setAlpha(1f);
         alarmVolumeTitle.setAlpha(1f);
@@ -1294,6 +1424,424 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     }
 
     private String formatAlarmDate(Alarm alarm) {
-        return "Placeholder Date"; // Placeholder
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(alarm.year, alarm.month, alarm.day);
+        String pattern = DateFormat.getBestDateTimePattern(Locale.getDefault(), "yyyyMMMMd");
+        return new SimpleDateFormat(pattern, Locale.getDefault()).format(calendar.getTime());
     }
+
+    private void toggleShiftPanel() {
+        final boolean isVisible = advancedShiftPanel.getVisibility() == View.VISIBLE;
+        if (!isVisible && !mPrefs.getBoolean(PreferencesKeys.KEY_ROTATION_GUIDE_SHOWN, false)) {
+            new MaterialAlertDialogBuilder(itemView.getContext())
+                .setTitle(R.string.rotation_guide_title)
+                .setMessage(R.string.rotation_guide_message)
+                .setPositiveButton(R.string.got_it, (dialog, which) -> {
+                    mPrefs.edit().putBoolean(PreferencesKeys.KEY_ROTATION_GUIDE_SHOWN, true).apply();
+                })
+                .show();
+        }
+        if (itemView instanceof ViewGroup) {
+            androidx.transition.TransitionManager.beginDelayedTransition((ViewGroup) itemView);
+        }
+        if (isVisible) {
+            advancedShiftPanel.setVisibility(View.GONE);
+            shiftSetupCaret.animate().rotation(0).setDuration(200).start();
+            if (android.text.TextUtils.isEmpty(getItemHolder().item.rotationPayload)) {
+                repeatDays.setVisibility(View.VISIBLE);
+            }
+        } else {
+            advancedShiftPanel.setVisibility(View.VISIBLE);
+            shiftSetupCaret.animate().rotation(180).setDuration(200).start();
+            repeatDays.setVisibility(View.GONE);
+        }
+        itemView.requestLayout();
+    }
+
+    private void rebuildShiftGrid(int length) {
+        long start = System.currentTimeMillis();
+        int currentCount = shiftGridContainer.getChildCount();
+
+        if (currentCount > length) {
+            // Remove excess nodes and put in pool
+            for (int i = currentCount - 1; i >= length; i--) {
+                android.view.View child = shiftGridContainer.getChildAt(i);
+                shiftGridContainer.removeViewAt(i);
+                mNodePool.push(child);
+            }
+        } else if (currentCount < length) {
+            // Add required nodes from pool or inflate
+            LayoutInflater inflater = LayoutInflater.from(itemView.getContext());
+            for (int i = currentCount; i < length; i++) {
+                final int index = i;
+                android.view.View node = mNodePool.isEmpty() ? inflater.inflate(R.layout.rotation_day_node, shiftGridContainer, false) : mNodePool.pop();
+
+                TextView label = node.findViewById(R.id.day_label);
+                TextView input = node.findViewById(R.id.day_time_input);
+                android.view.View card = node.findViewById(R.id.day_card);
+
+                label.setText("Day " + (i + 1));
+                input.setText(R.string.off);
+                card.setOnClickListener(v -> {
+                    int currentMins = parseTimeToMinutes(input.getText().toString());
+                    int h = currentMins >= 0 ? currentMins / 60 : 8;
+                    int m = currentMins >= 0 ? currentMins % 60 : 0;
+                    com.google.android.material.timepicker.MaterialTimePicker picker = new com.google.android.material.timepicker.MaterialTimePicker.Builder()
+                            .setTimeFormat(com.google.android.material.timepicker.TimeFormat.CLOCK_24H)
+                            .setHour(h)
+                            .setMinute(m)
+                            .setTitleText("Day " + (index + 1))
+                            .build();
+                    picker.addOnPositiveButtonClickListener(view -> {
+                        input.setText(String.format(java.util.Locale.US, "%02d:%02d", picker.getHour(), picker.getMinute()));
+                        mHandler.removeCallbacks(mSavePayloadRunnable); mHandler.post(mSavePayloadRunnable);
+                    });
+                    if (itemView.getContext() instanceof androidx.appcompat.app.AppCompatActivity) {
+                        picker.show(((androidx.appcompat.app.AppCompatActivity) itemView.getContext()).getSupportFragmentManager(), "SHIFT_TIME_PICKER");
+                    }
+                });
+                shiftGridContainer.addView(node);
+            }
+        }
+
+        // Always update labels just in case of recycling issues
+        for (int i = 0; i < shiftGridContainer.getChildCount(); i++) {
+            android.view.View node = shiftGridContainer.getChildAt(i);
+            ((TextView) node.findViewById(R.id.day_label)).setText("Day " + (i + 1));
+        }
+
+        com.best.deskclock.utils.LogUtils.v("RotationGrid: Incremental update to " + length + " nodes in " + (System.currentTimeMillis() - start) + "ms");
+    }
+
+    private void saveRotationPayload() {
+        int length;
+        if (mPendingCycleLength != -1) {
+            length = mPendingCycleLength;
+            rebuildShiftGrid(mPendingCycleLength);
+            mPendingCycleLength = -1;
+        } else {
+            length = (int) cycleLengthSlider.getValue();
+        }
+        Alarm alarm = getItemHolder().item;
+        String originalPayload = alarm.rotationPayload;
+        boolean holidaySkip = holidaySkipSwitch.isChecked();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < shiftGridContainer.getChildCount(); i++) {
+            View node = shiftGridContainer.getChildAt(i);
+            TextView input = node.findViewById(R.id.day_time_input);
+            sb.append(parseTimeToMinutes(input.getText().toString()));
+            if (i < shiftGridContainer.getChildCount() - 1) sb.append(",");
+        }
+        long anchorMs = 0;
+        try {
+            anchorMs = new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(anchorDateButton.getText().toString()).getTime();
+        } catch (Exception ignored) {}
+
+        String overrides = "{}";
+        boolean existingSyncEnabled = false;
+        String existingCalendarId = "all";
+        if (!android.text.TextUtils.isEmpty(alarm.rotationPayload) && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+            String[] existingParts = alarm.rotationPayload.split("\\|");
+            if (existingParts.length >= 6) {
+                overrides = existingParts[5];
+            }
+            if (existingParts.length >= 8) {
+                existingSyncEnabled = Boolean.parseBoolean(existingParts[6]);
+                existingCalendarId = existingParts[7];
+            }
+        }
+
+        boolean calendarSyncEnabled = calendarSyncSwitch.isChecked();
+        String payload;
+        if (calendarSyncEnabled) {
+            String payloadTemp = String.format(Locale.US, "SHIFT_ROTATION_V2|%d|%d|%b|%s|%s|%b|%s",
+                    length, anchorMs, holidaySkip, sb.toString(), overrides, calendarSyncEnabled, existingCalendarId);
+            alarm.rotationPayload = payloadTemp;
+            ShiftCalendarManager.getInstance(itemView.getContext()).syncAlarmWithCalendar(alarm);
+            payload = alarm.rotationPayload;
+        } else {
+            payload = String.format(Locale.US, "SHIFT_ROTATION_V2|%d|%d|%b|%s|%s|%b|%s",
+                    length, anchorMs, holidaySkip, sb.toString(), overrides, calendarSyncEnabled, existingCalendarId);
+        }
+
+        if (!payload.equals(originalPayload)) {
+            alarm.rotationPayload = payload;
+            getAlarmTimeClickHandler().asyncUpdateAlarm(alarm, false);
+            bindShiftSetup(itemView.getContext(), alarm);
+        }
+    }
+
+    private int parseTimeToMinutes(String text) {
+        if (android.text.TextUtils.isEmpty(text) || text.equalsIgnoreCase("Off") || text.equals(itemView.getContext().getString(R.string.off))) return -1;
+        try {
+            if (text.contains(":")) {
+                String[] p = text.split(":");
+                return Integer.parseInt(p[0]) * 60 + Integer.parseInt(p[1]);
+            }
+            return Integer.parseInt(text);
+        } catch (Exception e) { return -1; }
+    }
+
+    private String formatMinutesToTime(int mins) {
+        if (mins < 0) return itemView.getContext().getString(R.string.off);
+        return String.format(Locale.US, "%02d:%02d", mins / 60, mins % 60);
+    }
+
+    private void bindShiftSetupExtras(Context context, Alarm alarm) {
+        if (alarm == null || TextUtils.isEmpty(alarm.rotationPayload) || !alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+            calendarSyncSwitch.setChecked(false);
+            calendarSelectionLayout.setVisibility(GONE);
+            annualLeaveStatusText.setVisibility(GONE);
+            return;
+        }
+
+        String[] parts = alarm.rotationPayload.split("\\|");
+        boolean calendarSyncEnabled = false;
+        String calendarId = "all";
+
+        if (parts.length >= 8) {
+            calendarSyncEnabled = Boolean.parseBoolean(parts[6]);
+            calendarId = parts[7];
+        }
+
+        calendarSyncSwitch.setChecked(calendarSyncEnabled);
+        calendarSelectionLayout.setVisibility(calendarSyncEnabled ? VISIBLE : GONE);
+
+        // Set calendar display name
+        if ("all".equals(calendarId)) {
+            calendarSelectorButton.setText(R.string.calendar_none_selected);
+        } else {
+            List<ShiftCalendarManager.CalendarInfo> calendars = ShiftCalendarManager.getInstance(context).getSystemCalendars();
+            String foundName = null;
+            for (ShiftCalendarManager.CalendarInfo info : calendars) {
+                if (info.id.equals(calendarId)) {
+                    foundName = info.displayName;
+                    break;
+                }
+            }
+            if (foundName != null) {
+                calendarSelectorButton.setText(foundName);
+            } else {
+                calendarSelectorButton.setText(R.string.calendar_none_selected);
+            }
+        }
+
+        // Parse overrides to find annual leave (-1 value)
+        try {
+            Type type = new TypeToken<Map<String, Double>>(){}.getType();
+            Map<String, Double> overrides = new Gson().fromJson(parts[5], type);
+            if (overrides != null) {
+                List<String> pausedDates = new ArrayList<>();
+                for (Map.Entry<String, Double> entry : overrides.entrySet()) {
+                    if (entry.getValue().intValue() == -1) {
+                        pausedDates.add(entry.getKey());
+                    }
+                }
+                if (!pausedDates.isEmpty()) {
+                    Collections.sort(pausedDates);
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < pausedDates.size(); i++) {
+                        String rawDate = pausedDates.get(i);
+                        try {
+                            // Extract MM-DD for brevity
+                            String[] dp = rawDate.split("-");
+                            if (dp.length >= 3) {
+                                sb.append(dp[1]).append("-").append(dp[2]);
+                            } else {
+                                sb.append(rawDate);
+                            }
+                        } catch (Exception e) {
+                            sb.append(rawDate);
+                        }
+                        if (i < pausedDates.size() - 1) {
+                            sb.append(", ");
+                        }
+                    }
+                    annualLeaveStatusText.setVisibility(VISIBLE);
+                    annualLeaveStatusText.setText(context.getString(R.string.annual_leave_active, sb.toString()));
+                } else {
+                    annualLeaveStatusText.setVisibility(GONE);
+                }
+            } else {
+                annualLeaveStatusText.setVisibility(GONE);
+            }
+        } catch (Exception e) {
+            annualLeaveStatusText.setVisibility(GONE);
+        }
+    }
+
+    private void showCalendarSelectorDialog() {
+        Context context = itemView.getContext();
+        List<ShiftCalendarManager.CalendarInfo> calendars = ShiftCalendarManager.getInstance(context).getSystemCalendars();
+        
+        List<String> itemsList = new ArrayList<>();
+        List<String> idsList = new ArrayList<>();
+
+        itemsList.add(context.getString(R.string.calendar_none_selected));
+        idsList.add("all");
+
+        for (ShiftCalendarManager.CalendarInfo info : calendars) {
+            itemsList.add(info.displayName + " (" + info.accountName + ")");
+            idsList.add(info.id);
+        }
+
+        String[] items = itemsList.toArray(new String[0]);
+        
+        new MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.choose_calendar)
+                .setItems(items, (dialog, which) -> {
+                    String selectedId = idsList.get(which);
+                    Alarm alarm = getItemHolder().item;
+                    if (alarm.rotationPayload != null && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+                        String[] parts = alarm.rotationPayload.split("\\|");
+                        if (parts.length >= 6) {
+                            int length = Integer.parseInt(parts[1]);
+                            long anchorMs = Long.parseLong(parts[2]);
+                            boolean holidaySkip = Boolean.parseBoolean(parts[3]);
+                            String minutesPerDayStr = parts[4];
+                            String overrides = parts[5];
+                            boolean calendarSyncEnabled = calendarSyncSwitch.isChecked();
+
+                            alarm.rotationPayload = String.format(Locale.US, "SHIFT_ROTATION_V2|%d|%d|%b|%s|%s|%b|%s",
+                                    length, anchorMs, holidaySkip, minutesPerDayStr, overrides, calendarSyncEnabled, selectedId);
+                            
+                            // Re-sync
+                            if (calendarSyncEnabled) {
+                                ShiftCalendarManager.getInstance(context).syncAlarmWithCalendar(alarm);
+                            }
+                            getAlarmTimeClickHandler().asyncUpdateAlarm(alarm, false);
+                            bindShiftSetupExtras(context, alarm);
+                        }
+                    }
+                })
+                .show();
+    }
+
+    private void showAnnualLeaveDatePicker() {
+        Context context = itemView.getContext();
+        if (!(context instanceof AppCompatActivity)) return;
+        FragmentManager fm = ((AppCompatActivity) context).getSupportFragmentManager();
+
+        MaterialDatePicker<Pair<Long, Long>> dateRangePicker =
+                MaterialDatePicker.Builder.dateRangePicker()
+                        .setTitleText(R.string.annual_leave_pause)
+                        .build();
+
+        dateRangePicker.addOnPositiveButtonClickListener(selection -> {
+            if (selection != null && selection.first != null && selection.second != null) {
+                Alarm alarm = getItemHolder().item;
+                if (alarm.rotationPayload != null && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+                    String[] parts = alarm.rotationPayload.split("\\|");
+                    if (parts.length >= 6) {
+                        try {
+                            int length = Integer.parseInt(parts[1]);
+                            long anchorMs = Long.parseLong(parts[2]);
+                            boolean holidaySkip = Boolean.parseBoolean(parts[3]);
+                            String minutesPerDayStr = parts[4];
+                            
+                            Type type = new TypeToken<Map<String, Double>>(){}.getType();
+                            Map<String, Double> overrides = new Gson().fromJson(parts[5], type);
+                            if (overrides == null) {
+                                overrides = new HashMap<>();
+                            }
+
+                            // Fill with -1 (pause) for all dates in the picked range
+                            Calendar startCal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                            startCal.setTimeInMillis(selection.first);
+                            Calendar endCal = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                            endCal.setTimeInMillis(selection.second);
+
+                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                            while (!startCal.after(endCal)) {
+                                String dateKey = sdf.format(startCal.getTime());
+                                overrides.put(dateKey, -1.0);
+                                startCal.add(Calendar.DAY_OF_YEAR, 1);
+                            }
+
+                            boolean calendarSyncEnabled = calendarSyncSwitch.isChecked();
+                            String calendarId = parts.length >= 8 ? parts[7] : "all";
+
+                            alarm.rotationPayload = String.format(Locale.US, "SHIFT_ROTATION_V2|%d|%d|%b|%s|%s|%b|%s",
+                                    length, anchorMs, holidaySkip, minutesPerDayStr, new Gson().toJson(overrides), calendarSyncEnabled, calendarId);
+
+                            getAlarmTimeClickHandler().asyncUpdateAlarm(alarm, false);
+                            bindShiftSetupExtras(context, alarm);
+                        } catch (Exception e) {
+                            LogUtils.e("ExpandedAlarmViewHolder", "Failed to save annual leave", e);
+                        }
+                    }
+                }
+            }
+        });
+
+        dateRangePicker.show(fm, "annual_leave_picker");
+    }
+
+    private void bindShiftSetup(Context context, Alarm alarm) {
+        shiftSetupActivator.setVisibility(VISIBLE);
+        final boolean hasRotation = !android.text.TextUtils.isEmpty(alarm.rotationPayload)
+                && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2");
+
+        if (hasRotation || advancedShiftPanel.getVisibility() == VISIBLE) {
+            repeatDays.setVisibility(GONE);
+        } else {
+            repeatDays.setVisibility(VISIBLE);
+        }
+
+        if (!hasRotation) {
+            if (advancedShiftPanel.getVisibility() != VISIBLE) {
+                advancedShiftPanel.setVisibility(GONE);
+                shiftSetupCaret.setRotation(0);
+            }
+            cycleLengthSlider.setValue(7);
+            cycleLengthValue.setText(context.getString(R.string.days_count, 7));
+            if (android.text.TextUtils.isEmpty(anchorDateButton.getText())) {
+                anchorDateButton.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date()));
+            }
+            holidaySkipSwitch.setChecked(false);
+            // Only rebuild grid if panel is actually visible to save cold-start time
+            if (advancedShiftPanel.getVisibility() == VISIBLE && shiftGridContainer.getChildCount() == 0) {
+                rebuildShiftGrid(7);
+            }
+            return;
+        }
+        String[] parts = alarm.rotationPayload.split("\\|");
+        if (parts.length < 6) return;
+        try {
+            int length = Integer.parseInt(parts[1]);
+            long anchorMs = Long.parseLong(parts[2]);
+            boolean holidaySkip = Boolean.parseBoolean(parts[3]);
+            String[] minutes = parts[4].split(",");
+            int displayLength = mPendingCycleLength != -1 ? mPendingCycleLength : length;
+            if (!mIsDraggingSlider && cycleLengthSlider.getValue() != displayLength) {
+                cycleLengthSlider.setValue((float) displayLength);
+            }
+            cycleLengthValue.setText(context.getString(R.string.days_count, length));
+            anchorDateButton.setText(new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date(anchorMs)));
+            if (holidaySkipSwitch.isChecked() != holidaySkip) {
+                holidaySkipSwitch.setChecked(holidaySkip);
+            }
+            long start = System.currentTimeMillis();
+            if (mPendingCycleLength != -1) {
+                length = mPendingCycleLength;
+            }
+            if (shiftGridContainer.getChildCount() != length) {
+                rebuildShiftGrid(length);
+            }
+            for (int i = 0; i < length; i++) {
+                android.view.View node = shiftGridContainer.getChildAt(i);
+                TextView input = node.findViewById(R.id.day_time_input);
+                if (i < minutes.length) {
+                    input.setText(formatMinutesToTime(Integer.parseInt(minutes[i])));
+                } else {
+                    input.setText(R.string.off);
+                }
+            }
+            com.best.deskclock.utils.LogUtils.v("RotationGrid: Bound " + length + " nodes in " + (System.currentTimeMillis() - start) + "ms");
+            bindShiftSetupExtras(context, alarm);
+        } catch (Exception ignored) {}
+    }
+
 }

@@ -18,6 +18,7 @@ import com.best.deskclock.controller.Controller;
 import com.best.deskclock.controller.ThemeController;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.holiday.HolidayRepository;
+import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.events.LogEventTracker;
 import com.best.deskclock.uidata.UiDataModel;
 import com.best.deskclock.utils.LogUtils;
@@ -47,6 +48,9 @@ public class DeskClockApplication extends Application {
 
         // Download holiday data on start
         HolidayRepository.getInstance(applicationContext).updateWorkdayData();
+
+        // Register shift calendar observer
+        ShiftCalendarManager.getInstance(applicationContext).registerObserver();
     }
 
     public static Context getContext() {

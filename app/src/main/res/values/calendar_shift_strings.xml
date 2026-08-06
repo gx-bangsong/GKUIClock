@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string name="calendar_shift_sync_title">Calendar shift alarm synchronization</string>
+    <string name="calendar_shift_sync_summary">Create alarms from compatible shift events in the system calendar</string>
+    <string name="calendar_shift_default_label">Calendar shift</string>
+    <string name="upcoming_shifts_title">Upcoming calendar shift alarms</string>
+    <string name="sync_now">Sync now</string>
+    <string name="calendar_sync_not_started">Not synchronized yet</string>
+    <string name="calendar_sync_in_progress">Synchronizing calendar…</string>
+    <string name="calendar_sync_success">Synchronized %1$d shift alarms at %2$s</string>
+    <string name="calendar_sync_failed">Synchronization failed: %s</string>
+    <string name="missing_calendar_permission_warning">Calendar permission is required. Tap sync to grant it.</string>
+    <string name="missing_calendar_permission_toast">Calendar permission is required to synchronize shift alarms</string>
+    <string name="no_upcoming_shifts">No calendar shift alarms in the next 7 days</string>
+    <string name="skip_this_shift">Skip this shift</string>
+    <string name="skip_shift_short">Skip</string>
+    <string name="shift_skipped">Shift alarm skipped</string>
+    <string name="calendar_sync_requested">Calendar synchronization started</string>
+</resources>

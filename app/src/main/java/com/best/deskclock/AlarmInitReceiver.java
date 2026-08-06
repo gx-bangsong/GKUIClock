@@ -16,6 +16,7 @@ import android.os.PowerManager.WakeLock;
 
 import com.best.deskclock.alarms.AlarmNotifications;
 import com.best.deskclock.alarms.AlarmStateManager;
+import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.holiday.HolidayRepository;
 import com.best.deskclock.controller.Controller;
 import com.best.deskclock.data.DataModel;
@@ -63,6 +64,12 @@ public class AlarmInitReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, Intent intent) {
         final String action = intent.getAction();
         LogUtils.i("AlarmInitReceiver " + action);
+
+        // Register shift calendar observer dynamically
+        ShiftCalendarManager.getInstance(context).registerObserver();
+        if (Intent.ACTION_BOOT_COMPLETED.equals(action) || Intent.ACTION_TIME_CHANGED.equals(action)) {
+            ShiftCalendarManager.getInstance(context).triggerSyncAllAlarms();
+        }
 
         final PendingResult result = goAsync();
         final WakeLock wl = AlarmAlertWakeLock.createPartialWakeLock(context);
@@ -147,6 +154,13 @@ public class AlarmInitReceiver extends BroadcastReceiver {
                     // Update all the alarm instances on time change event
                     AlarmStateManager.fixAlarmInstances(context);
                 }
+
+                // Calendar data may be unavailable during LOCKED_BOOT_COMPLETED. Existing calendar
+                // instances were preserved above; USER_UNLOCKED will trigger another reconciliation.
+                final ShiftCalendarManager shiftManager =
+                        ShiftCalendarManager.getInstance(context);
+                shiftManager.registerObserver();
+                shiftManager.requestSync();
             } finally {
                 result.finish();
                 wl.release();

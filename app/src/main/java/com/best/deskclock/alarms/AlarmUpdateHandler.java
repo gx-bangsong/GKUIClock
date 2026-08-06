@@ -70,6 +70,7 @@ public final class AlarmUpdateHandler {
                 if (newAlarm.enabled) {
                     instance = setupAlarmInstance(newAlarm);
                 }
+                requestCalendarReconciliation();
             }
 
             final AlarmInstance finalInstance = instance;
@@ -115,6 +116,7 @@ public final class AlarmUpdateHandler {
                     newInstance.mSnoozeDuration = alarm.snoozeDuration;
                     newInstance.mCrescendoDuration = alarm.crescendoDuration;
                     newInstance.mAlarmVolume = alarm.alarmVolume;
+                    newInstance.mRotationPayload = alarm.rotationPayload;
                     // Since we copied the mId of the old instance and the mId is used
                     // as the primary key in the AlarmInstance table, this will replace
                     // the existing instance.
@@ -122,12 +124,14 @@ public final class AlarmUpdateHandler {
                     // Update the notification for this instance.
                     AlarmNotifications.updateNotification(mAppContext, newInstance);
                 }
+                requestCalendarReconciliation();
                 return;
             }
             // Otherwise, this is a major update and we're going to re-create the alarm
             AlarmStateManager.deleteAllInstances(mAppContext, alarm.id);
 
             final AlarmInstance finalInstance = alarm.enabled ? setupAlarmInstance(alarm) : null;
+            requestCalendarReconciliation();
 
             handler.post(() -> {
                 if (popToast && finalInstance != null) {
@@ -153,6 +157,7 @@ public final class AlarmUpdateHandler {
             }
             AlarmStateManager.deleteAllInstances(mAppContext, alarm.id);
             final boolean deleted = Alarm.deleteAlarm(mAppContext.getContentResolver(), alarm.id);
+            requestCalendarReconciliation();
 
             handler.post(() -> {
                 if (deleted) {
@@ -194,6 +199,12 @@ public final class AlarmUpdateHandler {
                     asyncAddAlarm(deletedAlarm);
                 });
         SnackbarManager.show(snackbar);
+    }
+
+    private void requestCalendarReconciliation() {
+        // Manual and local-rotation instances take precedence within +/-30 minutes. Debouncing in
+        // the manager keeps rapid UI edits from causing repeated calendar queries.
+        ShiftCalendarManager.getInstance(mAppContext).requestSync();
     }
 
     private AlarmInstance setupAlarmInstance(Alarm alarm) {
