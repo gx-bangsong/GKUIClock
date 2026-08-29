@@ -650,6 +650,11 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
     }
 
+    /** Requests calendar access for per-alarm rotation synchronization. */
+    public void requestCalendarPermissionForRotation() {
+        mCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR);
+    }
+
     private void requestCalendarSyncFromUi() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CALENDAR)
                 != PackageManager.PERMISSION_GRANTED) {

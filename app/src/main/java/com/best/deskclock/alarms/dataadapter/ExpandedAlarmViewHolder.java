@@ -20,6 +20,7 @@ import static com.best.deskclock.settings.PreferencesDefaultValues.VIBRATION_PAT
 import static com.best.deskclock.settings.PreferencesDefaultValues.VIBRATION_PATTERN_STRONG;
 import static com.best.deskclock.settings.PreferencesDefaultValues.VIBRATION_PATTERN_TICK_TOCK;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
@@ -27,6 +28,7 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
@@ -39,12 +41,16 @@ import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.ContextCompat;
+import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView.ViewHolder;
 
 import com.best.deskclock.ItemAdapter;
 import com.best.deskclock.R;
+import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.settings.PreferencesKeys;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.best.deskclock.data.DataModel;
@@ -55,8 +61,10 @@ import com.best.deskclock.uidata.UiDataModel;
 import com.best.deskclock.utils.AlarmUtils;
 import com.best.deskclock.utils.AnimatorUtils;
 import com.best.deskclock.utils.DeviceUtils;
+import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.RingtoneUtils;
 
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
 import androidx.transition.TransitionManager;
@@ -72,9 +80,17 @@ import java.util.Date;
 import android.text.format.DateFormat;
 import java.text.SimpleDateFormat;
 import com.google.android.material.color.MaterialColors;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * A ViewHolder containing views for an alarm item in expanded state.
@@ -116,6 +132,11 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private final TextView cycleLengthValue;
     private final com.google.android.material.button.MaterialButton anchorDateButton;
     private final MaterialSwitch holidaySkipSwitch;
+    private final MaterialSwitch rotationCalendarSyncSwitch;
+    private final View rotationCalendarSelectionLayout;
+    private final com.google.android.material.button.MaterialButton rotationCalendarSelectorButton;
+    private final com.google.android.material.button.MaterialButton annualLeaveButton;
+    private final TextView annualLeaveStatusText;
     private final ChipGroup shiftGridContainer;
     private final java.util.Stack<android.view.View> mNodePool = new java.util.Stack<>();
     private final android.os.Handler mHandler = new android.os.Handler(android.os.Looper.getMainLooper());
@@ -173,6 +194,14 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         cycleLengthValue = itemView.findViewById(R.id.cycle_length_value);
         anchorDateButton = itemView.findViewById(R.id.anchor_date_button);
         holidaySkipSwitch = itemView.findViewById(R.id.holiday_skip_switch);
+        rotationCalendarSyncSwitch =
+                itemView.findViewById(R.id.rotation_calendar_sync_switch);
+        rotationCalendarSelectionLayout =
+                itemView.findViewById(R.id.rotation_calendar_selection_layout);
+        rotationCalendarSelectorButton =
+                itemView.findViewById(R.id.rotation_calendar_selector_button);
+        annualLeaveButton = itemView.findViewById(R.id.annual_leave_button);
+        annualLeaveStatusText = itemView.findViewById(R.id.annual_leave_status_text);
         shiftGridContainer = itemView.findViewById(R.id.shift_grid_container);
 
         // Collapse handler
@@ -273,8 +302,32 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
                 mHandler.postDelayed(mSavePayloadRunnable, 300);
             }
         });
-        holidaySkipSwitch.setOnClickListener(v -> { mHandler.removeCallbacks(mSavePayloadRunnable); mHandler.post(mSavePayloadRunnable); });
-        anchorDateButton.setOnClickListener(v -> getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
+        holidaySkipSwitch.setOnClickListener(v -> {
+            mHandler.removeCallbacks(mSavePayloadRunnable);
+            mHandler.post(mSavePayloadRunnable);
+        });
+        rotationCalendarSyncSwitch.setOnClickListener(v -> {
+            final Context calendarContext = v.getContext();
+            if (rotationCalendarSyncSwitch.isChecked()
+                    && ContextCompat.checkSelfPermission(calendarContext,
+                    Manifest.permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+                rotationCalendarSyncSwitch.setChecked(false);
+                rotationCalendarSelectionLayout.setVisibility(GONE);
+                getAlarmTimeClickHandler().requestRotationCalendarPermission();
+                Toast.makeText(calendarContext, R.string.rotation_calendar_permission,
+                        Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            rotationCalendarSelectionLayout.setVisibility(
+                    rotationCalendarSyncSwitch.isChecked() ? VISIBLE : GONE);
+            mHandler.removeCallbacks(mSavePayloadRunnable);
+            mHandler.post(mSavePayloadRunnable);
+        });
+        rotationCalendarSelectorButton.setOnClickListener(v -> showCalendarSelectorDialog());
+        annualLeaveButton.setOnClickListener(v -> showAnnualLeaveDatePicker());
+        anchorDateButton.setOnClickListener(v ->
+                getAlarmTimeClickHandler().onAnchorDateClicked(getItemHolder().item));
 
         // Vibrator checkbox handler
         vibrate.setOnClickListener(v ->
@@ -1409,6 +1462,9 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             advancedShiftPanel.setVisibility(View.VISIBLE);
             shiftSetupCaret.animate().rotation(180).setDuration(200).start();
             repeatDays.setVisibility(View.GONE);
+            if (shiftGridContainer.getChildCount() == 0) {
+                rebuildShiftGrid((int) cycleLengthSlider.getValue());
+            }
         }
         itemView.requestLayout();
     }
@@ -1492,19 +1548,42 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
         } catch (Exception ignored) {}
 
         String overrides = "{}";
-        if (!android.text.TextUtils.isEmpty(alarm.rotationPayload) && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
-            String[] existingParts = alarm.rotationPayload.split("\\|");
+        String calendarId = "all";
+        String managedCalendarDates = "[]";
+        boolean previouslyCalendarSynced = false;
+        if (!android.text.TextUtils.isEmpty(alarm.rotationPayload)
+                && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+            String[] existingParts = alarm.rotationPayload.split("\\|", -1);
             if (existingParts.length >= 6) {
                 overrides = existingParts[5];
             }
+            if (existingParts.length >= 8) {
+                previouslyCalendarSynced = Boolean.parseBoolean(existingParts[6]);
+                calendarId = TextUtils.isEmpty(existingParts[7]) ? "all" : existingParts[7];
+            }
+            if (existingParts.length >= 9 && !TextUtils.isEmpty(existingParts[8])) {
+                managedCalendarDates = existingParts[8];
+            }
         }
 
-        String payload = String.format(Locale.US, "SHIFT_ROTATION_V2|%d|%d|%b|%s|%s", length, anchorMs, holidaySkip, sb.toString(), overrides);
+        final boolean calendarSyncEnabled = rotationCalendarSyncSwitch.isChecked();
+        String payload = String.format(Locale.US,
+                "SHIFT_ROTATION_V2|%d|%d|%b|%s|%s|%b|%s|%s",
+                length, anchorMs, holidaySkip, sb, overrides, calendarSyncEnabled, calendarId,
+                managedCalendarDates);
         if (!payload.equals(alarm.rotationPayload)) {
             alarm.rotationPayload = payload;
             getAlarmTimeClickHandler().asyncUpdateAlarm(alarm, false);
             // DO NOT call getItemHolder().notifyItemChanged() here as it causes view re-binding and slider jumping.
             // The UI is already up-to-date.
+        }
+
+        if (calendarSyncEnabled || previouslyCalendarSynced
+                || !"[]".equals(managedCalendarDates)) {
+            final ShiftCalendarManager manager =
+                    ShiftCalendarManager.getInstance(itemView.getContext());
+            manager.registerObserver();
+            manager.requestSync();
         }
     }
 
@@ -1522,6 +1601,210 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
     private String formatMinutesToTime(int mins) {
         if (mins < 0) return itemView.getContext().getString(R.string.off);
         return String.format(Locale.US, "%02d:%02d", mins / 60, mins % 60);
+    }
+
+    private void bindShiftSetupExtras(Context context, Alarm alarm) {
+        if (alarm == null || TextUtils.isEmpty(alarm.rotationPayload)
+                || !alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+            rotationCalendarSyncSwitch.setChecked(false);
+            rotationCalendarSelectionLayout.setVisibility(GONE);
+            rotationCalendarSelectorButton.setText(R.string.rotation_calendar_all);
+            annualLeaveStatusText.setVisibility(GONE);
+            return;
+        }
+
+        final String[] parts = alarm.rotationPayload.split("\\|", -1);
+        final boolean calendarSyncEnabled = parts.length >= 8
+                && Boolean.parseBoolean(parts[6]);
+        final String calendarId = parts.length >= 8 && !TextUtils.isEmpty(parts[7])
+                ? parts[7] : "all";
+        rotationCalendarSyncSwitch.setChecked(calendarSyncEnabled);
+        rotationCalendarSelectionLayout.setVisibility(calendarSyncEnabled ? VISIBLE : GONE);
+        bindCalendarSelection(context, calendarId);
+
+        if (parts.length < 6) {
+            annualLeaveStatusText.setVisibility(GONE);
+            return;
+        }
+        try {
+            final Type type = new TypeToken<Map<String, Double>>() { }.getType();
+            final Map<String, Double> overrides = new Gson().fromJson(parts[5], type);
+            final List<String> pausedDates = new ArrayList<>();
+            if (overrides != null) {
+                for (Map.Entry<String, Double> entry : overrides.entrySet()) {
+                    if (entry.getValue() != null && entry.getValue() < 0) {
+                        pausedDates.add(entry.getKey());
+                    }
+                }
+            }
+            if (pausedDates.isEmpty()) {
+                annualLeaveStatusText.setVisibility(GONE);
+                return;
+            }
+
+            Collections.sort(pausedDates);
+            final StringBuilder summary = new StringBuilder();
+            for (int i = 0; i < pausedDates.size(); i++) {
+                final String date = pausedDates.get(i);
+                final String[] dateParts = date.split("-");
+                summary.append(dateParts.length == 3
+                        ? dateParts[1] + "-" + dateParts[2] : date);
+                if (i < pausedDates.size() - 1) {
+                    summary.append(", ");
+                }
+            }
+            annualLeaveStatusText.setText(
+                    context.getString(R.string.annual_leave_active, summary));
+            annualLeaveStatusText.setVisibility(VISIBLE);
+        } catch (RuntimeException e) {
+            LogUtils.e("ExpandedAlarmViewHolder", "Unable to read annual leave dates", e);
+            annualLeaveStatusText.setVisibility(GONE);
+        }
+    }
+
+    private void bindCalendarSelection(Context context, String calendarId) {
+        if ("all".equals(calendarId)) {
+            rotationCalendarSelectorButton.setText(R.string.rotation_calendar_all);
+            return;
+        }
+        for (ShiftCalendarManager.CalendarInfo info
+                : ShiftCalendarManager.getInstance(context).getSystemCalendars()) {
+            if (calendarId.equals(info.id)) {
+                rotationCalendarSelectorButton.setText(TextUtils.isEmpty(info.displayName)
+                        ? calendarId : info.displayName);
+                return;
+            }
+        }
+        rotationCalendarSelectorButton.setText(calendarId);
+    }
+
+    private void showCalendarSelectorDialog() {
+        final Context context = itemView.getContext();
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR)
+                != PackageManager.PERMISSION_GRANTED) {
+            getAlarmTimeClickHandler().requestRotationCalendarPermission();
+            Toast.makeText(context, R.string.rotation_calendar_permission,
+                    Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        final List<String> labels = new ArrayList<>();
+        final List<String> ids = new ArrayList<>();
+        labels.add(context.getString(R.string.rotation_calendar_all));
+        ids.add("all");
+        for (ShiftCalendarManager.CalendarInfo info
+                : ShiftCalendarManager.getInstance(context).getSystemCalendars()) {
+            final String displayName = TextUtils.isEmpty(info.displayName) ? info.id : info.displayName;
+            labels.add(TextUtils.isEmpty(info.accountName)
+                    ? displayName : displayName + " (" + info.accountName + ")");
+            ids.add(info.id);
+        }
+
+        new MaterialAlertDialogBuilder(context)
+                .setTitle(R.string.rotation_calendar_choose)
+                .setItems(labels.toArray(new String[0]), (dialog, which) -> {
+                    final Alarm alarm = getItemHolder().item;
+                    if (TextUtils.isEmpty(alarm.rotationPayload)
+                            || !alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+                        saveRotationPayload();
+                    }
+                    final String[] parts = alarm.rotationPayload.split("\\|", -1);
+                    if (parts.length < 6) {
+                        return;
+                    }
+                    final String managedDates = parts.length >= 9
+                            && !TextUtils.isEmpty(parts[8]) ? parts[8] : "[]";
+                    alarm.rotationPayload = buildRotationPayload(parts, parts[5],
+                            rotationCalendarSyncSwitch.isChecked(), ids.get(which), managedDates);
+                    getAlarmTimeClickHandler().asyncUpdateAlarm(alarm, false);
+                    bindShiftSetupExtras(context, alarm);
+
+                    final ShiftCalendarManager manager =
+                            ShiftCalendarManager.getInstance(context);
+                    manager.registerObserver();
+                    manager.requestSync();
+                })
+                .show();
+    }
+
+    private void showAnnualLeaveDatePicker() {
+        final Context context = itemView.getContext();
+        if (!(context instanceof AppCompatActivity activity)) {
+            return;
+        }
+
+        final Alarm currentAlarm = getItemHolder().item;
+        if (TextUtils.isEmpty(currentAlarm.rotationPayload)
+                || !currentAlarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
+            saveRotationPayload();
+        }
+
+        final MaterialDatePicker<Pair<Long, Long>> dateRangePicker =
+                MaterialDatePicker.Builder.dateRangePicker()
+                        .setTitleText(R.string.annual_leave_pause)
+                        .build();
+        dateRangePicker.addOnPositiveButtonClickListener(selection -> {
+            if (selection == null || selection.first == null || selection.second == null) {
+                return;
+            }
+
+            final Alarm alarm = getItemHolder().item;
+            final String[] parts = alarm.rotationPayload.split("\\|", -1);
+            if (parts.length < 6) {
+                return;
+            }
+            try {
+                final Type type = new TypeToken<Map<String, Double>>() { }.getType();
+                Map<String, Double> overrides = new Gson().fromJson(parts[5], type);
+                if (overrides == null) {
+                    overrides = new HashMap<>();
+                } else {
+                    overrides = new HashMap<>(overrides);
+                }
+
+                final Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                start.setTimeInMillis(selection.first);
+                final Calendar end = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+                end.setTimeInMillis(selection.second);
+                final SimpleDateFormat dateFormat =
+                        new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                while (!start.after(end)) {
+                    overrides.put(dateFormat.format(start.getTime()), -1.0);
+                    start.add(Calendar.DAY_OF_YEAR, 1);
+                }
+
+                final boolean calendarSyncEnabled = parts.length >= 8
+                        && Boolean.parseBoolean(parts[6]);
+                final String calendarId = parts.length >= 8 && !TextUtils.isEmpty(parts[7])
+                        ? parts[7] : "all";
+                final String managedDates = parts.length >= 9
+                        && !TextUtils.isEmpty(parts[8]) ? parts[8] : "[]";
+                alarm.rotationPayload = buildRotationPayload(parts, new Gson().toJson(overrides),
+                        calendarSyncEnabled, calendarId, managedDates);
+                getAlarmTimeClickHandler().asyncUpdateAlarm(alarm, false);
+                bindShiftSetupExtras(context, alarm);
+
+                if (calendarSyncEnabled) {
+                    final ShiftCalendarManager manager =
+                            ShiftCalendarManager.getInstance(context);
+                    manager.registerObserver();
+                    manager.requestSync();
+                }
+            } catch (RuntimeException e) {
+                LogUtils.e("ExpandedAlarmViewHolder", "Failed to save annual leave", e);
+            }
+        });
+        dateRangePicker.show(activity.getSupportFragmentManager(), "annual_leave_picker");
+    }
+
+    private static String buildRotationPayload(String[] parts, String overrides,
+                                               boolean calendarSyncEnabled,
+                                               String calendarId, String managedDates) {
+        return String.format(Locale.US, "SHIFT_ROTATION_V2|%s|%s|%s|%s|%s|%b|%s|%s",
+                parts[1], parts[2], parts[3], parts[4], overrides, calendarSyncEnabled,
+                TextUtils.isEmpty(calendarId) ? "all" : calendarId,
+                TextUtils.isEmpty(managedDates) ? "[]" : managedDates);
     }
 
     private void bindShiftSetup(Context context, Alarm alarm) {
@@ -1550,6 +1833,7 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
             if (advancedShiftPanel.getVisibility() == VISIBLE && shiftGridContainer.getChildCount() == 0) {
                 rebuildShiftGrid(7);
             }
+            bindShiftSetupExtras(context, alarm);
             return;
         }
         String[] parts = alarm.rotationPayload.split("\\|");
@@ -1585,7 +1869,10 @@ public final class ExpandedAlarmViewHolder extends AlarmItemViewHolder {
                 }
             }
             com.best.deskclock.utils.LogUtils.v("RotationGrid: Bound " + length + " nodes in " + (System.currentTimeMillis() - start) + "ms");
-        } catch (Exception ignored) {}
+            bindShiftSetupExtras(context, alarm);
+        } catch (Exception ignored) {
+            bindShiftSetupExtras(context, alarm);
+        }
     }
 
 }

@@ -137,6 +137,74 @@
             <com.google.android.material.button.MaterialButton android:id="@+id/anchor_date_button" style="@style/Widget.Material3.Button.TextButton" android:layout_width="wrap_content" android:layout_height="wrap_content" tools:text="2023-10-27" />
         </LinearLayout>
         <com.google.android.material.materialswitch.MaterialSwitch android:id="@+id/holiday_skip_switch" android:layout_width="match_parent" android:layout_height="48dp" android:text="@string/holiday_skip" />
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/rotation_calendar_sync_switch"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="@string/rotation_calendar_sync_title" />
+
+        <LinearLayout
+            android:id="@+id/rotation_calendar_selection_layout"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/rotation_calendar_selection" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/rotation_calendar_selector_button"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/rotation_calendar_all" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/annual_leave_pause"
+                    android:textStyle="bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/annual_leave_button"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/add_annual_leave_date" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/annual_leave_status_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="4dp"
+                android:textColor="?attr/colorPrimary"
+                android:visibility="gone"
+                tools:text="Paused dates: 08-10, 08-11" />
+        </LinearLayout>
+
         <com.best.deskclock.widget.MaxHeightNestedScrollView android:id="@+id/shift_grid_scroll" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp">
             <com.google.android.material.chip.ChipGroup android:id="@+id/shift_grid_container" android:layout_width="match_parent" android:layout_height="wrap_content" app:chipSpacingVertical="4dp" app:chipSpacingHorizontal="4dp" />
         </com.best.deskclock.widget.MaxHeightNestedScrollView>

@@ -663,4 +663,12 @@
     <string name="quick_timer_instant_noodles">泡麵</string>
     <string name="quick_timer_steam_eggs">蒸蛋</string>
     <string name="quick_timer_face_mask">敷面膜</string>
+    <string name="rotation_calendar_sync_title">將此輪班與系統日曆同步</string>
+    <string name="rotation_calendar_selection">日曆來源</string>
+    <string name="rotation_calendar_all">所有日曆</string>
+    <string name="rotation_calendar_choose">選擇日曆</string>
+    <string name="rotation_calendar_permission">需要日曆權限。授權後請再次開啟同步。</string>
+    <string name="annual_leave_pause">個人假期 / 年假暫停</string>
+    <string name="add_annual_leave_date">暫停指定日期</string>
+    <string name="annual_leave_active">已暫停日期：%s</string>
 </resources>

@@ -14,6 +14,7 @@ import android.net.Uri;
 
 import androidx.preference.PreferenceManager;
 
+import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.controller.Controller;
 import com.best.deskclock.controller.ThemeController;
 import com.best.deskclock.data.DataModel;
@@ -47,6 +48,13 @@ public class DeskClockApplication extends Application {
 
         // Download holiday data on start
         HolidayRepository.getInstance(applicationContext).updateWorkdayData();
+
+        // Keep both standalone and per-rotation calendar synchronization responsive while the
+        // process is alive. The manager unregisters itself when neither mode is active.
+        final ShiftCalendarManager shiftCalendarManager =
+                ShiftCalendarManager.getInstance(applicationContext);
+        shiftCalendarManager.registerObserver();
+        shiftCalendarManager.requestSync();
     }
 
     public static Context getContext() {
