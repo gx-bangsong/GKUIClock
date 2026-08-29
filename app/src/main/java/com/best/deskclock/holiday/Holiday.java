@@ -29,4 +29,6 @@ public class Holiday {
     public String startDate;
     public String endDate;
     public List<String> compDays;
+    /** ISO 3166-1 country code. Empty or null means the holiday applies globally. */
+    public String countryCode;
 }

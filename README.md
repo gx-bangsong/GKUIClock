@@ -46,6 +46,32 @@
 * 支持动态取色（Android 12+）;
 * 支持 [Reproducible Builds](https://reproducible-builds.org/).  [详情请点击](https://github.com/BlackyHawky/Clock/issues/140).
 
+## 节假日 JSON 导入
+
+可在“设置 → 闹钟 → 节假日闹钟”中导入本地 JSON，并选择要应用的国家或地区。默认会跟随应用语言（系统语言模式下跟随系统语言和地区）自动选择对应国家；也可以手动指定。应用支持项目原有的 `Years` 格式、普通节假日数组，以及 Nager.Date、Calendarific 等常见国际数据结构。最简单的自定义格式如下：
+
+```json
+{
+  "countryCode": "US",
+  "holidays": [
+    {
+      "name": "New Year's Day",
+      "date": "2026-01-01"
+    },
+    {
+      "name": "Example holiday",
+      "startDate": "2026-05-01",
+      "endDate": "2026-05-03",
+      "compDays": ["2026-05-09"]
+    }
+  ]
+}
+```
+
+日期使用 `yyyy-MM-dd`。`countryCode` 为可选的 ISO 3166-1 国家代码；`compDays` 为可选的调休工作日。
+
+快捷计时器首次使用时会提供“刷牙（2 分钟）”“泡面（3 分钟）”“蒸蛋（10 分钟）”和“敷面膜（15 分钟）”等生活化预设；预设名称会随应用语言切换。
+
 ## 通病
 
 由于缺乏测试设备，某些问题可能在这些设备上出现.

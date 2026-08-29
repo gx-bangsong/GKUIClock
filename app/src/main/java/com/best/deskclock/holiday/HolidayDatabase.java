@@ -18,17 +18,29 @@ package com.best.deskclock.holiday;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
+import androidx.room.migration.Migration;
+import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Holiday.class}, version = 1, exportSchema = false)
+@Database(entities = {Holiday.class}, version = 2, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class HolidayDatabase extends RoomDatabase {
-    public abstract HolidayDao holidayDao();
+    private static final Migration MIGRATION_1_2 = new Migration(1, 2) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            // Existing custom URL data has no country metadata, so preserve it as globally
+            // applicable instead of incorrectly assuming it came from one particular country.
+            database.execSQL("ALTER TABLE holiday ADD COLUMN countryCode TEXT");
+        }
+    };
 
     private static volatile HolidayDatabase INSTANCE;
+
+    public abstract HolidayDao holidayDao();
 
     public static HolidayDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
@@ -36,7 +48,9 @@ public abstract class HolidayDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     HolidayDatabase.class, "holiday_database")
-                            .allowMainThreadQueries().build();
+                            .addMigrations(MIGRATION_1_2)
+                            .allowMainThreadQueries()
+                            .build();
                 }
             }
         }

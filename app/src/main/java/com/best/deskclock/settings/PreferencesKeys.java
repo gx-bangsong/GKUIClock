@@ -374,6 +374,9 @@ public class PreferencesKeys {
     public static final String KEY_EXTERNAL_AUDIO_DEVICE_VOLUME = "key_external_audio_device_volume";
     public static final String KEY_HOLIDAY_DATA_URL = "key_holiday_data_url";
     public static final String KEY_UPDATE_HOLIDAY_DATA = "key_update_holiday_data";
+    public static final String KEY_IMPORT_HOLIDAY_DATA = "key_import_holiday_data";
+    public static final String KEY_HOLIDAY_COUNTRY = "key_holiday_country";
+    public static final String KEY_USE_IMPORTED_HOLIDAY_DATA = "key_use_imported_holiday_data";
     public static final String KEY_ABOUT_BLACKYHAWKY = "key_about_blackyhawky";
     public static final String KEY_ABOUT_QW123WH = "key_about_qw123wh";
     public static final String KEY_ABOUT_ODMFL = "key_about_odmfl";

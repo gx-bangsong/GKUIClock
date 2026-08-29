@@ -204,6 +204,7 @@
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
                 <action android:name="android.intent.action.USER_UNLOCKED" />
+                <action android:name="com.best.deskclock.LANGUAGE_CODE_CHANGED" />
                 <action android:name="org.codeaurora.poweroffalarm.action.UPDATE_ALARM" />
             </intent-filter>
         </receiver>

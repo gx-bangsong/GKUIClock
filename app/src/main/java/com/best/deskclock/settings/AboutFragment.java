@@ -366,8 +366,6 @@ public class AboutFragment extends ScreenFragment
 
             LogUtils.clearSavedLocalLogs(requireContext());
 
-            // Required to update Locale.
-            requireContext().sendBroadcast(new Intent(ACTION_LANGUAGE_CODE_CHANGED));
             // Required to update widgets.
             requireContext().sendBroadcast(new Intent(ACTION_APPWIDGET_UPDATE));
             // Required to update the timer list.
@@ -380,6 +378,10 @@ public class AboutFragment extends ScreenFragment
                 AlarmStateManager.deleteAllInstances(requireContext(), alarm.id);
                 Alarm.deleteAlarm(requireContext().getContentResolver(), alarm.id);
             }
+            // Update the locale after deleting alarms so the language-change receiver cannot race
+            // with reset and recreate instances for alarms that are being removed.
+            requireContext().sendBroadcast(new Intent(ACTION_LANGUAGE_CODE_CHANGED)
+                    .setPackage(requireContext().getPackageName()));
 
             ThemeController.setNewSettingWithDelay();
 

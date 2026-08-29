@@ -7,6 +7,8 @@
 package com.best.deskclock;
 
 import static com.best.deskclock.DeskClockApplication.getDefaultSharedPreferences;
+import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_HOLIDAY_COUNTRY;
+import static com.best.deskclock.utils.Utils.ACTION_LANGUAGE_CODE_CHANGED;
 
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -16,11 +18,14 @@ import android.os.PowerManager.WakeLock;
 
 import com.best.deskclock.alarms.AlarmNotifications;
 import com.best.deskclock.alarms.AlarmStateManager;
+import com.best.deskclock.alarms.AlarmUpdateHandler;
 import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.holiday.HolidayRepository;
+import com.best.deskclock.holiday.HolidayUtils;
 import com.best.deskclock.controller.Controller;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
+import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.NotificationUtils;
@@ -149,6 +154,13 @@ public class AlarmInitReceiver extends BroadcastReceiver {
                     AlarmStateManager.fixAlarmInstances(context);
                 }
 
+                if ((Intent.ACTION_LOCALE_CHANGED.equals(action)
+                        || ACTION_LANGUAGE_CODE_CHANGED.equals(action))
+                        && DEFAULT_HOLIDAY_COUNTRY.equals(
+                        SettingsDAO.getHolidayCountryMode(getDefaultSharedPreferences(context)))) {
+                    rescheduleHolidayAlarms(context);
+                }
+
                 // Calendar data may be unavailable during LOCKED_BOOT_COMPLETED. Existing calendar
                 // instances were preserved above; USER_UNLOCKED will trigger another reconciliation.
                 final ShiftCalendarManager shiftManager =
@@ -161,5 +173,15 @@ public class AlarmInitReceiver extends BroadcastReceiver {
                 LogUtils.v("AlarmInitReceiver finished");
             }
         });
+    }
+
+    private static void rescheduleHolidayAlarms(Context context) {
+        final AlarmUpdateHandler updateHandler = new AlarmUpdateHandler(context, null, null);
+        final List<Alarm> alarms = Alarm.getAlarms(context.getContentResolver(), null);
+        for (Alarm alarm : alarms) {
+            if (alarm.enabled && alarm.holidayOption != HolidayUtils.HOLIDAY_OPTION_NONE) {
+                updateHandler.asyncUpdateAlarm(alarm, false, false);
+            }
+        }
     }
 }

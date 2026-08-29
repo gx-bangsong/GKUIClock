@@ -11,6 +11,7 @@ import java.util.Calendar;
 
 public class PreferencesDefaultValues {
     public static final String DEFAULT_HOLIDAY_DATA_URL = "https://raw.githubusercontent.com/lanceliao/china-holiday-calender/master/holidayAPI.json";
+    public static final String DEFAULT_HOLIDAY_COUNTRY = "auto";
 
     // **************
     // ** SETTINGS **

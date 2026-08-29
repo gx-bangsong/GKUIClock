@@ -391,6 +391,23 @@
             app:singleLineTitle="false"
             tools:layout="@layout/settings_preference_layout" />
 
+        <Preference
+            android:key="key_import_holiday_data"
+            android:title="@string/import_holiday_data_title"
+            android:summary="@string/import_holiday_data_summary"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false"
+            tools:layout="@layout/settings_preference_layout" />
+
+        <ListPreference
+            android:key="key_holiday_country"
+            android:title="@string/holiday_country_title"
+            android:summary="@string/holiday_country_summary"
+            android:defaultValue="auto"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false"
+            tools:layout="@layout/settings_preference_layout" />
+
         <EditTextPreference
             android:key="key_holiday_data_url"
             android:title="@string/holiday_data_url_title"

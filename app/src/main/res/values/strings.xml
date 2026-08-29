@@ -1210,6 +1210,20 @@
     <string name="holiday_data_url_summary">Set the URL for holiday and work schedule data</string>
 
     <string name="holiday_data_url_dialog_message">Enter the URL for the holiday and work schedule data</string>
+    <string name="import_holiday_data_title">Import holiday JSON</string>
+    <string name="import_holiday_data_summary">Import holidays and optional compensation workdays from a JSON file. Supports country codes and common international formats.</string>
+    <string name="holiday_country_title">Holiday country or region</string>
+    <string name="holiday_country_summary">Follow the app language automatically or choose which country’s records to use</string>
+    <string name="holiday_country_auto">Follow app language (%1$s)</string>
+    <string name="holiday_country_all">All or unspecified countries</string>
+    <string name="holiday_import_success">Imported %1$d holiday records</string>
+    <string name="holiday_import_failed">Could not import holiday data: %1$s</string>
+    <string name="holiday_update_success">Updated %1$d holiday records</string>
+    <string name="no_file_manager_found">No file manager found</string>
+    <string name="quick_timer_brush_teeth">Brush teeth</string>
+    <string name="quick_timer_instant_noodles">Instant noodles</string>
+    <string name="quick_timer_steam_eggs">Steam eggs</string>
+    <string name="quick_timer_face_mask">Face mask</string>
 
 
 

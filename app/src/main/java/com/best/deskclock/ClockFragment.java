@@ -361,6 +361,8 @@ public final class ClockFragment extends DeskClockFragment {
                     mAnalogClock.getLayoutParams().width = ThemeUtils.convertDpToPixels(mIsTablet ? 150 : 80, context);
                     mDigitalClockContainer.setVisibility(GONE);
                     mAnalogClock.setVisibility(VISIBLE);
+                    mAnalogClock.setTimeZoneDayNightStyleEnabled(
+                            mClockStyle == DataModel.ClockStyle.ANALOG_MATERIAL);
                     mAnalogClock.setTimeZone(cityTimeZoneId);
                     mAnalogClock.enableSeconds(false);
                 } else {

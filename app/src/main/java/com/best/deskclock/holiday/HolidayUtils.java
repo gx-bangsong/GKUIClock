@@ -16,10 +16,13 @@
 
 package com.best.deskclock.holiday;
 
+import static com.best.deskclock.DeskClockApplication.getDefaultSharedPreferences;
+
 import com.best.deskclock.provider.Alarm;
 
 import android.content.Context;
 
+import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.data.Weekdays;
 
 import java.text.SimpleDateFormat;
@@ -53,10 +56,12 @@ public class HolidayUtils {
 
         String dateStr = DATE_FORMAT_THREAD_LOCAL.get().format(calendar.getTime());
         HolidayRepository repo = HolidayRepository.getInstance(context);
+        String countryCode = SettingsDAO.getHolidayCountry(getDefaultSharedPreferences(context));
 
-        // Check if it's a legal holiday or compensation workday
-        Holiday holiday = repo.getHolidayByDate(dateStr);
-        Holiday compDay = repo.getCompDayByDate(dateStr);
+        // Check if it's a legal holiday or compensation workday for the selected country.
+        // Records without a country remain global for backwards-compatible custom files.
+        Holiday holiday = repo.getHolidayByDate(dateStr, countryCode);
+        Holiday compDay = repo.getCompDayByDate(dateStr, countryCode);
 
         boolean isLegalHoliday = (holiday != null);
         boolean isCompWorkday = (compDay != null);

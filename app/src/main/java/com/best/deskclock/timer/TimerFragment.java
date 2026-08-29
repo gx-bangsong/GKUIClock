@@ -127,7 +127,7 @@ public final class TimerFragment extends DeskClockFragment {
         mQuickTimerAdapter = new QuickTimerAdapter(mContext, new QuickTimerAdapter.OnQuickTimerClickListener() {
             @Override
             public void onQuickTimerClick(QuickTimer quickTimer) {
-                startQuickTimer(quickTimer.duration, quickTimer.label);
+                startQuickTimer(quickTimer.duration, quickTimer.getDisplayLabel(mContext));
             }
 
             @Override

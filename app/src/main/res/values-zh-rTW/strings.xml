@@ -649,4 +649,18 @@
     <string name="holiday_data_url_summary">設定節假日和工作日資料的 URL</string>
     <!-- Dialog message for the preference to set the holiday data URL -->
     <string name="holiday_data_url_dialog_message">輸入節假日和工作日資料的 URL</string>
+    <string name="import_holiday_data_title">匯入節假日 JSON</string>
+    <string name="import_holiday_data_summary">從 JSON 檔案匯入節假日及可選調休工作日，支援國家代碼和常見國際格式</string>
+    <string name="holiday_country_title">節假日國家或地區</string>
+    <string name="holiday_country_summary">自動跟隨應用程式語言，也可以手動選擇要使用的國家或地區</string>
+    <string name="holiday_country_auto">跟隨應用程式語言（%1$s）</string>
+    <string name="holiday_country_all">全部或未指定國家</string>
+    <string name="holiday_import_success">已匯入 %1$d 條節假日記錄</string>
+    <string name="holiday_import_failed">無法匯入節假日資料：%1$s</string>
+    <string name="holiday_update_success">已更新 %1$d 條節假日記錄</string>
+    <string name="no_file_manager_found">找不到檔案管理器</string>
+    <string name="quick_timer_brush_teeth">刷牙</string>
+    <string name="quick_timer_instant_noodles">泡麵</string>
+    <string name="quick_timer_steam_eggs">蒸蛋</string>
+    <string name="quick_timer_face_mask">敷面膜</string>
 </resources>

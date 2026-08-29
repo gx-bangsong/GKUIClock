@@ -62,7 +62,11 @@ public class AnalogClock extends FrameLayout {
 
     private final Context mContext;
     private final SharedPreferences mPrefs;
+    private static final int DAY_START_HOUR = 6;
+    private static final int NIGHT_START_HOUR = 18;
+
     private final DataModel.ClockStyle mClockStyle;
+    private final ImageView mDial;
     private final ImageView mHourHand;
     private final ImageView mMinuteHand;
     private final ImageView mSecondHand;
@@ -70,6 +74,8 @@ public class AnalogClock extends FrameLayout {
     private Calendar mTime;
     private TimeZone mTimeZone;
     private boolean mEnableSeconds = true;
+    private boolean mUseTimeZoneDayNightStyle;
+    private Boolean mIsNightStyle;
     private final BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -116,7 +122,7 @@ public class AnalogClock extends FrameLayout {
         final int defaultClockColor = MaterialColors.getColor(mContext, android.R.attr.textColorPrimary, Color.BLACK);
 
         // Create clock dial
-        final ImageView dial = createClockComponent(accentColor, DIAL, alarmClockColor, defaultClockColor);
+        mDial = createClockComponent(accentColor, DIAL, alarmClockColor, defaultClockColor);
 
         // Create hour hand
         mHourHand = createClockComponent(accentColor, HOUR_HAND, alarmClockColor, defaultClockColor);
@@ -127,7 +133,7 @@ public class AnalogClock extends FrameLayout {
         // Create second hand
         mSecondHand = createSecondHand(accentColor, alarmSecondsHandColor);
 
-        addView(dial);
+        addView(mDial);
         addView(mHourHand);
         addView(mMinuteHand);
         addView(mSecondHand);
@@ -389,6 +395,7 @@ public class AnalogClock extends FrameLayout {
 
     private void onTimeChanged() {
         mTime.setTimeInMillis(System.currentTimeMillis());
+        updateTimeZoneDayNightStyle();
 
         // To get closer to a mechanical watch, the hour hand will move according to the minute value
         int hour = mTime.get(Calendar.HOUR);
@@ -410,9 +417,48 @@ public class AnalogClock extends FrameLayout {
         invalidate();
     }
 
+    /**
+     * Makes a Material world clock use a light face during the city's daytime and a dark face
+     * during its nighttime. The style follows the clock's own time zone rather than the device
+     * theme. This is intentionally opt-in so the main clock, alarm and screensaver retain their
+     * configured Material colors.
+     */
+    public void setTimeZoneDayNightStyleEnabled(boolean enabled) {
+        mUseTimeZoneDayNightStyle = enabled;
+        mIsNightStyle = null;
+        onTimeChanged();
+    }
+
+    private void updateTimeZoneDayNightStyle() {
+        if (!mUseTimeZoneDayNightStyle || mClockStyle != DataModel.ClockStyle.ANALOG_MATERIAL) {
+            return;
+        }
+
+        final int hour = mTime.get(Calendar.HOUR_OF_DAY);
+        final boolean isNight = hour < DAY_START_HOUR || hour >= NIGHT_START_HOUR;
+        if (mIsNightStyle != null && mIsNightStyle == isNight) {
+            return;
+        }
+
+        mIsNightStyle = isNight;
+        mDial.setColorFilter(mContext.getColor(isNight
+                ? R.color.world_clock_material_night_dial
+                : R.color.world_clock_material_day_dial));
+        mHourHand.setColorFilter(mContext.getColor(isNight
+                ? R.color.world_clock_material_night_hour_hand
+                : R.color.world_clock_material_day_hour_hand));
+        mMinuteHand.setColorFilter(mContext.getColor(isNight
+                ? R.color.world_clock_material_night_minute_hand
+                : R.color.world_clock_material_day_minute_hand));
+        mSecondHand.setColorFilter(mContext.getColor(isNight
+                ? R.color.world_clock_material_night_second_hand
+                : R.color.world_clock_material_day_second_hand));
+    }
+
     public void setTimeZone(String id) {
         mTimeZone = TimeZone.getTimeZone(id);
         mTime.setTimeZone(mTimeZone);
+        mIsNightStyle = null;
         onTimeChanged();
     }
 
