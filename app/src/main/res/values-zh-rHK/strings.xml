@@ -307,4 +307,26 @@
     <string name="pick_alarm_to_dismiss" msgid="5408769235866082896">"選擇要關閉的鬧鐘"</string>
     <string name="no_firing_alarms" msgid="4986161963178722289">"現時沒有響鬧"</string>
     <string name="alarm_is_snoozed" msgid="7044644119744928846">"<xliff:g id="ALARM_TIME">%s</xliff:g> 的鬧鐘已延後 10 分鐘"</string>
+    <string name="import_holiday_data_title">匯入節假日 JSON</string>
+    <string name="import_holiday_data_summary">從 JSON 檔案匯入節假日及可選調休工作日，支援國家代碼和常見國際格式</string>
+    <string name="holiday_country_title">節假日國家或地區</string>
+    <string name="holiday_country_summary">自動跟隨應用程式語言，也可以手動選擇要使用的國家或地區</string>
+    <string name="holiday_country_auto">跟隨應用程式語言（%1$s）</string>
+    <string name="holiday_country_all">全部或未指定國家</string>
+    <string name="holiday_import_success">已匯入 %1$d 條節假日記錄</string>
+    <string name="holiday_import_failed">無法匯入節假日資料：%1$s</string>
+    <string name="holiday_update_success">已更新 %1$d 條節假日記錄</string>
+    <string name="no_file_manager_found">找不到檔案管理器</string>
+    <string name="quick_timer_brush_teeth">刷牙</string>
+    <string name="quick_timer_instant_noodles">泡麵</string>
+    <string name="quick_timer_steam_eggs">蒸蛋</string>
+    <string name="quick_timer_face_mask">敷面膜</string>
+    <string name="rotation_calendar_sync_title">將此輪班與系統日曆同步</string>
+    <string name="rotation_calendar_selection">日曆來源</string>
+    <string name="rotation_calendar_all">所有日曆</string>
+    <string name="rotation_calendar_choose">選擇日曆</string>
+    <string name="rotation_calendar_permission">需要日曆權限。授權後請再次開啟同步。</string>
+    <string name="annual_leave_pause">個人假期 / 年假暫停</string>
+    <string name="add_annual_leave_date">暫停指定日期</string>
+    <string name="annual_leave_active">已暫停日期：%s</string>
 </resources>

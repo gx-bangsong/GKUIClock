@@ -151,7 +151,11 @@ public class InterfaceCustomizationFragment extends ScreenFragment
             case KEY_CUSTOM_LANGUAGE_CODE -> {
                 final int index = mCustomLanguageCodePref.findIndexOfValue((String) newValue);
                 mCustomLanguageCodePref.setSummary(mCustomLanguageCodePref.getEntries()[index]);
-                requireContext().sendBroadcast(new Intent(ACTION_LANGUAGE_CODE_CHANGED));
+                // Persist before broadcasting so automatic holiday-country resolution observes
+                // the newly selected app language while alarm instances are rebuilt.
+                mPrefs.edit().putString(KEY_CUSTOM_LANGUAGE_CODE, (String) newValue).apply();
+                requireContext().sendBroadcast(new Intent(ACTION_LANGUAGE_CODE_CHANGED)
+                        .setPackage(requireContext().getPackageName()));
                 isLanguageChanged = true;
                 recreateActivity();
             }

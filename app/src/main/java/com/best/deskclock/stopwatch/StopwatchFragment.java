@@ -93,6 +93,7 @@ public final class StopwatchFragment extends DeskClockFragment {
      * The layout manager for the {@link #mLapsAdapter}.
      */
     private LinearLayoutManager mLapsLayoutManager;
+    private ScrollPositionWatcher mScrollPositionWatcher;
 
     /**
      * Draws the reference lap while the stopwatch is running.
@@ -161,9 +162,9 @@ public final class StopwatchFragment extends DeskClockFragment {
             mLapsList.setLayoutManager(mLapsLayoutManager);
 
             if (mIsLandscape) {
-                final ScrollPositionWatcher scrollPositionWatcher = new ScrollPositionWatcher();
-                mLapsList.addOnLayoutChangeListener(scrollPositionWatcher);
-                mLapsList.addOnScrollListener(scrollPositionWatcher);
+                mScrollPositionWatcher = new ScrollPositionWatcher();
+                mLapsList.addOnLayoutChangeListener(mScrollPositionWatcher);
+                mLapsList.addOnScrollListener(mScrollPositionWatcher);
             } else {
                 setTabScrolledToTop(true);
             }
@@ -292,9 +293,35 @@ public final class StopwatchFragment extends DeskClockFragment {
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
-
+        stopUpdatingTime();
         DataModel.getDataModel().removeStopwatchListener(mStopwatchWatcher);
+
+        if (mStopwatchWrapper != null) {
+            mStopwatchWrapper.setOnClickListener(null);
+            mStopwatchWrapper.setOnTouchListener(null);
+        }
+        if (mLapsList != null) {
+            if (mScrollPositionWatcher != null) {
+                mLapsList.removeOnLayoutChangeListener(mScrollPositionWatcher);
+                mLapsList.removeOnScrollListener(mScrollPositionWatcher);
+            }
+            mLapsList.setAdapter(null);
+            mLapsList.setLayoutManager(null);
+        }
+
+        mLapsAdapter = null;
+        mLapsLayoutManager = null;
+        mScrollPositionWatcher = null;
+        mTime = null;
+        mStopwatchWrapper = null;
+        mLapsList = null;
+        mMainTimeText = null;
+        mHundredthsTimeText = null;
+        mStopwatchTextController = null;
+        mActivity = null;
+        mContext = null;
+
+        super.onDestroyView();
     }
 
     @Override
@@ -526,7 +553,9 @@ public final class StopwatchFragment extends DeskClockFragment {
      * Remove the runnable that updates times within the UI.
      */
     private void stopUpdatingTime() {
-        mMainTimeText.removeCallbacks(mTimeUpdateRunnable);
+        if (mMainTimeText != null) {
+            mMainTimeText.removeCallbacks(mTimeUpdateRunnable);
+        }
     }
 
     /**

@@ -11,4 +11,4 @@
     app:chipBackgroundColor="?attr/colorSecondaryContainer"
     app:chipStrokeColor="?attr/colorOutline"
     app:chipStrokeWidth="1dp"
-    android:textColor="?attr/colorOnSecondary" />
+    android:textColor="?attr/colorOnSecondaryContainer" />

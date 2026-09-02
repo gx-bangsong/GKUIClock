@@ -8,4 +8,12 @@
     <string name="days_count">%d 天</string>
     <string name="shift_day_description">轮班周期第 %d 天闹钟时间</string>
     <string name="shift_cycle_day_n">轮班周期第 %d 天</string>
+    <string name="rotation_calendar_sync_title">将此轮班与系统日历同步</string>
+    <string name="rotation_calendar_selection">日历来源</string>
+    <string name="rotation_calendar_all">所有日历</string>
+    <string name="rotation_calendar_choose">选择日历</string>
+    <string name="rotation_calendar_permission">需要日历权限。授权后请再次开启同步。</string>
+    <string name="annual_leave_pause">个人假期 / 年假暂停</string>
+    <string name="add_annual_leave_date">暂停指定日期</string>
+    <string name="annual_leave_active">已暂停日期：%s</string>
 </resources>

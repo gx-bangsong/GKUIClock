@@ -65,6 +65,16 @@
     <color name="next_alarm_widget_title_color">#575E71</color>
     <color name="next_alarm_widget_alarm_color">#475D92</color>
 
+    <!-- Material world clocks follow the local time of each city, independently of app theme. -->
+    <color name="world_clock_material_day_dial">#F5F7FF</color>
+    <color name="world_clock_material_day_hour_hand">#5F6368</color>
+    <color name="world_clock_material_day_minute_hand">#202124</color>
+    <color name="world_clock_material_day_second_hand">#B3261E</color>
+    <color name="world_clock_material_night_dial">#263238</color>
+    <color name="world_clock_material_night_hour_hand">#B0BEC5</color>
+    <color name="world_clock_material_night_minute_hand">#FFFFFF</color>
+    <color name="world_clock_material_night_second_hand">#FF8A80</color>
+
     <!--
     TO FIND ACCENT COLORS (except for Black colors):
 

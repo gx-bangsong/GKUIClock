@@ -11,4 +11,12 @@
     <string name="rotation_guide_title" translatable="false">Shift Rotation Mode</string>
     <string name="rotation_guide_message" translatable="false">This mode allows you to create an alarm schedule that repeats over a multi-day cycle instead of a standard weekly one.\n\n1. Define the cycle length (e.g., 4 days).\n2. Set an anchor date to start the rotation.\n3. Configure different alarm times for each day in the cycle.\n\nYou can also enable Holiday Skip to automatically suppress alarms on statutory holidays.</string>
     <string name="got_it" translatable="false">Got it</string>
+    <string name="rotation_calendar_sync_title">Sync this rotation with system calendar</string>
+    <string name="rotation_calendar_selection">Calendar source</string>
+    <string name="rotation_calendar_all">All calendars</string>
+    <string name="rotation_calendar_choose">Select calendar</string>
+    <string name="rotation_calendar_permission">Calendar permission is required. Grant it, then enable synchronization again.</string>
+    <string name="annual_leave_pause">Annual leave / vacation pause</string>
+    <string name="add_annual_leave_date">Pause dates</string>
+    <string name="annual_leave_active">Paused dates: %s</string>
 </resources>

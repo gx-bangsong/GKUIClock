@@ -32,7 +32,7 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.best.deskclock.AlarmAlertWakeLock;
 import com.best.deskclock.AlarmClockFragment;
-import com.best.deskclock.AsyncHandler;
+import com.best.deskclock.AppExecutors;
 import com.best.deskclock.DeskClock;
 import com.best.deskclock.R;
 import com.best.deskclock.data.DataModel;
@@ -910,10 +910,15 @@ public final class AlarmStateManager extends BroadcastReceiver {
         final PendingResult result = goAsync();
         final PowerManager.WakeLock wl = AlarmAlertWakeLock.createPartialWakeLock(context);
         wl.acquire(10000L);
-        AsyncHandler.post(() -> {
-            handleIntent(context, intent);
-            result.finish();
-            wl.release();
+        AppExecutors.getAlarmIO().execute(() -> {
+            try {
+                handleIntent(context, intent);
+            } finally {
+                result.finish();
+                if (wl.isHeld()) {
+                    wl.release();
+                }
+            }
         });
     }
 

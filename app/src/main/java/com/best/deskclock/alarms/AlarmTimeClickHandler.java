@@ -98,6 +98,13 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         mSelectedAlarm = selectedAlarm;
     }
 
+    /** Delegates calendar permission requests from the expanded rotation-alarm editor. */
+    public void requestRotationCalendarPermission() {
+        if (mFragment instanceof AlarmClockFragment alarmClockFragment) {
+            alarmClockFragment.requestCalendarPermissionForRotation();
+        }
+    }
+
     public void setAlarmEnabled(Alarm alarm, boolean newState) {
         if (newState != alarm.enabled) {
             alarm.enabled = newState;

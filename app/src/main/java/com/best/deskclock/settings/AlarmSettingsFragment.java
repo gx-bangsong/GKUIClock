@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 package com.best.deskclock.settings;
-import com.best.deskclock.holiday.HolidayRepository;
 
 import static android.app.Activity.RESULT_OK;
 import static com.best.deskclock.settings.PreferencesDefaultValues.ALARM_SNOOZE_DURATION_DISABLED;
 import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_ALARM_VOLUME;
 import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_VIBRATION_START_DELAY;
 import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_VOLUME_CRESCENDO_DURATION;
+import static com.best.deskclock.settings.PreferencesDefaultValues.DEFAULT_HOLIDAY_COUNTRY;
 import static com.best.deskclock.settings.PreferencesDefaultValues.TIMEOUT_END_OF_RINGTONE;
 import static com.best.deskclock.settings.PreferencesDefaultValues.TIMEOUT_NEVER;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_ADVANCED_AUDIO_PLAYBACK;
@@ -53,6 +53,8 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_VOLUME_BUTTONS;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_WEEK_START;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_UPDATE_HOLIDAY_DATA;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_HOLIDAY_DATA_URL;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_HOLIDAY_COUNTRY;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_IMPORT_HOLIDAY_DATA;
 
 import android.Manifest;
 import android.content.ContentResolver;
@@ -91,6 +93,8 @@ import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.data.DataModel;
 import com.best.deskclock.data.SettingsDAO;
 import com.best.deskclock.data.Weekdays;
+import com.best.deskclock.holiday.HolidayRepository;
+import com.best.deskclock.holiday.HolidayUtils;
 import com.best.deskclock.provider.Alarm;
 import com.best.deskclock.ringtone.RingtonePickerActivity;
 import com.best.deskclock.settings.custompreference.AlarmSnoozeDurationPreference;
@@ -107,7 +111,12 @@ import com.best.deskclock.utils.DeviceUtils;
 import com.best.deskclock.utils.RingtoneUtils;
 import com.best.deskclock.utils.Utils;
 
+import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class AlarmSettingsFragment extends ScreenFragment
         implements Preference.OnPreferenceChangeListener, Preference.OnPreferenceClickListener {
@@ -154,6 +163,7 @@ public class AlarmSettingsFragment extends ScreenFragment
     ListPreference mMaterialTimePickerStylePref;
     ListPreference mMaterialDatePickerStylePref;
     Preference mHolidayDataUrlPref;
+    ListPreference mHolidayCountryPref;
     Preference mAlarmDisplayCustomizationPref;
     SwitchPreferenceCompat mCalendarShiftSyncPref;
 
@@ -214,6 +224,25 @@ public class AlarmSettingsFragment extends ScreenFragment
                     CustomToast.show(requireContext(), "Error importing font");
                     mAlarmFontPref.setTitle(getString(R.string.custom_font_title));
                 }
+            });
+
+    private final ActivityResultLauncher<String[]> holidayDataPickerLauncher =
+            registerForActivityResult(new ActivityResultContracts.OpenDocument(), uri -> {
+                if (uri == null) {
+                    return;
+                }
+                HolidayRepository.getInstance(requireContext()).importHolidayData(uri,
+                        new HolidayRepository.UpdateListener() {
+                            @Override
+                            public void onSuccess(HolidayRepository.ImportSummary summary) {
+                                handleHolidayDataSuccess(summary, true);
+                            }
+
+                            @Override
+                            public void onError(Exception exception) {
+                                showHolidayDataError(exception);
+                            }
+                        });
             });
 
     @Override
@@ -490,6 +519,17 @@ public class AlarmSettingsFragment extends ScreenFragment
                 stopRingtonePreview();
                 mExternalAudioDeviceVolumePref.setVisible(!(boolean) newValue);
                 Utils.setVibrationTime(requireContext(), 50);
+            }
+
+            case KEY_HOLIDAY_DATA_URL -> mHolidayDataUrlPref.setSummary((String) newValue);
+
+            case KEY_HOLIDAY_COUNTRY -> {
+                final int index = mHolidayCountryPref.findIndexOfValue((String) newValue);
+                if (index >= 0) {
+                    mHolidayCountryPref.setSummary(mHolidayCountryPref.getEntries()[index]);
+                }
+                new Handler(Looper.getMainLooper()).post(this::rescheduleEnabledAlarms);
+                ShiftCalendarManager.getInstance(requireContext()).requestImmediateSync();
             }
 
             case KEY_VOLUME_BUTTONS, KEY_POWER_BUTTON, KEY_FLIP_ACTION,
@@ -795,10 +835,39 @@ public class AlarmSettingsFragment extends ScreenFragment
         Preference updateHolidayDataPref = findPreference(KEY_UPDATE_HOLIDAY_DATA);
         if (updateHolidayDataPref != null) {
             updateHolidayDataPref.setOnPreferenceClickListener(preference -> {
-                HolidayRepository.getInstance(requireContext()).updateWorkdayData();
+                HolidayRepository.getInstance(requireContext()).updateWorkdayData(
+                        new HolidayRepository.UpdateListener() {
+                            @Override
+                            public void onSuccess(HolidayRepository.ImportSummary summary) {
+                                handleHolidayDataSuccess(summary, false);
+                            }
+
+                            @Override
+                            public void onError(Exception exception) {
+                                showHolidayDataError(exception);
+                            }
+                        });
                 return true;
             });
         }
+
+        Preference importHolidayDataPref = findPreference(KEY_IMPORT_HOLIDAY_DATA);
+        if (importHolidayDataPref != null) {
+            importHolidayDataPref.setOnPreferenceClickListener(preference -> {
+                try {
+                    holidayDataPickerLauncher.launch(new String[]{
+                            "application/json", "text/json", "text/plain",
+                            "application/octet-stream"
+                    });
+                } catch (android.content.ActivityNotFoundException exception) {
+                    CustomToast.show(requireContext(), R.string.no_file_manager_found);
+                }
+                return true;
+            });
+        }
+
+        mHolidayCountryPref = findPreference(KEY_HOLIDAY_COUNTRY);
+        configureHolidayCountryPreference(Collections.emptySet());
 
         mHolidayDataUrlPref = findPreference(KEY_HOLIDAY_DATA_URL);
         if (mHolidayDataUrlPref != null) {
@@ -895,6 +964,110 @@ public class AlarmSettingsFragment extends ScreenFragment
         void update(Alarm alarm);
     }
 
+
+    private void handleHolidayDataSuccess(HolidayRepository.ImportSummary summary,
+                                          boolean importedFromFile) {
+        if (!isAdded()) {
+            return;
+        }
+
+        final Set<String> countries = summary.getCountryCodes();
+        if (countries.size() == 1) {
+            // A single-country file is almost always intended to become active immediately.
+            SettingsDAO.setHolidayCountry(mPrefs, countries.iterator().next());
+        }
+        configureHolidayCountryPreference(countries);
+        rescheduleEnabledAlarms();
+        ShiftCalendarManager.getInstance(requireContext()).requestImmediateSync();
+
+        CustomToast.show(requireContext(), getString(importedFromFile
+                        ? R.string.holiday_import_success : R.string.holiday_update_success,
+                summary.getHolidayCount()));
+    }
+
+    private void showHolidayDataError(Exception exception) {
+        if (!isAdded()) {
+            return;
+        }
+        String message = exception.getLocalizedMessage();
+        if (message == null || message.trim().isEmpty()) {
+            message = exception.getClass().getSimpleName();
+        }
+        CustomToast.showLong(requireContext(),
+                getString(R.string.holiday_import_failed, message));
+    }
+
+    private void rescheduleEnabledAlarms() {
+        for (Alarm alarm : mAlarmList) {
+            if (alarm.enabled && alarm.holidayOption != HolidayUtils.HOLIDAY_OPTION_NONE) {
+                mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, false);
+            }
+        }
+    }
+
+    private void configureHolidayCountryPreference(Set<String> additionalCountries) {
+        if (mHolidayCountryPref == null) {
+            return;
+        }
+
+        final List<CountryOption> countries = new ArrayList<>();
+        final Set<String> knownCodes = new java.util.HashSet<>();
+        for (String code : Locale.getISOCountries()) {
+            final String displayName = new Locale("", code).getDisplayCountry();
+            countries.add(new CountryOption(code, displayName.isEmpty() ? code : displayName));
+            knownCodes.add(code);
+        }
+        for (String code : additionalCountries) {
+            final String normalized = code.toUpperCase(Locale.US);
+            if (knownCodes.add(normalized)) {
+                countries.add(new CountryOption(normalized, normalized));
+            }
+        }
+
+        final String countryMode = SettingsDAO.getHolidayCountryMode(mPrefs);
+        final String resolvedCountry = SettingsDAO.getHolidayCountry(mPrefs);
+        if (!resolvedCountry.isEmpty() && knownCodes.add(resolvedCountry)) {
+            countries.add(new CountryOption(resolvedCountry, resolvedCountry));
+        }
+        if (!countryMode.isEmpty() && !DEFAULT_HOLIDAY_COUNTRY.equals(countryMode)
+                && knownCodes.add(countryMode)) {
+            countries.add(new CountryOption(countryMode, countryMode));
+        }
+        final Collator collator = Collator.getInstance();
+        countries.sort((first, second) -> collator.compare(first.name, second.name));
+
+        final CharSequence[] entries = new CharSequence[countries.size() + 2];
+        final CharSequence[] values = new CharSequence[countries.size() + 2];
+        final String automaticCountryName = resolvedCountry.isEmpty()
+                ? getString(R.string.holiday_country_all)
+                : new Locale("", resolvedCountry).getDisplayCountry();
+        entries[0] = getString(R.string.holiday_country_auto,
+                automaticCountryName.isEmpty() ? resolvedCountry : automaticCountryName);
+        values[0] = DEFAULT_HOLIDAY_COUNTRY;
+        entries[1] = getString(R.string.holiday_country_all);
+        values[1] = "";
+        for (int i = 0; i < countries.size(); i++) {
+            final CountryOption country = countries.get(i);
+            entries[i + 2] = country.name;
+            values[i + 2] = country.code;
+        }
+
+        mHolidayCountryPref.setEntries(entries);
+        mHolidayCountryPref.setEntryValues(values);
+        mHolidayCountryPref.setValue(countryMode);
+        mHolidayCountryPref.setSummary(mHolidayCountryPref.getEntry());
+        mHolidayCountryPref.setOnPreferenceChangeListener(this);
+    }
+
+    private static final class CountryOption {
+        private final String code;
+        private final String name;
+
+        private CountryOption(String code, String name) {
+            this.code = code;
+            this.name = name;
+        }
+    }
 
     private void clearFile(String path) {
         if (path != null) {

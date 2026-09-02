@@ -43,27 +43,31 @@ final class AlarmKlaxon {
     public static void stop(Context context, SharedPreferences prefs) {
         if (sStarted) {
             LogUtils.v("AlarmKlaxon.stop()");
-            sStarted = false;
-            if (SettingsDAO.isAdvancedAudioPlaybackEnabled(prefs)) {
-                getRingtonePlayer(context).stop();
-            } else {
-                getAsyncRingtonePlayer(context).stop();
-
-                if (SettingsDAO.isPerAlarmVolumeEnabled(prefs) && sPreviousAlarmVolume != -1) {
-                    AudioManager audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-                    int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
-                    // Restore the original alarm volume only if it was changed
-                    if (currentVolume != sPreviousAlarmVolume) {
-                        audioManager.setStreamVolume(AudioManager.STREAM_ALARM, sPreviousAlarmVolume, 0);
-                    }
-
-                    sPreviousAlarmVolume = -1;
-                }
-            }
-
-            final Vibrator vibrator = context.getSystemService(Vibrator.class);
-            vibrator.cancel();
         }
+        sStarted = false;
+
+        // Stop whichever players were actually created. The preference may have changed since
+        // playback started and therefore cannot safely identify the active implementation.
+        if (sRingtonePlayer != null) {
+            sRingtonePlayer.stop();
+        }
+        if (sAsyncRingtonePlayer != null) {
+            sAsyncRingtonePlayer.stop();
+        }
+
+        if (sPreviousAlarmVolume != -1) {
+            final AudioManager audioManager =
+                    (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+            final int currentVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
+            if (currentVolume != sPreviousAlarmVolume) {
+                audioManager.setStreamVolume(
+                        AudioManager.STREAM_ALARM, sPreviousAlarmVolume, 0);
+            }
+            sPreviousAlarmVolume = -1;
+        }
+
+        final Vibrator vibrator = context.getSystemService(Vibrator.class);
+        vibrator.cancel();
     }
 
     public static void start(Context context, SharedPreferences prefs, AlarmInstance instance) {
@@ -119,11 +123,10 @@ final class AlarmKlaxon {
     }
 
     public static void deactivateRingtonePlayback(SharedPreferences prefs) {
-        if (SettingsDAO.isAdvancedAudioPlaybackEnabled(prefs)) {
-            stopListeningToPreferences();
-        } else {
-            releaseResources();
-        }
+        // Release both implementations regardless of the current preference; it may differ from
+        // the value used when playback was activated.
+        stopListeningToPreferences();
+        releaseResources();
     }
 
     // MediaPlayer
@@ -153,6 +156,7 @@ final class AlarmKlaxon {
 
     public static synchronized void stopListeningToPreferences() {
         if (sRingtonePlayer != null) {
+            sRingtonePlayer.stop();
             sRingtonePlayer.stopListeningToPreferences();
             sRingtonePlayer = null;
         }

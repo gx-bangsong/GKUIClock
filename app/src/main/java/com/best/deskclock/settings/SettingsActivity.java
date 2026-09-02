@@ -312,7 +312,8 @@ public final class SettingsActivity extends CollapsingToolbarBaseActivity {
 
             new Handler(requireContext().getMainLooper()).postDelayed(() -> {
                 // Required to update Locale.
-                requireContext().sendBroadcast(new Intent(ACTION_LANGUAGE_CODE_CHANGED));
+                requireContext().sendBroadcast(new Intent(ACTION_LANGUAGE_CODE_CHANGED)
+                        .setPackage(requireContext().getPackageName()));
                 // Required to update widgets.
                 requireContext().sendBroadcast(new Intent(ACTION_APPWIDGET_UPDATE));
             }, 300);

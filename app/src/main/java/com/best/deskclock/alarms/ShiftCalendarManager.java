@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.provider.CalendarContract;
 import android.provider.Settings;
+import android.text.TextUtils;
 
 import androidx.core.content.ContextCompat;
 
@@ -33,14 +34,21 @@ import com.best.deskclock.provider.AlarmInstance;
 import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.RingtoneUtils;
 import com.best.deskclock.utils.ShiftAlarmUtils;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -48,21 +56,45 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Mirrors compatible system-calendar events into standalone {@link AlarmInstance} rows.
+ * Synchronizes compatible system-calendar events with standalone calendar alarms and optionally
+ * with individual advanced rotation alarms.
  *
- * <p>The synchronization is diff based: a stable calendar occurrence key is stored with every
- * instance, unchanged instances retain their alarm state, and only changed or removed events are
- * rescheduled. PR #32's local rotation engine remains the owner of regular alarm templates; this
- * class only owns instances whose source is {@link AlarmInstance#SOURCE_TYPE_CALENDAR}.</p>
+ * <p>Standalone synchronization is diff based: a stable calendar occurrence key is stored with
+ * every instance, unchanged instances retain their alarm state, and only changed or removed events
+ * are rescheduled. Per-rotation synchronization stores upcoming event times as date overrides in
+ * that alarm's existing {@code SHIFT_ROTATION_V2} payload.</p>
  */
 public final class ShiftCalendarManager {
 
     private static final String TAG = "ShiftCalendarManager";
     private static final long SYNC_DEBOUNCE_SECONDS = 2;
     private static final long MILLIS_PER_DAY = 24L * 60L * 60L * 1000L;
+    private static final int ROTATION_SYNC_WINDOW_DAYS = 30;
+    private static final String ROTATION_PAYLOAD_PREFIX = "SHIFT_ROTATION_V2";
+    private static final String ALL_CALENDARS = "all";
+    private static final Gson GSON = new Gson();
+    private static final Type OVERRIDE_MAP_TYPE =
+            new TypeToken<Map<String, Double>>() { }.getType();
+    private static final Type DATE_SET_TYPE =
+            new TypeToken<Set<String>>() { }.getType();
 
     public interface SyncListener {
         void onShiftSyncChanged();
+    }
+
+    /** A selectable system calendar exposed to the advanced shift alarm editor. */
+    public static final class CalendarInfo {
+        public final String id;
+        public final String displayName;
+        public final String accountName;
+        public final int color;
+
+        CalendarInfo(String id, String displayName, String accountName, int color) {
+            this.id = id;
+            this.displayName = displayName;
+            this.accountName = accountName;
+            this.color = color;
+        }
     }
 
     @SuppressLint("StaticFieldLeak")
@@ -109,9 +141,10 @@ public final class ShiftCalendarManager {
     }
 
     public synchronized void registerObserver() {
-        if (!isEnabled() || !hasCalendarPermission()) {
+        // Whether synchronization is enabled is resolved on the worker because an individual
+        // rotation alarm can opt in even when standalone calendar alarms are disabled globally.
+        if (!hasCalendarPermission()) {
             unregisterObserver();
-            ShiftCalendarSyncJobService.cancel(mContext);
             return;
         }
 
@@ -127,6 +160,9 @@ public final class ShiftCalendarManager {
             LogUtils.i(TAG + ": Calendar shift observer registered");
         } catch (SecurityException e) {
             LogUtils.e(TAG + ": Unable to register calendar observer", e);
+        } catch (RuntimeException e) {
+            // CalendarProvider may still be credential-encrypted during locked boot.
+            LogUtils.e(TAG + ": Calendar provider is not available yet", e);
         }
     }
 
@@ -191,7 +227,12 @@ public final class ShiftCalendarManager {
         dispatchStatusChanged();
 
         try {
-            if (!isEnabled()) {
+            final ContentResolver resolver = mContext.getContentResolver();
+            final List<Alarm> alarms = Alarm.getAlarms(resolver, null);
+            final boolean standaloneSyncEnabled = isEnabled();
+            final boolean rotationSyncEnabled = hasEnabledRotationCalendarSync(alarms);
+
+            if (!standaloneSyncEnabled && !rotationSyncEnabled) {
                 unregisterObserver();
                 removeAllCalendarInstances();
                 setSuccessfulStatus(0);
@@ -204,7 +245,15 @@ public final class ShiftCalendarManager {
                 return;
             }
 
-            final ContentResolver resolver = mContext.getContentResolver();
+            registerObserver();
+            final int updatedRotationAlarms = synchronizeRotationAlarms(alarms);
+
+            if (!standaloneSyncEnabled) {
+                removeAllCalendarInstances();
+                setSuccessfulStatus(updatedRotationAlarms);
+                return;
+            }
+
             final List<AlarmInstance> existing = AlarmInstance.getInstances(resolver,
                     AlarmInstance.SOURCE_TYPE + " = ?",
                     String.valueOf(AlarmInstance.SOURCE_TYPE_CALENDAR));
@@ -319,6 +368,203 @@ public final class ShiftCalendarManager {
             }
         }
         return desired;
+    }
+
+    /** Returns system calendars that can be selected by an individual rotation alarm. */
+    public List<CalendarInfo> getSystemCalendars() {
+        final List<CalendarInfo> calendars = new ArrayList<>();
+        if (!hasCalendarPermission()) {
+            return calendars;
+        }
+
+        final String[] projection = {
+                CalendarContract.Calendars._ID,
+                CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
+                CalendarContract.Calendars.ACCOUNT_NAME,
+                CalendarContract.Calendars.CALENDAR_COLOR
+        };
+        try (Cursor cursor = mContext.getContentResolver().query(
+                CalendarContract.Calendars.CONTENT_URI, projection, null, null,
+                CalendarContract.Calendars.CALENDAR_DISPLAY_NAME + " COLLATE NOCASE ASC")) {
+            if (cursor == null) {
+                return calendars;
+            }
+            while (cursor.moveToNext()) {
+                calendars.add(new CalendarInfo(cursor.getString(0), cursor.getString(1),
+                        cursor.getString(2), cursor.getInt(3)));
+            }
+        } catch (SecurityException e) {
+            LogUtils.e(TAG + ": Calendar permission was revoked while listing calendars", e);
+        } catch (RuntimeException e) {
+            LogUtils.e(TAG + ": Failed to query system calendars", e);
+        }
+        return calendars;
+    }
+
+    private static boolean hasEnabledRotationCalendarSync(List<Alarm> alarms) {
+        for (Alarm alarm : alarms) {
+            if (!alarm.enabled || TextUtils.isEmpty(alarm.rotationPayload)
+                    || !alarm.rotationPayload.startsWith(ROTATION_PAYLOAD_PREFIX)) {
+                continue;
+            }
+            final String[] parts = alarm.rotationPayload.split("\\|", -1);
+            if (parts.length >= 8 && (Boolean.parseBoolean(parts[6])
+                    || parts.length == 8 || !readManagedCalendarDates(parts).isEmpty())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Synchronizes the 30-day calendar window into enabled rotation alarms. Calendar-managed
+     * overrides are tracked separately in payload part 8 so stale events can be removed without
+     * deleting annual-leave pauses or future manual overrides.
+     */
+    private int synchronizeRotationAlarms(List<Alarm> alarms) {
+        int updatedCount = 0;
+        for (Alarm alarm : alarms) {
+            if (!alarm.enabled || TextUtils.isEmpty(alarm.rotationPayload)
+                    || !alarm.rotationPayload.startsWith(ROTATION_PAYLOAD_PREFIX)) {
+                continue;
+            }
+            final String[] parts = alarm.rotationPayload.split("\\|", -1);
+            if (parts.length < 8) {
+                continue;
+            }
+            if (synchronizeRotationAlarm(alarm, parts)) {
+                new AlarmUpdateHandler(mContext, null, null)
+                        .asyncUpdateAlarm(alarm, false, false);
+                updatedCount++;
+            }
+        }
+        return updatedCount;
+    }
+
+    private boolean synchronizeRotationAlarm(Alarm alarm, String[] parts) {
+        final boolean syncEnabled = Boolean.parseBoolean(parts[6]);
+        final String targetCalendarId = TextUtils.isEmpty(parts[7])
+                ? ALL_CALENDARS : parts[7];
+        final Map<String, Double> overrides = readOverrides(parts[5]);
+        final Set<String> oldManagedDates = readManagedCalendarDates(parts);
+
+        // Payloads created by the source feature did not identify which positive overrides came
+        // from Calendar. Since that UI exposed only annual-leave (-1) overrides, migrate its
+        // positive values into the managed set so deleted events do not remain scheduled forever.
+        if (parts.length == 8) {
+            for (Map.Entry<String, Double> entry : overrides.entrySet()) {
+                if (entry.getValue() != null && entry.getValue() >= 0) {
+                    oldManagedDates.add(entry.getKey());
+                }
+            }
+        }
+
+        for (String date : oldManagedDates) {
+            final Double value = overrides.get(date);
+            if (value != null && value >= 0) {
+                overrides.remove(date);
+            }
+        }
+
+        final Set<String> newManagedDates = new LinkedHashSet<>();
+        if (syncEnabled) {
+            queryRotationCalendarOverrides(targetCalendarId, overrides, newManagedDates);
+        }
+
+        final String payload = String.format(Locale.US,
+                "%s|%s|%s|%s|%s|%s|%b|%s|%s",
+                ROTATION_PAYLOAD_PREFIX, parts[1], parts[2], parts[3], parts[4],
+                GSON.toJson(overrides), syncEnabled, targetCalendarId,
+                GSON.toJson(newManagedDates));
+        if (payload.equals(alarm.rotationPayload)) {
+            return false;
+        }
+        alarm.rotationPayload = payload;
+        return true;
+    }
+
+    private void queryRotationCalendarOverrides(String targetCalendarId,
+                                                Map<String, Double> overrides,
+                                                Set<String> managedDates) {
+        final long now = System.currentTimeMillis();
+        final long windowEnd = now + ROTATION_SYNC_WINDOW_DAYS * MILLIS_PER_DAY;
+        final long maximumOffsetMillis =
+                ShiftAlarmUtils.MAX_ABSOLUTE_OFFSET_MINUTES * 60L * 1000L;
+        final Uri.Builder builder = CalendarContract.Instances.CONTENT_URI.buildUpon();
+        ContentUris.appendId(builder, now - maximumOffsetMillis);
+        ContentUris.appendId(builder, windowEnd + maximumOffsetMillis);
+
+        final String[] projection = {
+                CalendarContract.Instances.TITLE,
+                CalendarContract.Instances.DESCRIPTION,
+                CalendarContract.Instances.BEGIN,
+                CalendarContract.Instances.CALENDAR_ID
+        };
+        final int fallbackOffset = readDefaultOffset();
+        try (Cursor cursor = mContext.getContentResolver().query(builder.build(), projection,
+                null, null, CalendarContract.Instances.BEGIN + " ASC")) {
+            if (cursor == null) {
+                throw new IllegalStateException("Calendar provider returned no result");
+            }
+            while (cursor.moveToNext()) {
+                final String title = cursor.getString(0);
+                final String description = cursor.getString(1);
+                final long beginTime = cursor.getLong(2);
+                final String calendarId = cursor.getString(3);
+                if (!ALL_CALENDARS.equals(targetCalendarId)
+                        && !targetCalendarId.equals(calendarId)) {
+                    continue;
+                }
+                if (!ShiftAlarmUtils.isShiftEvent(title, description)) {
+                    continue;
+                }
+
+                final Calendar alarmTime = Calendar.getInstance();
+                alarmTime.setTimeInMillis(beginTime);
+                alarmTime.add(Calendar.MINUTE,
+                        ShiftAlarmUtils.parseOffsetMinutes(description, fallbackOffset));
+                alarmTime.set(Calendar.SECOND, 0);
+                alarmTime.set(Calendar.MILLISECOND, 0);
+                if (alarmTime.getTimeInMillis() <= now
+                        || alarmTime.getTimeInMillis() > windowEnd) {
+                    continue;
+                }
+
+                final String date = String.format(Locale.US, "%04d-%02d-%02d",
+                        alarmTime.get(Calendar.YEAR), alarmTime.get(Calendar.MONTH) + 1,
+                        alarmTime.get(Calendar.DAY_OF_MONTH));
+                final Double existingValue = overrides.get(date);
+                if (existingValue != null && existingValue < 0) {
+                    // An explicit annual-leave pause always wins over calendar synchronization.
+                    continue;
+                }
+                final int minuteOfDay = alarmTime.get(Calendar.HOUR_OF_DAY) * 60
+                        + alarmTime.get(Calendar.MINUTE);
+                overrides.put(date, (double) minuteOfDay);
+                managedDates.add(date);
+            }
+        }
+    }
+
+    private static Map<String, Double> readOverrides(String json) {
+        try {
+            final Map<String, Double> parsed = GSON.fromJson(json, OVERRIDE_MAP_TYPE);
+            return parsed == null ? new TreeMap<>() : new TreeMap<>(parsed);
+        } catch (RuntimeException e) {
+            return new TreeMap<>();
+        }
+    }
+
+    private static Set<String> readManagedCalendarDates(String[] parts) {
+        if (parts.length < 9 || TextUtils.isEmpty(parts[8])) {
+            return new LinkedHashSet<>();
+        }
+        try {
+            final Set<String> parsed = GSON.fromJson(parts[8], DATE_SET_TYPE);
+            return parsed == null ? new LinkedHashSet<>() : new LinkedHashSet<>(parsed);
+        } catch (RuntimeException e) {
+            return new LinkedHashSet<>();
+        }
     }
 
     private boolean shouldRingOnShiftDate(Calendar shiftDate) {

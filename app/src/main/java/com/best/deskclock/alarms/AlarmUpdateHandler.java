@@ -8,12 +8,11 @@ package com.best.deskclock.alarms;
 
 import android.content.ContentResolver;
 import android.content.Context;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.best.deskclock.AppExecutors;
 import com.best.deskclock.R;
 import com.best.deskclock.events.Events;
 import com.best.deskclock.provider.Alarm;
@@ -23,10 +22,9 @@ import com.best.deskclock.utils.Utils;
 import com.best.deskclock.widget.toast.SnackbarManager;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.lang.ref.WeakReference;
 import java.util.Calendar;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * API for asynchronously mutating a single alarm.
@@ -34,16 +32,16 @@ import java.util.concurrent.Executors;
 public final class AlarmUpdateHandler {
 
     private final Context mAppContext;
-    private final ScrollHandler mScrollHandler;
-    private final View mSnackbarAnchor;
+    private final WeakReference<ScrollHandler> mScrollHandler;
+    private final WeakReference<View> mSnackbarAnchor;
 
     // For undo
     private Alarm mDeletedAlarm;
 
     public AlarmUpdateHandler(Context context, ScrollHandler scrollHandler, ViewGroup snackbarAnchor) {
         mAppContext = context.getApplicationContext();
-        mScrollHandler = scrollHandler;
-        mSnackbarAnchor = snackbarAnchor;
+        mScrollHandler = new WeakReference<>(scrollHandler);
+        mSnackbarAnchor = new WeakReference<>(snackbarAnchor);
     }
 
     /**
@@ -52,9 +50,7 @@ public final class AlarmUpdateHandler {
      * @param alarm The alarm to be added.
      */
     public void asyncAddAlarm(final Alarm alarm) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
-        executor.execute(() -> {
+        AppExecutors.getAlarmIO().execute(() -> {
             AlarmInstance instance = null;
             if (alarm != null) {
                 Events.sendAlarmEvent(R.string.action_create, R.string.label_deskclock);
@@ -63,8 +59,11 @@ public final class AlarmUpdateHandler {
                 // Add alarm to db
                 Alarm newAlarm = alarm.addAlarm(cr);
 
-                // Be ready to scroll to this alarm on UI later.
-                mScrollHandler.setSmoothScrollStableId(newAlarm.id);
+                // Be ready to scroll to this alarm on UI later, if its view still exists.
+                final ScrollHandler scrollHandler = mScrollHandler.get();
+                if (scrollHandler != null) {
+                    scrollHandler.setSmoothScrollStableId(newAlarm.id);
+                }
 
                 // Create and add instance to db
                 if (newAlarm.enabled) {
@@ -74,9 +73,11 @@ public final class AlarmUpdateHandler {
             }
 
             final AlarmInstance finalInstance = instance;
-            handler.post(() -> {
-                if (finalInstance != null) {
-                    AlarmUtils.popAlarmSetSnackbar(mSnackbarAnchor, finalInstance.getAlarmTime().getTimeInMillis());
+            AppExecutors.getMainThread().post(() -> {
+                final View snackbarAnchor = mSnackbarAnchor.get();
+                if (finalInstance != null && snackbarAnchor != null) {
+                    AlarmUtils.popAlarmSetSnackbar(snackbarAnchor,
+                            finalInstance.getAlarmTime().getTimeInMillis());
                 }
             });
         });
@@ -91,9 +92,7 @@ public final class AlarmUpdateHandler {
      */
     public void asyncUpdateAlarm(final Alarm alarm, final boolean popToast,
                                  final boolean minorUpdate) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
-        executor.execute(() -> {
+        AppExecutors.getAlarmIO().execute(() -> {
             ContentResolver cr = mAppContext.getContentResolver();
 
             // Update alarm
@@ -133,9 +132,11 @@ public final class AlarmUpdateHandler {
             final AlarmInstance finalInstance = alarm.enabled ? setupAlarmInstance(alarm) : null;
             requestCalendarReconciliation();
 
-            handler.post(() -> {
-                if (popToast && finalInstance != null) {
-                    AlarmUtils.popAlarmSetSnackbar(mSnackbarAnchor, finalInstance.getAlarmTime().getTimeInMillis());
+            AppExecutors.getMainThread().post(() -> {
+                final View snackbarAnchor = mSnackbarAnchor.get();
+                if (popToast && finalInstance != null && snackbarAnchor != null) {
+                    AlarmUtils.popAlarmSetSnackbar(snackbarAnchor,
+                            finalInstance.getAlarmTime().getTimeInMillis());
                 }
             });
         });
@@ -147,9 +148,7 @@ public final class AlarmUpdateHandler {
      * @param alarm The alarm to be deleted.
      */
     public void asyncDeleteAlarm(final Alarm alarm) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Handler handler = new Handler(Looper.getMainLooper());
-        executor.execute(() -> {
+        AppExecutors.getAlarmIO().execute(() -> {
             // Activity may be closed at this point , make sure data is still valid
             if (alarm == null) {
                 // Nothing to do here, just return.
@@ -159,7 +158,7 @@ public final class AlarmUpdateHandler {
             final boolean deleted = Alarm.deleteAlarm(mAppContext.getContentResolver(), alarm.id);
             requestCalendarReconciliation();
 
-            handler.post(() -> {
+            AppExecutors.getMainThread().post(() -> {
                 if (deleted) {
                     mDeletedAlarm = alarm;
                     showUndoBar();
@@ -179,7 +178,10 @@ public final class AlarmUpdateHandler {
         final String text = alarm.deleteAfterUse && !alarm.daysOfWeek.isRepeating()
                 ? localizedContext.getString(R.string.alarm_is_dismissed_and_deleted, time)
                 : localizedContext.getString(R.string.alarm_is_dismissed, time);
-        SnackbarManager.show(Snackbar.make(mSnackbarAnchor, text, Snackbar.LENGTH_SHORT));
+        final View snackbarAnchor = mSnackbarAnchor.get();
+        if (snackbarAnchor != null) {
+            SnackbarManager.show(Snackbar.make(snackbarAnchor, text, Snackbar.LENGTH_SHORT));
+        }
     }
 
     /**
@@ -191,10 +193,17 @@ public final class AlarmUpdateHandler {
     }
 
     private void showUndoBar() {
+        final View snackbarAnchor = mSnackbarAnchor.get();
+        if (snackbarAnchor == null) {
+            mDeletedAlarm = null;
+            return;
+        }
+
         final Context localizedContext = Utils.getLocalizedContext(mAppContext);
         final Alarm deletedAlarm = mDeletedAlarm;
-        final Snackbar snackbar = Snackbar.make(mSnackbarAnchor, localizedContext.getString(R.string.alarm_deleted),
-                Snackbar.LENGTH_LONG).setAction(android.R.string.cancel, v -> {
+        final Snackbar snackbar = Snackbar.make(snackbarAnchor,
+                localizedContext.getString(R.string.alarm_deleted), Snackbar.LENGTH_LONG)
+                .setAction(android.R.string.cancel, v -> {
                     mDeletedAlarm = null;
                     asyncAddAlarm(deletedAlarm);
                 });

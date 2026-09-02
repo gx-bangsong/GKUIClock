@@ -86,8 +86,9 @@ public class QuickTimerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
 
         public void bind(QuickTimer quickTimer) {
             String durationStr = DateUtils.formatElapsedTime(quickTimer.duration / 1000);
-            if (quickTimer.label != null && !quickTimer.label.isEmpty()) {
-                chip.setText(quickTimer.label + " (" + durationStr + ")");
+            String displayLabel = quickTimer.getDisplayLabel(mContext);
+            if (!displayLabel.isEmpty()) {
+                chip.setText(displayLabel + " (" + durationStr + ")");
             } else {
                 chip.setText(durationStr);
             }

@@ -20,6 +20,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Transaction;
 
 import java.util.List;
 
@@ -28,18 +29,31 @@ public interface HolidayDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(List<Holiday> holidays);
 
-    @Query("SELECT * FROM holiday WHERE SUBSTR(startDate, 1, 4) = :year")
-    List<Holiday> getHolidaysByYear(String year);
+    @Query("SELECT * FROM holiday WHERE SUBSTR(startDate, 1, 4) = :year "
+            + "AND (:countryCode = '' OR countryCode IS NULL OR countryCode = '' "
+            + "OR UPPER(countryCode) = UPPER(:countryCode))")
+    List<Holiday> getHolidaysByYear(String year, String countryCode);
 
-    @Query("SELECT * FROM holiday WHERE :date BETWEEN startDate AND endDate")
-    Holiday getHolidayByDate(String date);
+    @Query("SELECT * FROM holiday WHERE :date BETWEEN startDate AND endDate "
+            + "AND (:countryCode = '' OR countryCode IS NULL OR countryCode = '' "
+            + "OR UPPER(countryCode) = UPPER(:countryCode)) LIMIT 1")
+    Holiday getHolidayByDate(String date, String countryCode);
 
-    @Query("SELECT * FROM holiday WHERE compDays LIKE '%' || :date || '%'")
-    Holiday getCompDayByDate(String date);
+    @Query("SELECT * FROM holiday WHERE compDays LIKE '%' || :date || '%' "
+            + "AND (:countryCode = '' OR countryCode IS NULL OR countryCode = '' "
+            + "OR UPPER(countryCode) = UPPER(:countryCode)) LIMIT 1")
+    Holiday getCompDayByDate(String date, String countryCode);
 
     @Query("SELECT * FROM holiday")
     List<Holiday> getAllHolidays();
 
     @Query("DELETE FROM holiday")
     void deleteAll();
+
+    /** Replaces the active data atomically, so a malformed import never destroys valid data. */
+    @Transaction
+    default void replaceAll(List<Holiday> holidays) {
+        deleteAll();
+        insertAll(holidays);
+    }
 }

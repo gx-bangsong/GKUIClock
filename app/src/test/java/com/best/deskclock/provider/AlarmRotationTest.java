@@ -171,6 +171,25 @@ public class AlarmRotationTest {
     }
 
     @Test
+    public void testAnnualLeaveOverrideSkipsDateWithCalendarMetadata() {
+        Calendar anchor = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        anchor.set(2026, Calendar.AUGUST, 1, 0, 0, 0);
+        anchor.set(Calendar.MILLISECOND, 0);
+
+        String payload = String.format(Locale.US,
+                "SHIFT_ROTATION_V2|2|%d|false|480,480|{\"2026-08-02\":-1}|true|all|[]",
+                anchor.getTimeInMillis());
+        Calendar now = (Calendar) anchor.clone();
+        now.set(Calendar.HOUR_OF_DAY, 9);
+
+        Calendar next = getNextRotationAlarmTime(payload, now);
+
+        assertNotNull(next);
+        assertEquals(3, next.get(Calendar.DAY_OF_MONTH));
+        assertEquals(8, next.get(Calendar.HOUR_OF_DAY));
+    }
+
+    @Test
     public void testMalformedPayloadFallback() {
         Calendar now = Calendar.getInstance();
         Calendar next = getNextRotationAlarmTime("SHIFT_ROTATION_V2|broken|NaN|null", now);

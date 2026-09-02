@@ -14,6 +14,7 @@ import android.net.Uri;
 
 import androidx.preference.PreferenceManager;
 
+import com.best.deskclock.alarms.ShiftCalendarManager;
 import com.best.deskclock.controller.Controller;
 import com.best.deskclock.controller.ThemeController;
 import com.best.deskclock.data.DataModel;
@@ -30,13 +31,15 @@ public class DeskClockApplication extends Application {
 
     @SuppressLint("StaticFieldLeak")
     private static Context applicationContext;
+    private static volatile SharedPreferences defaultSharedPreferences;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         applicationContext = getApplicationContext();
-        final SharedPreferences prefs = getDefaultSharedPreferences(applicationContext);
+        defaultSharedPreferences = createDefaultSharedPreferences(applicationContext);
+        final SharedPreferences prefs = defaultSharedPreferences;
 
         ThemeController.initialize(this);
         DataModel.getDataModel().init(applicationContext, prefs);
@@ -47,6 +50,13 @@ public class DeskClockApplication extends Application {
 
         // Download holiday data on start
         HolidayRepository.getInstance(applicationContext).updateWorkdayData();
+
+        // Keep both standalone and per-rotation calendar synchronization responsive while the
+        // process is alive. The manager unregisters itself when neither mode is active.
+        final ShiftCalendarManager shiftCalendarManager =
+                ShiftCalendarManager.getInstance(applicationContext);
+        shiftCalendarManager.registerObserver();
+        shiftCalendarManager.requestSync();
     }
 
     public static Context getContext() {
@@ -57,6 +67,20 @@ public class DeskClockApplication extends Application {
      * Returns the default {@link SharedPreferences} instance from the underlying storage context.
      */
     public static SharedPreferences getDefaultSharedPreferences(Context context) {
+        SharedPreferences prefs = defaultSharedPreferences;
+        if (prefs == null) {
+            synchronized (DeskClockApplication.class) {
+                prefs = defaultSharedPreferences;
+                if (prefs == null) {
+                    prefs = createDefaultSharedPreferences(context.getApplicationContext());
+                    defaultSharedPreferences = prefs;
+                }
+            }
+        }
+        return prefs;
+    }
+
+    private static SharedPreferences createDefaultSharedPreferences(Context context) {
         final Context storageContext;
 
         if (SdkUtils.isAtLeastAndroid7()) {
@@ -65,12 +89,10 @@ public class DeskClockApplication extends Application {
             storageContext = context.createDeviceProtectedStorageContext();
             final String name = context.getPackageName() + "_preferences";
             final String prefsFilename = storageContext.getDataDir() + "/shared_prefs/" + name + ".xml";
-            final File prefs = new File(Objects.requireNonNull(Uri.parse(prefsFilename).getPath()));
+            final File prefsFile = new File(Objects.requireNonNull(Uri.parse(prefsFilename).getPath()));
 
-            if (!prefs.exists()) {
-                if (!storageContext.moveSharedPreferencesFrom(context, name)) {
-                    LogUtils.wtf("Failed to migrate shared preferences");
-                }
+            if (!prefsFile.exists() && !storageContext.moveSharedPreferencesFrom(context, name)) {
+                LogUtils.wtf("Failed to migrate shared preferences");
             }
         } else {
             storageContext = context;

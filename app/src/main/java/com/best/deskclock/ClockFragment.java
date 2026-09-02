@@ -72,6 +72,7 @@ public final class ClockFragment extends DeskClockFragment {
     private View mClockFrame;
     private SelectedCitiesAdapter mCityAdapter;
     private RecyclerView mCityList;
+    private ScrollPositionWatcher mScrollPositionWatcher;
     private String mDateFormat;
     private String mDateFormatForAccessibility;
     private Context mContext;
@@ -104,7 +105,7 @@ public final class ClockFragment extends DeskClockFragment {
         super.onCreateView(inflater, container, icicle);
 
         final View fragmentView = inflater.inflate(R.layout.clock_fragment, container, false);
-        final ScrollPositionWatcher scrollPositionWatcher = new ScrollPositionWatcher();
+        mScrollPositionWatcher = new ScrollPositionWatcher();
 
         mContext = requireContext();
         mPrefs = getDefaultSharedPreferences(mContext);
@@ -125,7 +126,7 @@ public final class ClockFragment extends DeskClockFragment {
             mCityList.setLayoutManager(new LinearLayoutManager(mContext));
             mCityList.setAdapter(mCityAdapter);
             mCityList.setItemAnimator(null);
-            mCityList.addOnScrollListener(scrollPositionWatcher);
+            mCityList.addOnScrollListener(mScrollPositionWatcher);
         }
         if (mCityList != null) {
             mCityList.setPadding(0, 0, 0, ThemeUtils.convertDpToPixels(
@@ -200,9 +201,29 @@ public final class ClockFragment extends DeskClockFragment {
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
         UiDataModel.getUiDataModel().removePeriodicCallback(mQuarterHourUpdater);
-        DataModel.getDataModel().removeCityListener(mCityAdapter);
+        if (mCityAdapter != null) {
+            DataModel.getDataModel().removeCityListener(mCityAdapter);
+        }
+        if (mCityList != null) {
+            if (mScrollPositionWatcher != null) {
+                mCityList.removeOnScrollListener(mScrollPositionWatcher);
+            }
+            mCityList.setAdapter(null);
+            mCityList.setLayoutManager(null);
+        }
+
+        mDigitalClock = null;
+        mAnalogClock = null;
+        mClockFrame = null;
+        mCityAdapter = null;
+        mCityList = null;
+        mScrollPositionWatcher = null;
+        mDateFormat = null;
+        mDateFormatForAccessibility = null;
+        mContext = null;
+
+        super.onDestroyView();
     }
 
     @Override
@@ -361,6 +382,8 @@ public final class ClockFragment extends DeskClockFragment {
                     mAnalogClock.getLayoutParams().width = ThemeUtils.convertDpToPixels(mIsTablet ? 150 : 80, context);
                     mDigitalClockContainer.setVisibility(GONE);
                     mAnalogClock.setVisibility(VISIBLE);
+                    mAnalogClock.setTimeZoneDayNightStyleEnabled(
+                            mClockStyle == DataModel.ClockStyle.ANALOG_MATERIAL);
                     mAnalogClock.setTimeZone(cityTimeZoneId);
                     mAnalogClock.enableSeconds(false);
                 } else {

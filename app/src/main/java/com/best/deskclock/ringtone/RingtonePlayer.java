@@ -17,6 +17,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.SystemClock;
 
 import androidx.annotation.OptIn;
 import androidx.media3.common.AudioAttributes;
@@ -77,6 +78,7 @@ public final class RingtonePlayer {
     private boolean mIsCrescendoRunningForSystemMediaVolume = false;
 
     private final Handler mVolumeHandler = new Handler(Looper.getMainLooper());
+    private final Object mSystemVolumeCrescendoToken = new Object();
 
     private final Runnable mVolumeAdjustmentRunnable = new Runnable() {
         @Override
@@ -298,7 +300,7 @@ public final class RingtonePlayer {
         }
         mOriginalMediaVolume = -1;
 
-        if (mIsAutoRoutingToBluetoothDeviceEnabled && mAudioDeviceCallback != null) {
+        if (mAudioDeviceCallback != null) {
             mAudioManager.unregisterAudioDeviceCallback(mAudioDeviceCallback);
             mAudioDeviceCallback = null;
         }
@@ -465,15 +467,17 @@ public final class RingtonePlayer {
 
         final int steps = Math.abs(volumeDiff);
         final long stepDuration = 2000 / steps;
+        stopSystemMediaVolumeCrescendo();
         mIsCrescendoRunningForSystemMediaVolume = true;
+        final long startTime = SystemClock.uptimeMillis();
 
         for (int i = 1; i <= steps; i++) {
             final int newVolume = startVolume + i;
-            mVolumeHandler.postDelayed(() -> {
+            mVolumeHandler.postAtTime(() -> {
                 if (mIsCrescendoRunningForSystemMediaVolume) {
                     mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume, 0);
                 }
-            }, stepDuration * i);
+            }, mSystemVolumeCrescendoToken, startTime + stepDuration * i);
         }
     }
 
@@ -485,6 +489,7 @@ public final class RingtonePlayer {
      */
     private void stopSystemMediaVolumeCrescendo() {
         mIsCrescendoRunningForSystemMediaVolume = false;
+        mVolumeHandler.removeCallbacksAndMessages(mSystemVolumeCrescendoToken);
     }
 
     /**

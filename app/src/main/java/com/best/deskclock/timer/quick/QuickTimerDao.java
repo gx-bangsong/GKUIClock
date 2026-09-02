@@ -11,7 +11,7 @@ import java.util.List;
 
 @Dao
 public interface QuickTimerDao {
-    @Query("SELECT * FROM quick_timers")
+    @Query("SELECT * FROM quick_timers ORDER BY id ASC")
     LiveData<List<QuickTimer>> getAllQuickTimers();
 
     @Insert

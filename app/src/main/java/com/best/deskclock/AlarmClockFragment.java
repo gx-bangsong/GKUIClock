@@ -147,6 +147,8 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     private EmptyViewController mEmptyViewController;
     private AlarmTimeClickHandler mAlarmTimeClickHandler;
     private LinearLayoutManager mLayoutManager;
+    private ScrollPositionWatcher mScrollPositionWatcher;
+    private ItemTouchHelper mItemTouchHelper;
 
     /**
      * The public no-arg constructor required by all fragments.
@@ -245,10 +247,10 @@ public final class AlarmClockFragment extends DeskClockFragment implements
             }
         });
 
-        final ScrollPositionWatcher scrollPositionWatcher = new ScrollPositionWatcher();
+        mScrollPositionWatcher = new ScrollPositionWatcher();
         if (mRecyclerView != null) {
-            mRecyclerView.addOnLayoutChangeListener(scrollPositionWatcher);
-            mRecyclerView.addOnScrollListener(scrollPositionWatcher);
+            mRecyclerView.addOnLayoutChangeListener(mScrollPositionWatcher);
+            mRecyclerView.addOnScrollListener(mScrollPositionWatcher);
             mRecyclerView.setAdapter(mItemAdapter);
         }
 
@@ -258,7 +260,8 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         if (mRecyclerView != null) { mRecyclerView.setItemAnimator(itemAnimator); }
 
         if (!ThemeUtils.areSystemAnimationsDisabled(requireContext())) {
-            new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            mItemTouchHelper = new ItemTouchHelper(
+                    new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
                 @Override
                 public boolean onMove(@NonNull RecyclerView recyclerView,
                                       @NonNull RecyclerView.ViewHolder viewHolder,
@@ -357,7 +360,8 @@ public final class AlarmClockFragment extends DeskClockFragment implements
                     Events.sendAlarmEvent(R.string.action_delete, R.string.label_deskclock);
                     mAlarmUpdateHandler.asyncDeleteAlarm(alarm);
                 }
-            }).attachToRecyclerView(mRecyclerView);
+            });
+            mItemTouchHelper.attachToRecyclerView(mRecyclerView);
         }
 
         return v;
@@ -453,7 +457,48 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         ToastManager.cancelToast();
     }
 
-    @NonNull
+    @Override
+    public void onDestroyView() {
+        if (mAlarmUpdateHandler != null) {
+            mAlarmUpdateHandler.hideUndoBar();
+        }
+        if (mItemTouchHelper != null) {
+            mItemTouchHelper.attachToRecyclerView(null);
+        }
+        if (mRecyclerView != null) {
+            if (mScrollPositionWatcher != null) {
+                mRecyclerView.removeOnLayoutChangeListener(mScrollPositionWatcher);
+                mRecyclerView.removeOnScrollListener(mScrollPositionWatcher);
+            }
+            mRecyclerView.setAdapter(null);
+            mRecyclerView.setItemAnimator(null);
+        }
+        if (mSyncNowButton != null) {
+            mSyncNowButton.setOnClickListener(null);
+        }
+        if (mItemAdapter != null) {
+            mItemAdapter.setOnItemChangedListener(null);
+        }
+
+        mContext = null;
+        mMainLayout = null;
+        mRecyclerView = null;
+        mUpcomingShiftsCard = null;
+        mSyncStatusText = null;
+        mUpcomingShiftsContainer = null;
+        mNoShiftsText = null;
+        mSyncNowButton = null;
+        mItemAdapter = null;
+        mAlarmUpdateHandler = null;
+        mEmptyViewController = null;
+        mAlarmTimeClickHandler = null;
+        mLayoutManager = null;
+        mScrollPositionWatcher = null;
+        mItemTouchHelper = null;
+
+        super.onDestroyView();
+    }
+
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return Alarm.getAlarmsCursorLoader(getActivity());
@@ -461,6 +506,12 @@ public final class AlarmClockFragment extends DeskClockFragment implements
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> cursorLoader, Cursor data) {
+        // The loader is fragment-scoped and may complete after onDestroyView().
+        if (mItemAdapter == null || mAlarmTimeClickHandler == null || mRecyclerView == null
+                || mEmptyViewController == null || data == null) {
+            return;
+        }
+
         final List<AlarmItemHolder> itemHolders = new ArrayList<>(data.getCount());
         for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
             final Alarm alarm = new Alarm(data);
@@ -483,6 +534,10 @@ public final class AlarmClockFragment extends DeskClockFragment implements
      *                    updates
      */
     private void setAdapterItems(final List<AlarmItemHolder> items, final long updateToken) {
+        if (mRecyclerView == null || mItemAdapter == null || mEmptyViewController == null
+                || mAlarmTimeClickHandler == null) {
+            return;
+        }
         if (updateToken < mCurrentUpdateToken) {
             LogUtils.v("Ignoring adapter update: %d < %d", updateToken, mCurrentUpdateToken);
             return;
@@ -648,6 +703,11 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     public void setAlarmVolume(Alarm alarm, int alarmVolume) {
         alarm.alarmVolume = alarmVolume;
         mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+    }
+
+    /** Requests calendar access for per-alarm rotation synchronization. */
+    public void requestCalendarPermissionForRotation() {
+        mCalendarPermissionLauncher.launch(Manifest.permission.READ_CALENDAR);
     }
 
     private void requestCalendarSyncFromUi() {

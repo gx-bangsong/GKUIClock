@@ -721,6 +721,20 @@
         <string name="holiday_data_url_summary">设置节假日和工作日数据的 URL</string>
 
         <string name="holiday_data_url_dialog_message">输入节假日和工作日数据的 URL</string>
+        <string name="import_holiday_data_title">导入节假日 JSON</string>
+        <string name="import_holiday_data_summary">从 JSON 文件导入节假日及可选调休工作日，支持国家代码和常见国际格式</string>
+        <string name="holiday_country_title">节假日国家或地区</string>
+        <string name="holiday_country_summary">自动跟随应用语言，也可以手动选择要使用的国家或地区</string>
+        <string name="holiday_country_auto">跟随应用语言（%1$s）</string>
+        <string name="holiday_country_all">全部或未指定国家</string>
+        <string name="holiday_import_success">已导入 %1$d 条节假日记录</string>
+        <string name="holiday_import_failed">无法导入节假日数据：%1$s</string>
+        <string name="holiday_update_success">已更新 %1$d 条节假日记录</string>
+        <string name="no_file_manager_found">未找到文件管理器</string>
+        <string name="quick_timer_brush_teeth">刷牙</string>
+        <string name="quick_timer_instant_noodles">泡面</string>
+        <string name="quick_timer_steam_eggs">蒸蛋</string>
+        <string name="quick_timer_face_mask">敷面膜</string>
 <string name="auto_silence_never" msgid="4821982647348750809">从不</string>
     <string name="auto_silence_1_minute">1 分钟</string>
     <string name="digital_widget_clock_custom_color_title">主时钟自定义颜色</string>

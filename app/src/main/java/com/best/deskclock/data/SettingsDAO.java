@@ -581,7 +581,19 @@ public final class SettingsDAO {
      * @return the duration for which a timer can ring before expiring and being reset.
      */
     static int getTimerAutoSilenceDuration(SharedPreferences prefs) {
-        return prefs.getInt(KEY_TIMER_AUTO_SILENCE_DURATION, DEFAULT_TIMER_AUTO_SILENCE_DURATION);
+        try {
+            return prefs.getInt(KEY_TIMER_AUTO_SILENCE_DURATION,
+                    DEFAULT_TIMER_AUTO_SILENCE_DURATION);
+        } catch (ClassCastException ignored) {
+            // Older preference screens stored this value as a string. Accept either type so an
+            // upgrade does not crash timer initialization.
+            try {
+                return Integer.parseInt(prefs.getString(KEY_TIMER_AUTO_SILENCE_DURATION,
+                        String.valueOf(DEFAULT_TIMER_AUTO_SILENCE_DURATION)));
+            } catch (NumberFormatException | ClassCastException invalidValue) {
+                return DEFAULT_TIMER_AUTO_SILENCE_DURATION;
+            }
+        }
     }
 
     /**
@@ -1533,6 +1545,98 @@ public final class SettingsDAO {
      */
     public static void setHolidayDataUrl(SharedPreferences prefs, String url) {
         prefs.edit().putString(KEY_HOLIDAY_DATA_URL, url).apply();
+    }
+
+    /** Returns the persisted country selection, including {@code auto} and the all-countries value. */
+    public static String getHolidayCountryMode(SharedPreferences prefs) {
+        final String mode = prefs.getString(KEY_HOLIDAY_COUNTRY, DEFAULT_HOLIDAY_COUNTRY);
+        return mode == null ? DEFAULT_HOLIDAY_COUNTRY : mode;
+    }
+
+    /**
+     * Resolves the ISO country whose holidays should be used. In automatic mode this follows the
+     * language selected inside the app, falling back to the system locale and its region.
+     */
+    public static String getHolidayCountry(SharedPreferences prefs) {
+        final String mode = getHolidayCountryMode(prefs);
+        if (!DEFAULT_HOLIDAY_COUNTRY.equalsIgnoreCase(mode)) {
+            return mode == null ? "" : mode.toUpperCase(Locale.US);
+        }
+
+        final String customLanguageCode = getCustomLanguageCode(prefs);
+        final Locale locale;
+        if (DEFAULT_SYSTEM_LANGUAGE_CODE.equals(customLanguageCode)) {
+            // Resources.getSystem() is not affected by GKUIClock's per-app language override.
+            locale = Resources.getSystem().getConfiguration().locale;
+        } else {
+            locale = Locale.forLanguageTag(customLanguageCode.replace('_', '-'));
+        }
+
+        if (!locale.getCountry().isEmpty()) {
+            return locale.getCountry().toUpperCase(Locale.US);
+        }
+        if ("zh".equals(locale.getLanguage()) && "Hant".equalsIgnoreCase(locale.getScript())) {
+            return "TW";
+        }
+        return getDefaultCountryForLanguage(locale.getLanguage());
+    }
+
+    public static void setHolidayCountry(SharedPreferences prefs, String countryCode) {
+        final String value;
+        if (countryCode == null || countryCode.isEmpty()) {
+            value = "";
+        } else if (DEFAULT_HOLIDAY_COUNTRY.equalsIgnoreCase(countryCode)) {
+            value = DEFAULT_HOLIDAY_COUNTRY;
+        } else {
+            value = countryCode.toUpperCase(Locale.US);
+        }
+        prefs.edit().putString(KEY_HOLIDAY_COUNTRY, value).apply();
+    }
+
+    private static String getDefaultCountryForLanguage(String language) {
+        return switch (language.toLowerCase(Locale.US)) {
+            case "ar" -> "SA";
+            case "be" -> "BY";
+            case "bg" -> "BG";
+            case "bn" -> "BD";
+            case "ca" -> "ES";
+            case "cs" -> "CZ";
+            case "da" -> "DK";
+            case "de" -> "DE";
+            case "el" -> "GR";
+            case "en" -> "US";
+            case "es" -> "ES";
+            case "et" -> "EE";
+            case "fa" -> "IR";
+            case "fi" -> "FI";
+            case "fr" -> "FR";
+            case "he", "iw" -> "IL";
+            case "hi" -> "IN";
+            case "hr" -> "HR";
+            case "hu" -> "HU";
+            case "id", "in" -> "ID";
+            case "it" -> "IT";
+            case "ja" -> "JP";
+            case "ko" -> "KR";
+            case "lt" -> "LT";
+            case "lv" -> "LV";
+            case "nb", "nn", "no" -> "NO";
+            case "nl" -> "NL";
+            case "pl" -> "PL";
+            case "pt" -> "PT";
+            case "ro" -> "RO";
+            case "ru" -> "RU";
+            case "sk" -> "SK";
+            case "sl" -> "SI";
+            case "sr" -> "RS";
+            case "sv" -> "SE";
+            case "th" -> "TH";
+            case "tr" -> "TR";
+            case "uk" -> "UA";
+            case "vi" -> "VN";
+            case "zh" -> "CN";
+            default -> "";
+        };
     }
 
     /**
