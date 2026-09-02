@@ -41,15 +41,20 @@ public abstract class TimerKlaxon {
     public static void stop(Context context, SharedPreferences prefs) {
         if (sStarted) {
             LogUtils.i("TimerKlaxon.stop()");
-            sStarted = false;
-            if (SettingsDAO.isAdvancedAudioPlaybackEnabled(prefs)) {
-                getRingtonePlayer(context).stop();
-            } else {
-                getAsyncRingtonePlayer(context).stop();
-            }
-            Vibrator vibrator = context.getSystemService(Vibrator.class);
-            vibrator.cancel();
         }
+        sStarted = false;
+
+        // Stop whichever implementations were actually created; the preference may have changed
+        // while the timer was firing.
+        if (sRingtonePlayer != null) {
+            sRingtonePlayer.stop();
+        }
+        if (sAsyncRingtonePlayer != null) {
+            sAsyncRingtonePlayer.stop();
+        }
+
+        final Vibrator vibrator = context.getSystemService(Vibrator.class);
+        vibrator.cancel();
     }
 
     public static void start(Context context, SharedPreferences prefs) {
@@ -104,11 +109,8 @@ public abstract class TimerKlaxon {
     }
 
     public static void deactivateRingtonePlayback(SharedPreferences prefs) {
-        if (SettingsDAO.isAdvancedAudioPlaybackEnabled(prefs)) {
-            stopListeningToPreferences();
-        } else {
-            releaseResources();
-        }
+        stopListeningToPreferences();
+        releaseResources();
     }
 
     // MediaPlayer
@@ -138,6 +140,7 @@ public abstract class TimerKlaxon {
 
     public static synchronized void stopListeningToPreferences() {
         if (sRingtonePlayer != null) {
+            sRingtonePlayer.stop();
             sRingtonePlayer.stopListeningToPreferences();
             sRingtonePlayer = null;
         }

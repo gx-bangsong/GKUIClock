@@ -6,6 +6,7 @@
 
 package com.best.deskclock;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -23,8 +24,6 @@ import com.best.deskclock.widget.selector.AlarmSelectionAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class AlarmSelectionActivity extends AppCompatActivity implements AlarmSelectionAdapter.OnAlarmClickListener {
 
@@ -90,10 +89,11 @@ public class AlarmSelectionActivity extends AppCompatActivity implements AlarmSe
     }
 
     void processAlarmActionAsync(Alarm alarm) {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
-            switch (mAction) {
-                case ACTION_DISMISS -> HandleApiCalls.dismissAlarm(alarm, this);
+        final Context appContext = getApplicationContext();
+        final int action = mAction;
+        AppExecutors.getAlarmIO().execute(() -> {
+            switch (action) {
+                case ACTION_DISMISS -> HandleApiCalls.dismissAlarm(alarm, appContext);
                 case ACTION_INVALID -> LogUtils.i("Invalid action");
             }
         });

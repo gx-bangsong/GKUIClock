@@ -31,13 +31,15 @@ public class DeskClockApplication extends Application {
 
     @SuppressLint("StaticFieldLeak")
     private static Context applicationContext;
+    private static volatile SharedPreferences defaultSharedPreferences;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
         applicationContext = getApplicationContext();
-        final SharedPreferences prefs = getDefaultSharedPreferences(applicationContext);
+        defaultSharedPreferences = createDefaultSharedPreferences(applicationContext);
+        final SharedPreferences prefs = defaultSharedPreferences;
 
         ThemeController.initialize(this);
         DataModel.getDataModel().init(applicationContext, prefs);
@@ -65,6 +67,20 @@ public class DeskClockApplication extends Application {
      * Returns the default {@link SharedPreferences} instance from the underlying storage context.
      */
     public static SharedPreferences getDefaultSharedPreferences(Context context) {
+        SharedPreferences prefs = defaultSharedPreferences;
+        if (prefs == null) {
+            synchronized (DeskClockApplication.class) {
+                prefs = defaultSharedPreferences;
+                if (prefs == null) {
+                    prefs = createDefaultSharedPreferences(context.getApplicationContext());
+                    defaultSharedPreferences = prefs;
+                }
+            }
+        }
+        return prefs;
+    }
+
+    private static SharedPreferences createDefaultSharedPreferences(Context context) {
         final Context storageContext;
 
         if (SdkUtils.isAtLeastAndroid7()) {
@@ -73,12 +89,10 @@ public class DeskClockApplication extends Application {
             storageContext = context.createDeviceProtectedStorageContext();
             final String name = context.getPackageName() + "_preferences";
             final String prefsFilename = storageContext.getDataDir() + "/shared_prefs/" + name + ".xml";
-            final File prefs = new File(Objects.requireNonNull(Uri.parse(prefsFilename).getPath()));
+            final File prefsFile = new File(Objects.requireNonNull(Uri.parse(prefsFilename).getPath()));
 
-            if (!prefs.exists()) {
-                if (!storageContext.moveSharedPreferencesFrom(context, name)) {
-                    LogUtils.wtf("Failed to migrate shared preferences");
-                }
+            if (!prefsFile.exists() && !storageContext.moveSharedPreferencesFrom(context, name)) {
+                LogUtils.wtf("Failed to migrate shared preferences");
             }
         } else {
             storageContext = context;

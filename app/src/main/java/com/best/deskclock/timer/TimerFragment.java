@@ -77,9 +77,15 @@ public final class TimerFragment extends DeskClockFragment {
     private TimerAdapter mAdapter;
     private QuickTimerRepository mQuickTimerRepository;
     private QuickTimerAdapter mQuickTimerAdapter;
+    private RecyclerView mKeyboardQuickTimerCarousel;
+    private RecyclerView mSpinnerQuickTimerCarousel;
     private View mTimersView;
     private View mCurrentView;
     private ItemTouchHelper mItemTouchHelper;
+    private TimerAdapter.TimerItemTouchHelper mTimerItemTouchHelper;
+    private View mPreDrawView;
+    private ViewTreeObserver.OnPreDrawListener mPreDrawListener;
+    private AnimatorSet mViewAnimator;
     private boolean mIsTablet;
     private boolean mIsLandscape;
 
@@ -141,17 +147,21 @@ public final class TimerFragment extends DeskClockFragment {
             }
         });
 
-        RecyclerView keyboardCarousel = mCreateTimerView.findViewById(R.id.quick_timer_carousel);
-        if (keyboardCarousel != null) {
-            keyboardCarousel.setAdapter(mQuickTimerAdapter);
+        mKeyboardQuickTimerCarousel =
+                mCreateTimerView.findViewById(R.id.quick_timer_carousel);
+        if (mKeyboardQuickTimerCarousel != null) {
+            mKeyboardQuickTimerCarousel.setAdapter(mQuickTimerAdapter);
         }
-        RecyclerView spinnerCarousel = mCreateTimerSpinnerView.findViewById(R.id.quick_timer_carousel);
-        if (spinnerCarousel != null) {
-            spinnerCarousel.setAdapter(mQuickTimerAdapter);
+        mSpinnerQuickTimerCarousel =
+                mCreateTimerSpinnerView.findViewById(R.id.quick_timer_carousel);
+        if (mSpinnerQuickTimerCarousel != null) {
+            mSpinnerQuickTimerCarousel.setAdapter(mQuickTimerAdapter);
         }
 
         mQuickTimerRepository.getAllQuickTimers().observe(getViewLifecycleOwner(), quickTimers -> {
-            mQuickTimerAdapter.setQuickTimers(quickTimers);
+            if (mQuickTimerAdapter != null) {
+                mQuickTimerAdapter.setQuickTimers(quickTimers);
+            }
         });
         mIsTablet = ThemeUtils.isTablet();
         mIsLandscape = ThemeUtils.isLandscape();
@@ -174,7 +184,8 @@ public final class TimerFragment extends DeskClockFragment {
 
         mAdapter.loadTimerList();
 
-        mItemTouchHelper = new ItemTouchHelper(new TimerAdapter.TimerItemTouchHelper(mAdapter, mRecyclerView));
+        mTimerItemTouchHelper = new TimerAdapter.TimerItemTouchHelper(mAdapter, mRecyclerView);
+        mItemTouchHelper = new ItemTouchHelper(mTimerItemTouchHelper);
         handleItemTouchHelper();
 
         // If timer setup state is present, retrieve it to be later honored.
@@ -190,6 +201,9 @@ public final class TimerFragment extends DeskClockFragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        // Sorting may have changed while the settings activity was open.
+        mAdapter.refreshTimers();
 
         boolean createTimer = false;
         int showTimerId = -1;
@@ -248,10 +262,67 @@ public final class TimerFragment extends DeskClockFragment {
 
     @Override
     public void onDestroyView() {
-        super.onDestroyView();
-
-        DataModel.getDataModel().removeTimerListener(mAdapter);
+        stopUpdatingTime();
+        if (mAdapter != null) {
+            DataModel.getDataModel().removeTimerListener(mAdapter);
+        }
         DataModel.getDataModel().removeTimerListener(mTimerWatcher);
+
+        if (mPreDrawView != null && mPreDrawListener != null) {
+            final ViewTreeObserver observer = mPreDrawView.getViewTreeObserver();
+            if (observer.isAlive()) {
+                observer.removeOnPreDrawListener(mPreDrawListener);
+            }
+        }
+        mPreDrawView = null;
+        mPreDrawListener = null;
+
+        if (mItemTouchHelper != null) {
+            mItemTouchHelper.attachToRecyclerView(null);
+        }
+        if (mTimerItemTouchHelper != null) {
+            mTimerItemTouchHelper.detach();
+        }
+        if (mCreateTimerView != null) {
+            mCreateTimerView.setFabContainer(null);
+        }
+        if (mCreateTimerSpinnerView != null) {
+            mCreateTimerSpinnerView.setOnChangeListener(null);
+        }
+        if (mKeyboardQuickTimerCarousel != null) {
+            mKeyboardQuickTimerCarousel.setAdapter(null);
+        }
+        if (mSpinnerQuickTimerCarousel != null) {
+            mSpinnerQuickTimerCarousel.setAdapter(null);
+        }
+        if (mRecyclerView != null) {
+            mRecyclerView.setAdapter(null);
+            mRecyclerView.setLayoutManager(null);
+        }
+
+        final AnimatorSet viewAnimator = mViewAnimator;
+        mViewAnimator = null;
+        mContext = null;
+        mRecyclerView = null;
+        mCreateTimerView = null;
+        mCreateTimerSpinnerView = null;
+        mAdapter = null;
+        mQuickTimerRepository = null;
+        mQuickTimerAdapter = null;
+        mKeyboardQuickTimerCarousel = null;
+        mSpinnerQuickTimerCarousel = null;
+        mTimersView = null;
+        mCurrentView = null;
+        mItemTouchHelper = null;
+        mTimerItemTouchHelper = null;
+        mCreatingTimer = false;
+
+        // Cancel only after clearing view fields; animator end callbacks are lifecycle-guarded.
+        if (viewAnimator != null) {
+            viewAnimator.cancel();
+        }
+
+        super.onDestroyView();
     }
 
     @Override
@@ -259,7 +330,7 @@ public final class TimerFragment extends DeskClockFragment {
         super.onSaveInstanceState(outState);
 
         // If the timer creation view is visible, store the input for later restoration.
-        if (mCurrentView != mTimersView) {
+        if (mCurrentView != null && mCurrentView != mTimersView && mCreateTimerView != null) {
             mTimerSetupState = mCreateTimerView.getState();
             outState.putSerializable(KEY_TIMER_SETUP_STATE, mTimerSetupState);
         }
@@ -472,12 +543,27 @@ public final class TimerFragment extends DeskClockFragment {
 
         final long animationDuration = 600;
 
+        if (mPreDrawView != null && mPreDrawListener != null) {
+            final ViewTreeObserver oldObserver = mPreDrawView.getViewTreeObserver();
+            if (oldObserver.isAlive()) {
+                oldObserver.removeOnPreDrawListener(mPreDrawListener);
+            }
+        }
+        mPreDrawView = toView;
         final ViewTreeObserver viewTreeObserver = toView.getViewTreeObserver();
-        viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+        mPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
                 if (viewTreeObserver.isAlive()) {
                     viewTreeObserver.removeOnPreDrawListener(this);
+                }
+                if (mPreDrawListener == this) {
+                    mPreDrawListener = null;
+                    mPreDrawView = null;
+                }
+                if (mTimersView == null || mCreateTimerView == null
+                        || mCreateTimerSpinnerView == null || !isAdded()) {
+                    return true;
                 }
 
                 final float distanceY = requireView().getHeight() + requireView().getY();
@@ -501,6 +587,9 @@ public final class TimerFragment extends DeskClockFragment {
                     @Override
                     public void onAnimationStart(Animator animation) {
                         super.onAnimationStart(animation);
+                        if (mContext == null) {
+                            return;
+                        }
 
                         // The fade-out animation and fab-shrinking animation should run together.
                         updateFab(FAB_AND_BUTTONS_SHRINK);
@@ -509,6 +598,10 @@ public final class TimerFragment extends DeskClockFragment {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
+                        if (mTimersView == null || mCreateTimerView == null
+                                || mCreateTimerSpinnerView == null) {
+                            return;
+                        }
                         if (toTimers) {
                             showTimersView(FAB_AND_BUTTONS_EXPAND);
 
@@ -535,6 +628,13 @@ public final class TimerFragment extends DeskClockFragment {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         super.onAnimationEnd(animation);
+                        if (mViewAnimator == animatorSet) {
+                            mViewAnimator = null;
+                        }
+                        if (mTimersView == null || mCreateTimerView == null
+                                || mCreateTimerSpinnerView == null) {
+                            return;
+                        }
                         mTimersView.setTranslationY(0f);
                         mCreateTimerView.setTranslationY(0f);
                         mCreateTimerSpinnerView.setTranslationY(0f);
@@ -544,11 +644,13 @@ public final class TimerFragment extends DeskClockFragment {
                     }
                 });
 
+                mViewAnimator = animatorSet;
                 animatorSet.start();
 
                 return true;
             }
-        });
+        };
+        viewTreeObserver.addOnPreDrawListener(mPreDrawListener);
     }
 
     private boolean hasTimers() {
@@ -562,7 +664,9 @@ public final class TimerFragment extends DeskClockFragment {
     }
 
     private void stopUpdatingTime() {
-        mRecyclerView.removeCallbacks(mTimeUpdateRunnable);
+        if (mRecyclerView != null) {
+            mRecyclerView.removeCallbacks(mTimeUpdateRunnable);
+        }
     }
 
     private RecyclerView.LayoutManager getLayoutManager(Context context) {

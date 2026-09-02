@@ -43,8 +43,9 @@ public final class StopwatchService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        final String action = intent.getAction();
-        final int label = intent.getIntExtra(Events.EXTRA_EVENT_LABEL, R.string.label_intent);
+        final String action = intent == null ? null : intent.getAction();
+        final int label = intent == null ? R.string.label_intent
+                : intent.getIntExtra(Events.EXTRA_EVENT_LABEL, R.string.label_intent);
         if (action != null) {
             switch (action) {
                 case ACTION_START_STOPWATCH -> {
@@ -66,6 +67,9 @@ public final class StopwatchService extends Service {
             }
         }
 
+        // Do not leave a started service alive after processing this command. Using startId avoids
+        // stopping a newer command that arrived concurrently.
+        stopSelf(startId);
         return START_NOT_STICKY;
     }
 }

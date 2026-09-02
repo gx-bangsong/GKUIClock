@@ -156,8 +156,16 @@ public final class AsyncRingtonePlayer {
      * of its `Executor.
      */
     public void shutdown() {
-        if (mExecutor != null && !mExecutor.isShutdown()) {
+        if (!mExecutor.isShutdown()) {
             LOGGER.d("Releasing AsyncRingtonePlayer resources");
+            // Queue cleanup before shutdown so an omitted or racing stop cannot leak playback,
+            // audio focus, or the periodic crescendo task.
+            mExecutor.execute(() -> {
+                if (mPlaybackDelegate != null) {
+                    mPlaybackDelegate.stop();
+                }
+                cancelVolumeAdjustment();
+            });
             mExecutor.shutdown();
         } else {
             LOGGER.d("No AsyncRingtonePlayer to release");
@@ -206,6 +214,7 @@ public final class AsyncRingtonePlayer {
     private static class MediaPlayerPlaybackDelegate implements PlaybackDelegate {
 
         private AudioManager mAudioManager;
+        private AudioFocusRequest mAudioFocusRequest;
         private MediaPlayer mMediaPlayer;
 
         private long mCrescendoDuration = 0;
@@ -287,14 +296,15 @@ public final class AsyncRingtonePlayer {
 
         private void requestAudioFocus() {
             if (SdkUtils.isAtLeastAndroid8()) {
-                AudioFocusRequest focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                mAudioFocusRequest = new AudioFocusRequest.Builder(
+                        AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
                         .setAudioAttributes(new AudioAttributes.Builder()
                                 .setUsage(AudioAttributes.USAGE_ALARM)
                                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
                                 .build())
                         .build();
 
-                mAudioManager.requestAudioFocus(focusRequest);
+                mAudioManager.requestAudioFocus(mAudioFocusRequest);
             } else {
                 mAudioManager.requestAudioFocus(null, AudioManager.STREAM_ALARM, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
             }
@@ -303,17 +313,14 @@ public final class AsyncRingtonePlayer {
         private void abandonAudioFocus() {
             if (mAudioManager != null) {
                 if (SdkUtils.isAtLeastAndroid8()) {
-                    AudioFocusRequest focusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
-                            .setAudioAttributes(new AudioAttributes.Builder()
-                                    .setUsage(AudioAttributes.USAGE_ALARM)
-                                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                                    .build())
-                            .build();
-
-                    mAudioManager.abandonAudioFocusRequest(focusRequest);
+                    if (mAudioFocusRequest != null) {
+                        mAudioManager.abandonAudioFocusRequest(mAudioFocusRequest);
+                        mAudioFocusRequest = null;
+                    }
                 } else {
                     mAudioManager.abandonAudioFocus(null);
                 }
+                mAudioManager = null;
             }
         }
     }

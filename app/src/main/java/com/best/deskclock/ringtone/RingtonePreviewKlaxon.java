@@ -24,16 +24,19 @@ public final class RingtonePreviewKlaxon {
 
     public static void stop(Context context, SharedPreferences prefs) {
         LogUtils.i("RingtonePreviewKlaxon.stop()");
-        if (SettingsDAO.isAdvancedAudioPlaybackEnabled(prefs)) {
-            getRingtonePlayer(context).stop();
-        } else {
-            getAsyncRingtonePlayer(context).stop();
+        if (sRingtonePlayer != null) {
+            sRingtonePlayer.stop();
+        }
+        if (sAsyncRingtonePlayer != null) {
+            sAsyncRingtonePlayer.stop();
         }
     }
 
     public static void stopPreviewFromSpeakers(Context context) {
         LogUtils.i("RingtonePreviewKlaxon.stop()");
-        getAsyncRingtonePlayer(context).stop();
+        if (sAsyncRingtonePlayer != null) {
+            sAsyncRingtonePlayer.stop();
+        }
     }
 
     public static void start(Context context, SharedPreferences prefs, Uri uri) {
@@ -53,11 +56,8 @@ public final class RingtonePreviewKlaxon {
     }
 
     public static void deactivateRingtonePlayback(SharedPreferences prefs) {
-        if (SettingsDAO.isAdvancedAudioPlaybackEnabled(prefs)) {
-            stopListeningToPreferences();
-        } else {
-            releaseResources();
-        }
+        stopListeningToPreferences();
+        releaseResources();
     }
 
     // MediaPlayer
@@ -87,6 +87,7 @@ public final class RingtonePreviewKlaxon {
 
     public static synchronized void stopListeningToPreferences() {
         if (sRingtonePlayer != null) {
+            sRingtonePlayer.stop();
             sRingtonePlayer.stopListeningToPreferences();
             sRingtonePlayer = null;
         }

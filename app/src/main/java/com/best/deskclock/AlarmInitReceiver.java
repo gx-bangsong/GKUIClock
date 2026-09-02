@@ -146,7 +146,7 @@ public class AlarmInitReceiver extends BroadcastReceiver {
             }
         }
 
-        AsyncHandler.post(() -> {
+        AppExecutors.getAlarmIO().execute(() -> {
             try {
                 // Process restored data if any exists
                 if (!DeskClockBackupAgent.processRestoredData(context)) {
@@ -169,7 +169,9 @@ public class AlarmInitReceiver extends BroadcastReceiver {
                 shiftManager.requestSync();
             } finally {
                 result.finish();
-                wl.release();
+                if (wl.isHeld()) {
+                    wl.release();
+                }
                 LogUtils.v("AlarmInitReceiver finished");
             }
         });

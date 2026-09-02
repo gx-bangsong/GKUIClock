@@ -155,6 +155,8 @@ class FetchMatchingAlarmsAction implements Runnable {
 
     private void notifyFailureAndLog(String reason, Activity activity) {
         LogUtils.e(reason);
-        Controller.getController().notifyVoiceFailure(activity, reason);
+        if (activity != null && !activity.isDestroyed()) {
+            Controller.getController().notifyVoiceFailure(activity, reason);
+        }
     }
 }

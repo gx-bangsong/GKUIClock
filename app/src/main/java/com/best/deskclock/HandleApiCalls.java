@@ -49,14 +49,13 @@ import com.best.deskclock.utils.LogUtils;
 import com.best.deskclock.utils.RingtoneUtils;
 import com.best.deskclock.utils.Utils;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * This activity is never visible. It processes all public intents defined by {@link AlarmClock}
@@ -111,46 +110,58 @@ public class HandleApiCalls extends Activity {
         new DismissAlarmAsync(mAppContext, intent, this).execute();
     }
 
-    public static void dismissAlarm(Alarm alarm, Activity activity) {
-        final Context context = activity.getApplicationContext();
+    public static void dismissAlarm(Alarm alarm, Context context) {
+        final Context appContext = context.getApplicationContext();
         final AlarmInstance instance = AlarmInstance.getNextUpcomingInstanceByAlarmId(
-                context.getContentResolver(), alarm.id);
+                appContext.getContentResolver(), alarm.id);
         if (instance == null) {
-            final String reason = context.getString(R.string.no_alarm_scheduled_for_this_time);
-            Controller.getController().notifyVoiceFailure(activity, reason);
+            final String reason = appContext.getString(R.string.no_alarm_scheduled_for_this_time);
+            notifyVoiceFailure(context, reason);
             LOGGER.i("No alarm instance to dismiss");
             return;
         }
 
-        dismissAlarmInstance(instance, activity);
+        dismissAlarmInstance(instance, context);
     }
 
-    public static void dismissAlarmInstance(AlarmInstance instance, Activity activity) {
+    public static void dismissAlarmInstance(AlarmInstance instance, Context context) {
         Utils.enforceNotMainLooper();
 
-        final Context context = activity.getApplicationContext();
+        final Context appContext = context.getApplicationContext();
         final Date alarmTime = instance.getAlarmTime().getTime();
-        final String time = DateFormat.getTimeFormat(context).format(alarmTime);
+        final String time = DateFormat.getTimeFormat(appContext).format(alarmTime);
 
         if (instance.mAlarmState == FIRED_STATE || instance.mAlarmState == SNOOZE_STATE) {
             // Always dismiss alarms that are fired or snoozed.
-            AlarmStateManager.deleteInstanceAndUpdateParent(context, instance);
+            AlarmStateManager.deleteInstanceAndUpdateParent(appContext, instance);
         } else if (isAlarmWithin24Hours(instance)) {
             // Upcoming alarms are always predismissed.
-            AlarmStateManager.setPreDismissState(context, instance);
+            AlarmStateManager.setPreDismissState(appContext, instance);
         } else {
             // Otherwise the alarm cannot be dismissed at this time.
-            final String reason = context.getString(
+            final String reason = appContext.getString(
                     R.string.alarm_cant_be_dismissed_still_more_than_24_hours_away, time);
-            Controller.getController().notifyVoiceFailure(activity, reason);
+            notifyVoiceFailure(context, reason);
             LOGGER.i("Can't dismiss alarm more than 24 hours in advance");
         }
 
         // Log the successful dismissal.
-        final String reason = context.getString(R.string.alarm_is_dismissed, time);
-        Controller.getController().notifyVoiceSuccess(activity, reason);
+        final String reason = appContext.getString(R.string.alarm_is_dismissed, time);
+        notifyVoiceSuccess(context, reason);
         LOGGER.i("Alarm dismissed: " + instance);
         Events.sendAlarmEvent(R.string.action_dismiss, R.string.label_intent);
+    }
+
+    private static void notifyVoiceFailure(Context context, String reason) {
+        if (context instanceof Activity activity && !activity.isDestroyed()) {
+            Controller.getController().notifyVoiceFailure(activity, reason);
+        }
+    }
+
+    private static void notifyVoiceSuccess(Context context, String reason) {
+        if (context instanceof Activity activity && !activity.isDestroyed()) {
+            Controller.getController().notifyVoiceSuccess(activity, reason);
+        }
     }
 
     private static boolean isAlarmWithin24Hours(AlarmInstance alarmInstance) {
@@ -163,22 +174,23 @@ public class HandleApiCalls extends Activity {
 
         private final Context mContext;
         private final Intent mIntent;
-        private final Activity mActivity;
+        private final WeakReference<Activity> mActivityReference;
 
         public DismissAlarmAsync(Context context, Intent intent, Activity activity) {
-            mContext = context;
+            mContext = context.getApplicationContext();
             mIntent = intent;
-            mActivity = activity;
+            mActivityReference = new WeakReference<>(activity);
         }
 
         protected void execute() {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            executor.execute(() -> {
+            AppExecutors.getAlarmIO().execute(() -> {
+                final Activity activity = mActivityReference.get();
+                final Context voiceContext = activity == null ? mContext : activity;
                 final ContentResolver cr = mContext.getContentResolver();
                 final List<Alarm> alarms = getEnabledAlarms(mContext);
                 if (alarms.isEmpty()) {
                     final String reason = mContext.getString(R.string.no_scheduled_alarms);
-                    Controller.getController().notifyVoiceFailure(mActivity, reason);
+                    notifyVoiceFailure(voiceContext, reason);
                     LOGGER.i("No scheduled alarms");
                     return;
                 }
@@ -203,13 +215,13 @@ public class HandleApiCalls extends Activity {
                             .putExtra(EXTRA_ALARMS, alarms.toArray(new Parcelable[0]));
                     mContext.startActivity(pickSelectionIntent);
                     final String voiceMessage = mContext.getString(R.string.pick_alarm_to_dismiss);
-                    Controller.getController().notifyVoiceSuccess(mActivity, voiceMessage);
+                    notifyVoiceSuccess(voiceContext, voiceMessage);
                     return;
                 }
 
                 // fetch the alarms that are specified by the intent
                 final FetchMatchingAlarmsAction fmaa =
-                        new FetchMatchingAlarmsAction(mContext, alarms, mIntent, mActivity);
+                        new FetchMatchingAlarmsAction(mContext, alarms, mIntent, activity);
                 fmaa.run();
                 final List<Alarm> matchingAlarms = fmaa.getMatchingAlarms();
 
@@ -224,13 +236,13 @@ public class HandleApiCalls extends Activity {
                             .putExtra(EXTRA_ALARMS, matchingAlarms.toArray(new Parcelable[0]));
                     mContext.startActivity(pickSelectionIntent);
                     final String voiceMessage = mContext.getString(R.string.pick_alarm_to_dismiss);
-                    Controller.getController().notifyVoiceSuccess(mActivity, voiceMessage);
+                    notifyVoiceSuccess(voiceContext, voiceMessage);
                     return;
                 }
 
                 // Apply the action to the matching alarms
                 for (Alarm alarm : matchingAlarms) {
-                    dismissAlarm(alarm, mActivity);
+                    dismissAlarm(alarm, voiceContext);
                     LOGGER.i("Alarm dismissed: " + alarm);
                 }
             });
@@ -244,26 +256,28 @@ public class HandleApiCalls extends Activity {
     }
 
     private void handleSnoozeAlarm() {
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        executor.execute(() -> {
-            final Context context = getApplicationContext();
-            final ContentResolver cr = context.getContentResolver();
+        final Context appContext = getApplicationContext();
+        final WeakReference<Activity> activityReference = new WeakReference<>(this);
+        AppExecutors.getAlarmIO().execute(() -> {
+            final Activity activity = activityReference.get();
+            final Context voiceContext = activity == null ? appContext : activity;
+            final ContentResolver cr = appContext.getContentResolver();
             final List<AlarmInstance> alarmInstances = AlarmInstance.getInstancesByState(
                     cr, FIRED_STATE);
             if (alarmInstances.isEmpty()) {
-                final String reason = context.getString(R.string.no_firing_alarms);
-                Controller.getController().notifyVoiceFailure(this, reason);
+                final String reason = appContext.getString(R.string.no_firing_alarms);
+                notifyVoiceFailure(voiceContext, reason);
                 LOGGER.i("No firing alarms");
                 return;
             }
 
             for (AlarmInstance firingAlarmInstance : alarmInstances) {
-                snoozeAlarm(firingAlarmInstance, context, this);
+                snoozeAlarm(firingAlarmInstance, appContext, voiceContext);
             }
         });
     }
 
-    static void snoozeAlarm(AlarmInstance alarmInstance, Context context, Activity activity) {
+    static void snoozeAlarm(AlarmInstance alarmInstance, Context context, Context voiceContext) {
         Utils.enforceNotMainLooper();
 
         final String time = DateFormat.getTimeFormat(context).format(
@@ -271,7 +285,7 @@ public class HandleApiCalls extends Activity {
         final String reason = context.getString(R.string.alarm_is_snoozed, time);
         AlarmStateManager.setSnoozeState(context, alarmInstance, true);
 
-        Controller.getController().notifyVoiceSuccess(activity, reason);
+        notifyVoiceSuccess(voiceContext, reason);
         LOGGER.i("Alarm snoozed: " + alarmInstance);
         Events.sendAlarmEvent(R.string.action_snooze, R.string.label_intent);
     }
