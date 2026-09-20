@@ -218,6 +218,74 @@ public class AlarmUtils {
     }
 
     /**
+     * Formats a short countdown string for the alarm card, e.g. "In 2 hr 15 min" / "8小时15分后".
+     * The delta is expected to be positive (future). If negative, returns empty.
+     */
+    public static String formatCountdownForCard(Context context, long deltaMillis) {
+        if (deltaMillis <= 0) {
+            return context.getString(R.string.alarm_countdown_less_than_minute);
+        }
+        if (deltaMillis < DateUtils.MINUTE_IN_MILLIS) {
+            return context.getString(R.string.alarm_countdown_less_than_minute);
+        }
+
+        // Round up to next minute
+        long remainder = deltaMillis % DateUtils.MINUTE_IN_MILLIS;
+        if (remainder != 0) {
+            deltaMillis += DateUtils.MINUTE_IN_MILLIS - remainder;
+        }
+
+        long totalMinutes = deltaMillis / DateUtils.MINUTE_IN_MILLIS;
+        long days = totalMinutes / (24 * 60);
+        long remainingMinutes = totalMinutes % (24 * 60);
+        long hours = remainingMinutes / 60;
+        long minutes = remainingMinutes % 60;
+
+        // For very large deltas, keep existing "scheduled for" logic outside; here we just format up to days.
+        if (days >= 7) {
+            // Let caller handle date display; but we provide fallback days
+            if (hours > 0) {
+                return context.getString(R.string.alarm_countdown_days_hours, days, hours);
+            } else {
+                return context.getString(R.string.alarm_countdown_days, days);
+            }
+        }
+
+        if (days > 0) {
+            if (hours > 0) {
+                return context.getString(R.string.alarm_countdown_days_hours, days, hours);
+            } else if (minutes > 0) {
+                return context.getString(R.string.alarm_countdown_days_minutes, days, minutes);
+            } else {
+                return context.getString(R.string.alarm_countdown_days, days);
+            }
+        }
+
+        if (hours > 0) {
+            if (minutes > 0) {
+                return context.getString(R.string.alarm_countdown_hours_minutes, hours, minutes);
+            } else {
+                return context.getString(R.string.alarm_countdown_hours, hours);
+            }
+        }
+
+        return context.getString(R.string.alarm_countdown_minutes, minutes);
+    }
+
+    /**
+     * Returns the next firing time for an alarm, respecting enabled state.
+     * Used for countdown display on the card.
+     */
+    public static Calendar getNextAlarmTimeForCountdown(com.best.deskclock.provider.Alarm alarm,
+                                                        com.best.deskclock.provider.AlarmInstance instance) {
+        Calendar now = Calendar.getInstance();
+        if (instance != null && instance.getAlarmTime().after(now)) {
+            return instance.getAlarmTime();
+        }
+        return alarm.getNextAlarmTime(now);
+    }
+
+    /**
      * @return {@code true} if the device has a back flash. {@code false} otherwise.
      */
     public static boolean hasBackFlash(Context context) {

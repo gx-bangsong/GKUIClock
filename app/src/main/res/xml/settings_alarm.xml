@@ -302,6 +302,16 @@
             app:singleLineTitle="false"
             tools:layout="@layout/settings_preference_layout" />
 
+        <com.best.deskclock.settings.custompreference.CustomListPreference
+            android:key="key_alarm_card_date_display"
+            android:title="@string/alarm_card_date_display_title"
+            android:entries="@array/alarm_card_date_display_entries"
+            android:entryValues="@array/alarm_card_date_display_values"
+            android:defaultValue="0"
+            app:iconSpaceReserved="false"
+            app:singleLineTitle="false"
+            tools:layout="@layout/settings_preference_layout" />
+
         <com.best.deskclock.settings.custompreference.CustomSwitchPreference
             android:key="key_display_enabled_alarms_first"
             android:title="@string/display_enabled_alarms_first_title"

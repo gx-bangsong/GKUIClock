@@ -685,7 +685,18 @@ public final class Alarm implements Parcelable, ClockContract.AlarmsColumns {
     }
 
     public AlarmInstance createInstanceAfter(Calendar time) {
-        Calendar nextInstanceTime = getNextAlarmTime(time);
+        Calendar nextInstanceTime;
+        if (holidayOption != HolidayUtils.HOLIDAY_OPTION_NONE
+                && daysOfWeek.isRepeating()
+                && DeskClockApplication.getContext() != null) {
+            // Respect the alarm's holiday/workday rule (e.g. ring on a weekend
+            // compensation workday, skip legal holidays) instead of the plain
+            // weekday-bit schedule.
+            nextInstanceTime = HolidayUtils.getNextWorkdayAlarmTime(
+                    DeskClockApplication.getContext(), holidayOption, this, time);
+        } else {
+            nextInstanceTime = getNextAlarmTime(time);
+        }
         AlarmInstance result = new AlarmInstance(nextInstanceTime, id);
         result.mVibrate = vibrate;
         result.mVibrationPattern = vibrationPattern;

@@ -1589,4 +1589,26 @@
     <string name="holiday_option_big_small_xiao">Small Week (5 days work)</string>
     <string name="holiday_option_single_day_off">Single Day Off (6 days work)</string>
     <string name="holiday_option_none">None</string>
+
+    <!-- Alarm card date display -->
+    <string name="alarm_card_date_display_title">Alarm card date display</string>
+    <string name="alarm_card_date_display_tomorrow_today">Show Tomorrow/Today</string>
+    <string name="alarm_card_date_display_countdown">Show countdown</string>
+
+    <!-- Countdown for alarm card -->
+    <string name="alarm_countdown_less_than_minute">In less than a minute</string>
+    <string name="alarm_countdown_minutes">In %1$d min</string>
+    <string name="alarm_countdown_hours">In %1$d hr</string>
+    <string name="alarm_countdown_hours_minutes">In %1$d hr %2$d min</string>
+    <string name="alarm_countdown_days">In %1$d days</string>
+    <string name="alarm_countdown_days_hours">In %1$d days %2$d hr</string>
+    <string name="alarm_countdown_days_minutes">In %1$d days %2$d min</string>
+
+    <!-- Dismiss bottom sheet -->
+    <string name="dismiss_alarm_bottom_sheet_title">Close alarm?</string>
+    <string name="dismiss_alarm_skip_once">Skip this time only</string>
+    <string name="dismiss_alarm_skip_once_summary">Skip next ring, keep repeating</string>
+    <string name="dismiss_alarm_disable_repeating">Disable repeating alarm</string>
+    <string name="dismiss_alarm_disable_summary">Won\'t ring until enabled again</string>
+    <string name="dismiss_alarm_next_ring">Next ring: %s</string>
 </resources>

@@ -52,14 +52,21 @@ public class HolidayUtils {
         }
 
         String dateStr = DATE_FORMAT_THREAD_LOCAL.get().format(calendar.getTime());
-        HolidayRepository repo = HolidayRepository.getInstance(context);
 
-        // Check if it's a legal holiday or compensation workday
-        Holiday holiday = repo.getHolidayByDate(dateStr);
-        Holiday compDay = repo.getCompDayByDate(dateStr);
-
-        boolean isLegalHoliday = (holiday != null);
-        boolean isCompWorkday = (compDay != null);
+        // Check if it's a legal holiday or compensation workday. Missing or broken
+        // holiday data must never silence an alarm: fall back to the plain weekday bits.
+        boolean isLegalHoliday = false;
+        boolean isCompWorkday = false;
+        try {
+            HolidayRepository repo = HolidayRepository.getInstance(context);
+            Holiday holiday = repo.getHolidayByDate(dateStr);
+            Holiday compDay = repo.getCompDayByDate(dateStr);
+            isLegalHoliday = (holiday != null);
+            isCompWorkday = (compDay != null);
+        } catch (RuntimeException e) {
+            // Data issue; treat the date as an ordinary day and keep ringing per the
+            // alarm's weekday selection.
+        }
 
         int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
 
@@ -112,27 +119,37 @@ public class HolidayUtils {
      * @return The next valid firing time.
      */
     public static Calendar getNextWorkdayAlarmTime(Context context, int holidayOption, Alarm alarm, Calendar currentTime) {
-        Calendar nextInstanceTime = alarm.getNextAlarmTime(currentTime);
-
         if (holidayOption == HOLIDAY_OPTION_NONE) {
-            return nextInstanceTime;
+            return alarm.getNextAlarmTime(currentTime);
         }
 
-        // Iterate up to 365 days to find the next valid workday
+        Calendar nextInstanceTime;
+        if (alarm.daysOfWeek.isRepeating()) {
+            // Anchor the search at *today* at the alarm's wall-clock time, not at the next
+            // weekday-bit match. getNextAlarmTime alone would already skip weekend days for
+            // e.g. a Mon-Fri alarm, so a weekend day that is a compensation workday (调休)
+            // would never even be considered as a candidate.
+            nextInstanceTime = Calendar.getInstance(currentTime.getTimeZone());
+            nextInstanceTime.setTimeInMillis(currentTime.getTimeInMillis());
+            nextInstanceTime.set(Calendar.HOUR_OF_DAY, alarm.hour);
+            nextInstanceTime.set(Calendar.MINUTE, alarm.minutes);
+            nextInstanceTime.set(Calendar.SECOND, 0);
+            nextInstanceTime.set(Calendar.MILLISECOND, 0);
+        } else {
+            nextInstanceTime = alarm.getNextAlarmTime(currentTime);
+        }
+
+        // Iterate up to 365 days, day by day, to find the next day the alarm may ring.
+        // shouldAlarmRing combines the weekday bits with the holiday rules, so
+        // compensation workdays on non-selected weekdays are picked up as well.
         for (int i = 0; i < 365; i++) {
-            if (shouldAlarmRing(context, holidayOption, alarm.daysOfWeek, nextInstanceTime)) {
+            if (nextInstanceTime.getTimeInMillis() > currentTime.getTimeInMillis()
+                    && shouldAlarmRing(context, holidayOption, alarm.daysOfWeek, nextInstanceTime)) {
                 return nextInstanceTime;
             }
-            // Advance to the next occurrence of the alarm
+            // Advance to the next day
             nextInstanceTime.add(Calendar.DAY_OF_YEAR, 1);
-            // After adding a day, the distance logic might be needed if it's a repeating alarm
-            if (alarm.daysOfWeek.isRepeating()) {
-                int addDays = alarm.daysOfWeek.getDistanceToNextDay(nextInstanceTime);
-                if (addDays > 0) {
-                    nextInstanceTime.add(Calendar.DAY_OF_WEEK, addDays);
-                }
-            }
-            // Ensure time is reset to the alarm time (in case of DST or multi-day jumps)
+            // Ensure time is reset to the alarm time (in case of DST)
             nextInstanceTime.set(Calendar.HOUR_OF_DAY, alarm.hour);
             nextInstanceTime.set(Calendar.MINUTE, alarm.minutes);
             nextInstanceTime.set(Calendar.SECOND, 0);

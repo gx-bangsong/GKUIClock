@@ -53,6 +53,7 @@ import static com.best.deskclock.settings.PreferencesKeys.KEY_VOLUME_BUTTONS;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_WEEK_START;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_UPDATE_HOLIDAY_DATA;
 import static com.best.deskclock.settings.PreferencesKeys.KEY_HOLIDAY_DATA_URL;
+import static com.best.deskclock.settings.PreferencesKeys.KEY_ALARM_CARD_DATE_DISPLAY;
 
 import android.Manifest;
 import android.content.ContentResolver;
@@ -156,6 +157,7 @@ public class AlarmSettingsFragment extends ScreenFragment
     Preference mHolidayDataUrlPref;
     Preference mAlarmDisplayCustomizationPref;
     SwitchPreferenceCompat mCalendarShiftSyncPref;
+    ListPreference mAlarmCardDateDisplayPref;
 
     private final ActivityResultLauncher<String> calendarPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
@@ -494,10 +496,12 @@ public class AlarmSettingsFragment extends ScreenFragment
 
             case KEY_VOLUME_BUTTONS, KEY_POWER_BUTTON, KEY_FLIP_ACTION,
                  KEY_MATERIAL_TIME_PICKER_STYLE, KEY_MATERIAL_DATE_PICKER_STYLE,
-                 KEY_SORT_ALARM, KEY_VIBRATION_PATTERN -> {
+                 KEY_SORT_ALARM, KEY_VIBRATION_PATTERN, KEY_ALARM_CARD_DATE_DISPLAY -> {
                 final ListPreference preference = (ListPreference) pref;
                 final int index = preference.findIndexOfValue((String) newValue);
-                preference.setSummary(preference.getEntries()[index]);
+                if (index >= 0) {
+                    preference.setSummary(preference.getEntries()[index]);
+                }
             }
 
             case KEY_ALARM_NOTIFICATION_REMINDER_TIME -> {
@@ -809,6 +813,12 @@ public class AlarmSettingsFragment extends ScreenFragment
         mCalendarShiftSyncPref = findPreference(KEY_CALENDAR_SHIFT_SYNC);
         if (mCalendarShiftSyncPref != null) {
             mCalendarShiftSyncPref.setOnPreferenceChangeListener(this);
+        }
+
+        mAlarmCardDateDisplayPref = findPreference(KEY_ALARM_CARD_DATE_DISPLAY);
+        if (mAlarmCardDateDisplayPref != null) {
+            mAlarmCardDateDisplayPref.setOnPreferenceChangeListener(this);
+            mAlarmCardDateDisplayPref.setSummary(mAlarmCardDateDisplayPref.getEntry());
         }
     }
 

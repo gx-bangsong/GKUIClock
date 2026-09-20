@@ -160,6 +160,72 @@ public final class AlarmStateManager extends BroadcastReceiver {
         updateNextAlarm(context);
     }
 
+    /**
+     * Re-evaluates the pending instances of enabled, repeating alarms that use a
+     * holiday/workday rule (skip holidays, big/small week, single day off).
+     *
+     * <p>A holiday data update can move an alarm's true next firing: for example an
+     * instance scheduled for Monday becomes too late when today is a Sunday marked as a
+     * compensation workday (调休). In that case the stale instance is replaced by one at
+     * the correct (earlier) time so the alarm rings. Instances that are already due
+     * earlier are left untouched, and snoozed/fired instances are never disturbed.
+     */
+    public static void reconcileHolidayInstances(Context context) {
+        final ContentResolver cr = context.getContentResolver();
+        final Calendar now = getCurrentTime();
+        final List<Alarm> alarms = Alarm.getAlarms(cr,
+                Alarm.ENABLED + " = ? AND " + Alarm.HOLIDAY_OPTION + " != ?",
+                "1", String.valueOf(HolidayUtils.HOLIDAY_OPTION_NONE));
+
+        for (Alarm alarm : alarms) {
+            if (!alarm.enabled || !alarm.daysOfWeek.isRepeating()) {
+                continue;
+            }
+
+            AlarmInstance earliest = null;
+            for (AlarmInstance instance : AlarmInstance.getInstancesByAlarmId(cr, alarm.id)) {
+                if (instance.mAlarmState >= AlarmInstance.FIRED_STATE) {
+                    continue;
+                }
+                if (earliest == null || instance.getAlarmTime().before(earliest.getAlarmTime())) {
+                    earliest = instance;
+                }
+            }
+
+            final Calendar desired =
+                    HolidayUtils.getNextWorkdayAlarmTime(context, alarm.holidayOption, alarm, now);
+            if (desired == null) {
+                continue;
+            }
+
+            if (earliest == null) {
+                // Enabled holiday-aware alarm with no pending instance; schedule it.
+                final AlarmInstance newInstance = alarm.createInstanceAfter(context, now);
+                newInstance.addInstance(cr);
+                registerInstance(context, newInstance, false);
+            } else if (earliest.getAlarmTime().getTimeInMillis() > desired.getTimeInMillis()) {
+                // The pending instance fires later than the true next firing (e.g. it was
+                // scheduled for Monday, but today is a makeup workday); replace it.
+                LogUtils.i("Reconciling holiday-aware alarm " + alarm.id + ": replacing instance at "
+                        + AlarmUtils.getFormattedTime(context, earliest.getAlarmTime())
+                        + " with " + AlarmUtils.getFormattedTime(context, desired));
+                final SharedPreferences prefs = getDefaultSharedPreferences(context);
+                if (SettingsDAO.areSnoozedOrDismissedAlarmVibrationsEnabled(prefs)) {
+                    AlarmService.stopAlarmWithSingleVibration(context, earliest);
+                } else {
+                    AlarmService.stopAlarm(context, earliest);
+                }
+                unregisterInstance(context, earliest);
+                AlarmInstance.deleteInstance(cr, earliest.mId);
+                final AlarmInstance newInstance = alarm.createInstanceAfter(context, now);
+                newInstance.addInstance(cr);
+                registerInstance(context, newInstance, false);
+            }
+        }
+
+        updateNextAlarm(context);
+    }
+
 
     /**
      * Returns an alarm instance of an alarm that's going to fire next.
