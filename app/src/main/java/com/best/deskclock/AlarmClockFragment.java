@@ -642,7 +642,10 @@ public final class AlarmClockFragment extends DeskClockFragment implements
 
     public void setHolidayOption(Alarm alarm, int holidayOption) {
         alarm.holidayOption = holidayOption;
-        mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
+        // Major update on purpose: the holiday rule changes when the alarm may ring
+        // (e.g. a Sunday compensation workday), so the pending instance must be
+        // re-scheduled, which a minor update would not do.
+        mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, false);
     }
 
     public void setAlarmVolume(Alarm alarm, int alarmVolume) {
