@@ -1585,4 +1585,12 @@ public final class SettingsDAO {
     public static boolean isCalendarShiftSyncEnabled(SharedPreferences prefs) {
         return prefs.getBoolean(KEY_CALENDAR_SHIFT_SYNC, false);
     }
+
+    public static String getAlarmCardDateDisplay(SharedPreferences prefs) {
+        return prefs.getString(KEY_ALARM_CARD_DATE_DISPLAY, DEFAULT_ALARM_CARD_DATE_DISPLAY);
+    }
+
+    public static boolean isAlarmCardCountdownEnabled(SharedPreferences prefs) {
+        return ALARM_CARD_DATE_DISPLAY_COUNTDOWN.equals(getAlarmCardDateDisplay(prefs));
+    }
 }

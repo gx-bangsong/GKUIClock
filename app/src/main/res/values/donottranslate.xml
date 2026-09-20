@@ -552,4 +552,14 @@
 
     <string name="add_quick_timer_title" translatable="false">Add quick timer</string>
     <string name="add_to_quick_timers_description" translatable="false">Add to quick timers</string>
+
+    <string-array name="alarm_card_date_display_entries">
+        <item>@string/alarm_card_date_display_tomorrow_today</item>
+        <item>@string/alarm_card_date_display_countdown</item>
+    </string-array>
+
+    <string-array name="alarm_card_date_display_values" translatable="false">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
     </resources>

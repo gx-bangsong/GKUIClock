@@ -257,4 +257,9 @@ public class PreferencesDefaultValues {
     public static final int DEFAULT_SNOOZE_BUTTON_COLOR = Color.WHITE;
     public static final int DEFAULT_SNOOZE_TEXT_COLOR = Color.BLACK;
     public static final boolean DEFAULT_MATERIAL_YOU_ANALOG_WIDGET_WITH_SECOND_HAND = false;
+
+    // Alarm card date display: 0 = Tomorrow/Today, 1 = Countdown (Xh Ym later)
+    public static final String DEFAULT_ALARM_CARD_DATE_DISPLAY = "0";
+    public static final String ALARM_CARD_DATE_DISPLAY_TOMORROW_TODAY = "0";
+    public static final String ALARM_CARD_DATE_DISPLAY_COUNTDOWN = "1";
 }

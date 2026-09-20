@@ -68,6 +68,7 @@ public abstract class AlarmItemViewHolder extends ItemAdapter.ItemViewHolder<Ala
     public final View bottomPaddingView;
 
     public float annotationsAlpha = CLOCK_ENABLED_ALPHA;
+    private boolean mIsProgrammaticSwitchChange = false;
 
     public AlarmItemViewHolder(View itemView) {
         super(itemView);
@@ -90,9 +91,27 @@ public abstract class AlarmItemViewHolder extends ItemAdapter.ItemViewHolder<Ala
         // Clock handler
         clock.setOnClickListener(v -> getAlarmTimeClickHandler().onClockClicked(getItemHolder().item));
 
-        // On/Off button handler
-        onOff.setOnCheckedChangeListener((compoundButton, checked) ->
-                getItemHolder().getAlarmTimeClickHandler().setAlarmEnabled(getItemHolder().item, checked));
+        // On/Off button handler - intercept disabling of repeating alarms to show BottomSheet
+        onOff.setOnCheckedChangeListener((compoundButton, checked) -> {
+            if (mIsProgrammaticSwitchChange) {
+                return;
+            }
+            final AlarmItemHolder holder = getItemHolder();
+            if (holder == null) {
+                return;
+            }
+            final Alarm alarm = holder.item;
+            // Only intercept when turning OFF a currently enabled repeating alarm
+            if (!checked && alarm.enabled && alarm.daysOfWeek.isRepeating()) {
+                // Revert switch visually to ON; user choice will decide final state
+                mIsProgrammaticSwitchChange = true;
+                onOff.setChecked(true);
+                mIsProgrammaticSwitchChange = false;
+                getAlarmTimeClickHandler().showDismissBottomSheet(alarm, holder.getAlarmInstance());
+                return;
+            }
+            getAlarmTimeClickHandler().setAlarmEnabled(alarm, checked);
+        });
 
         // Preemptive dismiss button handler
         preemptiveDismissButton.setOnClickListener(v -> {
@@ -111,7 +130,7 @@ public abstract class AlarmItemViewHolder extends ItemAdapter.ItemViewHolder<Ala
 
         bindClock(alarm);
         bindOnOffSwitch(alarm);
-        bindRepeatText(context, alarm);
+        bindRepeatText(context, alarm, alarmInstance);
         bindPreemptiveDismissButton(context, alarm, alarmInstance);
         bindAnnotations(alarm);
 
@@ -120,7 +139,9 @@ public abstract class AlarmItemViewHolder extends ItemAdapter.ItemViewHolder<Ala
 
     protected void bindOnOffSwitch(Alarm alarm) {
         if (onOff.isChecked() != alarm.enabled) {
+            mIsProgrammaticSwitchChange = true;
             onOff.setChecked(alarm.enabled);
+            mIsProgrammaticSwitchChange = false;
         }
     }
 
@@ -134,7 +155,10 @@ public abstract class AlarmItemViewHolder extends ItemAdapter.ItemViewHolder<Ala
         clock.setTypeface(alarm.enabled ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
     }
 
-    protected void bindRepeatText(Context context, Alarm alarm) {
+    protected void bindRepeatText(Context context, Alarm alarm, AlarmInstance alarmInstance) {
+        final boolean isCountdownEnabled = SettingsDAO.isAlarmCardCountdownEnabled(
+                getDefaultSharedPreferences(context));
+
         if (!android.text.TextUtils.isEmpty(alarm.rotationPayload) && alarm.rotationPayload.startsWith("SHIFT_ROTATION_V2")) {
             try {
                 String[] parts = alarm.rotationPayload.split("\\|");
@@ -151,56 +175,104 @@ public abstract class AlarmItemViewHolder extends ItemAdapter.ItemViewHolder<Ala
                 int cycleIndex = diffDays % cycleLength;
                 if (cycleIndex < 0) cycleIndex += cycleLength;
                 int upcomingDayIndex = cycleIndex + 1;
-                daysOfWeek.setText(context.getString(R.string.shift_cycle_day_n, upcomingDayIndex));
+                String base = context.getString(R.string.shift_cycle_day_n, upcomingDayIndex);
+                if (isCountdownEnabled && alarm.enabled) {
+                    Calendar countdownTime = AlarmUtils.getNextAlarmTimeForCountdown(alarm, alarmInstance);
+                    long delta = countdownTime.getTimeInMillis() - System.currentTimeMillis();
+                    String countdown = AlarmUtils.formatCountdownForCard(context, delta);
+                    daysOfWeek.setText(base + " • " + countdown);
+                } else {
+                    daysOfWeek.setText(base);
+                }
             } catch (Exception e) {
                 daysOfWeek.setText("Shift Rotation");
             }
         } else if (alarm.daysOfWeek.isRepeating()) {
             final Weekdays.Order weekdayOrder = SettingsDAO.getWeekdayOrder(getDefaultSharedPreferences(context));
             final String daysOfWeekText = alarm.daysOfWeek.toString(context, weekdayOrder);
-            daysOfWeek.setText(daysOfWeekText);
+            if (isCountdownEnabled && alarm.enabled) {
+                Calendar nextTime = AlarmUtils.getNextAlarmTimeForCountdown(alarm, alarmInstance);
+                long delta = nextTime.getTimeInMillis() - System.currentTimeMillis();
+                String countdown = AlarmUtils.formatCountdownForCard(context, delta);
+                // User choice: show weekday + countdown
+                if (daysOfWeekText.isEmpty()) {
+                    daysOfWeek.setText(countdown);
+                } else {
+                    daysOfWeek.setText(daysOfWeekText + " • " + countdown);
+                }
+            } else {
+                daysOfWeek.setText(daysOfWeekText);
+            }
 
             final String string = alarm.daysOfWeek.toAccessibilityString(context, weekdayOrder);
             daysOfWeek.setContentDescription(string);
         } else {
-            Calendar calendar = Calendar.getInstance();
-
-            if (Alarm.isTomorrow(alarm, calendar) && !alarm.isSpecifiedDate()) {
-                daysOfWeek.setText(context.getString(R.string.alarm_tomorrow));
-            } else if (alarm.isSpecifiedDate()) {
-                if (Alarm.isSpecifiedDateTomorrow(alarm.year, alarm.month, alarm.day)) {
-                    daysOfWeek.setText(context.getString(R.string.alarm_tomorrow));
-                } else if (alarm.isDateInThePast()) {
-                    // If the date has passed, the new alarm will be scheduled either the same day
-                    // or the next day depending on the time; the text is therefore updated accordingly.
-                    if (alarm.hour < calendar.get(Calendar.HOUR_OF_DAY)
-                            || (alarm.hour == calendar.get(Calendar.HOUR_OF_DAY) && alarm.minutes < calendar.get(Calendar.MINUTE))
-                            || (alarm.hour == calendar.get(Calendar.HOUR_OF_DAY) && alarm.minutes == calendar.get(Calendar.MINUTE))) {
-                        daysOfWeek.setText(context.getString(R.string.alarm_tomorrow));
-                    } else {
-                        daysOfWeek.setText(context.getString(R.string.alarm_today));
-                    }
-                } else {
+            // Non-repeating
+            if (isCountdownEnabled && alarm.enabled) {
+                Calendar nextTime = AlarmUtils.getNextAlarmTimeForCountdown(alarm, alarmInstance);
+                long delta = nextTime.getTimeInMillis() - System.currentTimeMillis();
+                // If delta is huge (>=7 days) and alarm has specified date, show scheduled date instead of countdown
+                if (delta > 7 * 24 * 60 * 60 * 1000L && alarm.isSpecifiedDate() && !alarm.isDateInThePast()) {
                     int year = alarm.year;
                     int month = alarm.month;
                     int dayOfMonth = alarm.day;
-                    boolean isCurrentYear = year == calendar.get(Calendar.YEAR);
-
-                    calendar.set(year, month, dayOfMonth);
-
+                    Calendar cal = Calendar.getInstance();
+                    boolean isCurrentYear = year == cal.get(Calendar.YEAR);
+                    cal.set(year, month, dayOfMonth);
                     String pattern = DateFormat.getBestDateTimePattern(
                             Locale.getDefault(), isCurrentYear ? "MMMMd" : "yyyyMMMMd");
                     SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, Locale.getDefault());
-                    String formattedDate = dateFormat.format(calendar.getTime());
-
+                    String formattedDate = dateFormat.format(cal.getTime());
                     daysOfWeek.setText(context.getString(R.string.alarm_scheduled_for, formattedDate));
+                } else {
+                    String countdown = AlarmUtils.formatCountdownForCard(context, delta);
+                    daysOfWeek.setText(countdown);
                 }
             } else {
-                daysOfWeek.setText(context.getString(R.string.alarm_today));
+                Calendar calendar = Calendar.getInstance();
+
+                if (Alarm.isTomorrow(alarm, calendar) && !alarm.isSpecifiedDate()) {
+                    daysOfWeek.setText(context.getString(R.string.alarm_tomorrow));
+                } else if (alarm.isSpecifiedDate()) {
+                    if (Alarm.isSpecifiedDateTomorrow(alarm.year, alarm.month, alarm.day)) {
+                        daysOfWeek.setText(context.getString(R.string.alarm_tomorrow));
+                    } else if (alarm.isDateInThePast()) {
+                        // If the date has passed, the new alarm will be scheduled either the same day
+                        // or the next day depending on the time; the text is therefore updated accordingly.
+                        if (alarm.hour < calendar.get(Calendar.HOUR_OF_DAY)
+                                || (alarm.hour == calendar.get(Calendar.HOUR_OF_DAY) && alarm.minutes < calendar.get(Calendar.MINUTE))
+                                || (alarm.hour == calendar.get(Calendar.HOUR_OF_DAY) && alarm.minutes == calendar.get(Calendar.MINUTE))) {
+                            daysOfWeek.setText(context.getString(R.string.alarm_tomorrow));
+                        } else {
+                            daysOfWeek.setText(context.getString(R.string.alarm_today));
+                        }
+                    } else {
+                        int year = alarm.year;
+                        int month = alarm.month;
+                        int dayOfMonth = alarm.day;
+                        boolean isCurrentYear = year == calendar.get(Calendar.YEAR);
+
+                        calendar.set(year, month, dayOfMonth);
+
+                        String pattern = DateFormat.getBestDateTimePattern(
+                                Locale.getDefault(), isCurrentYear ? "MMMMd" : "yyyyMMMMd");
+                        SimpleDateFormat dateFormat = new SimpleDateFormat(pattern, Locale.getDefault());
+                        String formattedDate = dateFormat.format(calendar.getTime());
+
+                        daysOfWeek.setText(context.getString(R.string.alarm_scheduled_for, formattedDate));
+                    }
+                } else {
+                    daysOfWeek.setText(context.getString(R.string.alarm_today));
+                }
             }
         }
 
         daysOfWeek.setTypeface(alarm.enabled ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
+    }
+
+    // Backward compat for callers that still use old signature
+    protected void bindRepeatText(Context context, Alarm alarm) {
+        bindRepeatText(context, alarm, getItemHolder() != null ? getItemHolder().getAlarmInstance() : null);
     }
 
     protected void bindPreemptiveDismissButton(Context context, Alarm alarm, AlarmInstance alarmInstance) {

@@ -83,7 +83,8 @@ import java.util.Objects;
  * A fragment that displays a list of alarm time and allows interaction with them.
  */
 public final class AlarmClockFragment extends DeskClockFragment implements
-        LoaderManager.LoaderCallbacks<Cursor>, ScrollHandler, OnTimeSetListener {
+        LoaderManager.LoaderCallbacks<Cursor>, ScrollHandler, OnTimeSetListener,
+        com.best.deskclock.alarms.DismissAlarmBottomSheetDialogFragment.OnDismissOptionSelectedListener {
 
     private static final String TAG = "AlarmClockFragment";
 
@@ -102,6 +103,8 @@ public final class AlarmClockFragment extends DeskClockFragment implements
 
     // Updates "Today/Tomorrow" in the UI when midnight passes.
     private final Runnable mMidnightUpdater = new MidnightRunnable();
+    // Updates countdown text ("In 5 min") every half minute when countdown mode is enabled
+    private final Runnable mCountdownUpdater = new CountdownRunnable();
 
     // Views
     private ViewGroup mMainLayout;
@@ -383,6 +386,11 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         // alarms when midnight passes.
         UiDataModel.getUiDataModel().addMidnightCallback(mMidnightUpdater, 100);
 
+        // If countdown display is enabled, refresh every half minute so "In 5 min" stays accurate
+        if (SettingsDAO.isAlarmCardCountdownEnabled(mPrefs)) {
+            UiDataModel.getUiDataModel().addHalfMinuteCallback(mCountdownUpdater, 100);
+        }
+
         // Check if another app asked us to create a blank new alarm.
         final Intent intent = requireActivity().getIntent();
         if (intent == null) {
@@ -420,6 +428,7 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     public void onPause() {
         super.onPause();
         UiDataModel.getUiDataModel().removePeriodicCallback(mMidnightUpdater);
+        UiDataModel.getUiDataModel().removePeriodicCallback(mCountdownUpdater);
 
         // When the user places the app in the background by pressing "home",
         // dismiss the toast bar. However, since there is no way to determine if
@@ -653,6 +662,27 @@ public final class AlarmClockFragment extends DeskClockFragment implements
         mAlarmUpdateHandler.asyncUpdateAlarm(alarm, false, true);
     }
 
+    @Override
+    public void onSkipOnceSelected(Alarm alarm, AlarmInstance instance) {
+        if (mAlarmTimeClickHandler != null) {
+            AlarmInstance target = instance;
+            if (target == null) {
+                target = AlarmInstance.getNextUpcomingInstanceByAlarmId(
+                        requireContext().getContentResolver(), alarm.id);
+            }
+            if (target != null) {
+                mAlarmTimeClickHandler.dismissAlarmInstance(target);
+            }
+        }
+    }
+
+    @Override
+    public void onDisableRepeatingSelected(Alarm alarm) {
+        if (mAlarmTimeClickHandler != null) {
+            mAlarmTimeClickHandler.setAlarmEnabled(alarm, false);
+        }
+    }
+
     private void requestCalendarSyncFromUi() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CALENDAR)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -781,7 +811,18 @@ public final class AlarmClockFragment extends DeskClockFragment implements
     private final class MidnightRunnable implements Runnable {
         @Override
         public void run() {
-            mItemAdapter.notifyDataSetChanged();
+            if (mItemAdapter != null) {
+                mItemAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    private final class CountdownRunnable implements Runnable {
+        @Override
+        public void run() {
+            if (mItemAdapter != null) {
+                mItemAdapter.notifyDataSetChanged();
+            }
         }
     }
 }

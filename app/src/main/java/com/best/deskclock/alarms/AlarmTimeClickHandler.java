@@ -232,6 +232,46 @@ public final class AlarmTimeClickHandler implements OnTimeSetListener {
         Utils.setVibrationTime(mContext, 50);
     }
 
+    public void showDismissBottomSheet(Alarm alarm, @androidx.annotation.Nullable AlarmInstance instance) {
+        // Ensure we have an instance to skip; if not, try to fetch next
+        AlarmInstance targetInstance = instance;
+        if (targetInstance == null) {
+            targetInstance = AlarmInstance.getNextUpcomingInstanceByAlarmId(
+                    mContext.getContentResolver(), alarm.id);
+        }
+
+        DismissAlarmBottomSheetDialogFragment bottomSheet =
+                DismissAlarmBottomSheetDialogFragment.newInstance(alarm, targetInstance);
+
+        // The parent fragment (AlarmClockFragment) implements OnDismissOptionSelectedListener,
+        // so onAttach will bind it. As a safety net, also set a direct listener that uses this handler.
+        bottomSheet.setOnDismissOptionSelectedListener(new DismissAlarmBottomSheetDialogFragment.OnDismissOptionSelectedListener() {
+            @Override
+            public void onSkipOnceSelected(Alarm alarmToSkip, AlarmInstance instanceToSkip) {
+                AlarmInstance toDismiss = instanceToSkip;
+                if (toDismiss == null) {
+                    toDismiss = AlarmInstance.getNextUpcomingInstanceByAlarmId(
+                            mContext.getContentResolver(), alarmToSkip.id);
+                }
+                if (toDismiss != null) {
+                    dismissAlarmInstance(toDismiss);
+                }
+            }
+
+            @Override
+            public void onDisableRepeatingSelected(Alarm alarmToDisable) {
+                setAlarmEnabled(alarmToDisable, false);
+            }
+        });
+
+        try {
+            bottomSheet.show(mFragment.getParentFragmentManager(), "dismiss_alarm_bottom_sheet");
+        } catch (Exception e) {
+            // Fallback: if fragment manager not available, directly disable
+            setAlarmEnabled(alarm, false);
+        }
+    }
+
     public void onDeleteClicked(AlarmItemHolder itemHolder) {
         if (mFragment instanceof AlarmClockFragment) {
             ((AlarmClockFragment) mFragment).removeItem(itemHolder);
